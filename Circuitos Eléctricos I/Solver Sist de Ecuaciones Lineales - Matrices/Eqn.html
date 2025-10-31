@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resolución de Sistemas de Ecuaciones</title>
+    <style>
+        /* --- 1. Variables de Color y Tema --- */
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --text-light: #5a7388;
+            --border-color: #e0e6ed;
+            --primary-color: #0078d4;
+            --primary-hover: #005a9c;
+            --danger-color: #d93025;
+            --danger-hover: #b0271e; /* Añadido para el botón Limpiar */
+            --code-bg: #f3f4f6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-hover: 0 6px 16px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ecf0f1;
+            --text-light: #95a5a6;
+            --border-color: #34495e;
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --danger-color: #e74c3c;
+            --danger-hover: #c0392b; /* Añadido para el botón Limpiar */
+            --code-bg: #2c3e50;
+            --shadow: 0 4px 12px rgba(0,0,0,0.2);
+            --shadow-hover: 0 6px 16px rgba(0,0,0,0.3);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* --- 2. Estilos Generales y Animaciones --- */
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+        h1 {
+            text-align: center;
+        }
+        h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* Botón Limpiar */
+        #limpiarBtn {
+            background-color: var(--danger-color);
+        }
+        #limpiarBtn:hover {
+            background-color: var(--danger-hover);
+        }
+
+        /* --- 3. Contenedores (Tarjetas) --- */
+        .controles, .resultados, .teoria, #ecuacionesContainer {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .controles {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .controles label {
+            font-weight: 600;
+        }
+        select {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        /* Botón Modo Oscuro */
+        #darkModeToggle {
+            background-color: transparent;
+            color: var(--text-color);
+            font-size: 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            padding: 0;
+            margin-left: auto; /* Empuja el botón a la derecha */
+        }
+        #darkModeToggle:hover {
+            background-color: var(--code-bg);
+            transform: translateY(-2px) rotate(15deg);
+        }
+
+        /* --- 4. Inputs y Ecuaciones --- */
+        #ecuacionesContainer .ecuacion {
+            display: grid;
+            grid-template-columns: repeat(var(--n-vars, 2), 1fr 1fr) 50px 1fr; /* Default a 2 */
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        #ecuacionesContainer input {
+            width: 70px;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            text-align: right;
+            font-weight: bold;
+        }
+        /* Ocultar flechas en inputs numéricos */
+        input[type=number] {
+            -moz-appearance: textfield; /* Firefox */
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0; /* Safari and Chrome */
+        }
+        
+        #ecuacionesContainer span {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-left: 5px;
+            color: var(--text-light);
+        }
+
+        /* --- 5. Resultados y Teoría --- */
+        #solucion, #procedimiento {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            padding: 15px;
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+        .error {
+            color: var(--danger-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        /* Estilos para el marco teórico */
+        .teoria {
+            line-height: 1.7;
+        }
+        .teoria h3 {
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+        .teoria h4 {
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        .teoria code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            color: var(--primary-color);
+        }
+        .teoria .formula {
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1em;
+            color: var(--danger-color);
+            display: block;
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: var(--code-bg);
+            border-radius: 5px;
+        }
+        .teoria p {
+            margin-bottom: 15px;
+        }
+        .teoria ul {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Calculadora de Sistemas de Ecuaciones</h1>
+
+    <div class="controles">
+        <label for="numVariables">Número de incógnitas:</label>
+        <select id="numVariables">
+            <option value="2" selected>2 (x, y)</option>
+            <option value="3">3 (x, y, z)</option>
+            <option value="4">4 (x, y, z, w)</option>
+        </select>
+        <button id="resolverBtn">Resolver</button>
+        <button id="limpiarBtn">Limpiar</button>
+        <button id="darkModeToggle">🌙</button>
+    </div>
+
+    <h2>Sistema de Ecuaciones</h2>
+    <div id="ecuacionesContainer"></div>
+
+    <div class="resultados">
+        <h2>Solución</h2>
+        <div id="solucion">Aún no se ha calculado...</div>
+    </div>
+
+    <div class="resultados">
+        <h2>Procedimiento (Regla de Cramer)</h2>
+        <div id="procedimiento">Aún no se ha calculado...</div>
+    </div>
+
+    <div class="teoria">
+        <h2>Marco Teórico (Explicación)</h2>
+        <p>Resolver un sistema de ecuaciones significa encontrar los valores de las incógnitas (<code>x</code>, <code>y</code>, <code>z</code>...) que hacen que todas las ecuaciones sean verdaderas <b>al mismo tiempo</b>. Imagina que cada ecuación es una condición o una pista; tú buscas la solución que cumple con todas las pistas.</p>
+
+        <h3>1. Método de Determinantes (Regla de Cramer)</h3>
+        <p>Este método es como una "fórmula mágica" que te da la respuesta directamente. Es muy útil para sistemas pequeños (2x2 y 3x3). Esta calculadora usa este método.</p>
+        
+        <h4>El Concepto Clave: El Determinante (Δ)</h4>
+        <p>Un <b>determinante</b> es un número especial que se calcula a partir de una matriz cuadrada (mismo número de filas y columnas). Este número, que llamamos <code>&Delta;</code> (Delta), nos dice mucho sobre el sistema.</p>
+        <ul>
+            <li>Imagina el determinante <code>&Delta;</code> como la "fuerza" o "validez" del sistema.</li>
+            <li>Si <code>&Delta;</code> <b>es diferente de 0</b>: ¡Perfecto! El sistema tiene una (y solo una) solución única.</li>
+            <li>Si <code>&Delta;</code> <b>es igual a 0</b>: ¡Problemas! El sistema está "roto". O no tiene ninguna solución (las ecuaciones se contradicen) o tiene infinitas soluciones (las ecuaciones son redundantes, como 2x = 4 y 4x = 8).</li>
+        </ul>
+
+        <h4>La Fórmula de Cramer</h4>
+        <p>La regla dice que para encontrar cada variable, solo debes hacer una división de determinantes:</p>
+        <code class="formula">x = &Delta;x / &Delta;   ;   y = &Delta;y / &Delta;   ;   z = &Delta;z / &Delta;</code>
+        <ul>
+            <li><code><b>&Delta;</b></code>: Es el determinante general (calculado con los coeficientes de <code>x</code>, <code>y</code>, <code>z</code>...).</li>
+            <li><code><b>&Delta;x</b></code>: Es un determinante especial. Tomas el determinante general <code>&Delta;</code> y <b>reemplazas</b> la columna de las <code>x</code> por la columna de los resultados (los números que están después del <code>=</code>).</li>
+            <li><code><b>&Delta;y</b></code>: Igual, pero reemplazas la columna de las <code>y</code> por los resultados.</li>
+            <li><code><b>&Delta;z</b></code>: Igual, pero reemplazas la columna de las <code>z</code> por los resultados.</li>
+        </ul>
+
+        <h4>¿Cómo se calcula un determinante?</h4>
+        <ul>
+            <li><b>Para 2x2:</b> Es muy fácil. "Multiplicación cruzada".
+                
+                <code>&Delta; = (a₁b₂) - (a₂b₁)</code>
+            </li>
+            <li><b>Para 3x3 (Regla de Sarrus):</b> Es el método más común.
+                
+                <ol>
+                    <li>Escribes la matriz y repites las primeras dos columnas (o filas) al lado.</li>
+                    <li>Sumas los productos de las 3 diagonales principales (hacia abajo).</li>
+                    <li>Restas los productos de las 3 diagonales secundarias (hacia arriba).</li>
+                </ol>
+            </li>
+            <li><b>Para 4x4 (Expansión por Cofactores):</b> Es mucho más largo. No hay una "regla" simple como Sarrus. El método consiste en "romper" el determinante 4x4 en 4 determinantes más pequeños de 3x3. Es tedioso y fácil de equivocarse a mano, por eso este método no es muy práctico para 4x4.</li>
+        </ul>
+
+        <hr>
+
+        <h3>2. Método de Matrices (Eliminación de Gauss-Jordan)</h3>
+        <p>Este es el método "industrial", el más poderoso y ordenado. Funciona siempre, para cualquier tamaño, y es el que usan las computadoras en el fondo. Es como un algoritmo de "limpieza".</p>
+        
+        <h4>El Objetivo</h4>
+        <p>El objetivo es transformar el sistema en uno equivalente que sea <b>obvio</b> de resolver.</p>
+        <p>Partimos de un sistema complicado como:</p>
+        <code>2x + 4y - 3z = 1</code><br>
+        <code>3x + 6y - 5z = 0</code><br>
+        <code>...</code>
+        
+        <p>Y queremos llegar a algo súper simple como:</p>
+        <code>1x + 0y + 0z = 1 &nbsp;&nbsp;&nbsp;&nbsp; (O sea: x = 1)</code><br>
+        <code>0x + 1y + 0z = 2 &nbsp;&nbsp;&nbsp;&nbsp; (O sea: y = 2)</code><br>
+        <code>0x + 0y + 1z = 3 &nbsp;&nbsp;&nbsp;&nbsp; (O sea: z = 3)</code>
+
+        <h4>El Procedimiento</h4>
+        <ol>
+            <li><b>Escribir la Matriz Aumentada <code>[A | B]</code>:</b> Es solo una forma de escribir el sistema de forma compacta, sin las <code>x</code>, <code>y</code>, <code>z</code>. Es como una tabla.</li>
+            <li><b>Usar "Operaciones de Fila":</b> Estas son las 3 "jugadas legales" que puedes hacer sin alterar la solución del sistema:
+                <ol>
+                    <li><b>Intercambiar</b> dos filas (es como cambiar el orden de las ecuaciones).</li>
+                    <li><b>Multiplicar o dividir</b> una fila entera por un número (es como multiplicar <code>x+y=2</code> por 2, obteniendo <code>2x+2y=4</code>. La solución es la misma).</li>
+                    <li><b>Sumar o restar</b> una fila a otra fila (es el método de "reducción" que ya conoces).</li>
+                </ol>
+            </li>
+            <li><b>Pivotar:</b> Usando estas 3 jugadas, vas "limpiando" la matriz. Eliges un "pivote" (un número, idealmente un 1) y lo usas para hacer ceros arriba y abajo de él en su columna.</li>
+            <li><b>Llegar a la Identidad:</b> Repites el proceso hasta que la parte izquierda de la matriz <code>[A]</code> se convierte en la "Matriz Identidad" (la de 1s en la diagonal y 0s en el resto).</li>
+            <li><b>Leer la Solución:</b> Los números que quedan a la derecha, en la columna <code>[B]</code>, son las soluciones.</li>
+        </ol>
+
+    </div>
+    <script>
+        const varSelect = document.getElementById('numVariables');
+        const container = document.getElementById('ecuacionesContainer');
+        const resolverBtn = document.getElementById('resolverBtn');
+        const limpiarBtn = document.getElementById('limpiarBtn'); // Botón Limpiar
+        const solucionDiv = document.getElementById('solucion');
+        const procedimientoDiv = document.getElementById('procedimiento');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+        const varNombres = ['x', 'y', 'z', 'w'];
+
+        // --- 1. Lógica de Modo Oscuro ---
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                darkModeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                darkModeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        // Cargar preferencia al iniciar
+        const currentMode = localStorage.getItem('darkMode');
+        let prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (currentMode === 'enabled') {
+            setDarkMode(true);
+        } else if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(prefersDark);
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+
+
+        // --- 2. Generar Inputs ---
+        function generarInputs() {
+            const n = parseInt(varSelect.value);
+            container.innerHTML = '';
+            container.style.setProperty('--n-vars', n); // Para el CSS Grid
+
+            for (let i = 0; i < n; i++) {
+                const divEcuacion = document.createElement('div');
+                divEcuacion.className = 'ecuacion';
+                let htmlEcuacion = '';
+
+                for (let j = 0; j < n; j++) {
+                    const valorEjemplo = (i === j) ? 1 : Math.floor(Math.random() * 10) - 5;
+                    htmlEcuacion += `
+                        <input type="number" id="coef-${i}-${j}" value="${valorEjemplo}" step="any">
+                        <span>${varNombres[j]} ${j < n - 1 ? '+' : ''}</span>
+                    `;
+                }
+
+                const constEjemplo = Math.floor(Math.random() * 20) - 10;
+                htmlEcuacion += `
+                    <span> = </span>
+                    <input type="number" id="const-${i}" value="${constEjemplo}" step="any">
+                `;
+                divEcuacion.innerHTML = htmlEcuacion;
+                container.appendChild(divEcuacion);
+            }
+        }
+
+        // --- 3. Lógica de Resolución (Cramer) ---
+        resolverBtn.addEventListener('click', resolverSistema);
+
+        function resolverSistema() {
+            const n = parseInt(varSelect.value);
+            const { A, B, ecuacionesStr } = getValores(n);
+
+            // Limpiar salidas anteriores
+            solucionDiv.classList.remove('error');
+
+            // --- Calcular Determinante Principal ---
+            const detA = calcularDeterminante(A);
+
+            // Formatear el procedimiento
+            let procHtml = "Sistema a resolver:\n";
+            ecuacionesStr.forEach(eq => {
+                procHtml += `${eq}\n`;
+            });
+            procHtml += "\n-------------------------------------\n";
+            procHtml += `Determinante General (\u0394) = ${detA.toFixed(0)}\n`;
+            procHtml += "-------------------------------------\n";
+
+            // --- Validar Determinante ---
+            if (Math.abs(detA) < 1e-9) {
+                solucionDiv.innerHTML = "El determinante general es 0. El sistema no tiene solución única (puede tener infinitas o ninguna).";
+                solucionDiv.classList.add('error');
+                procedimientoDiv.innerHTML = procHtml;
+                return;
+            }
+
+            // --- Calcular Determinantes de Variables ---
+            let solucionesHtml = "";
+            for (let i = 0; i < n; i++) {
+                const Ai = reemplazarColumna(A, B, i);
+                const detAi = calcularDeterminante(Ai);
+                const solucion = detAi / detA;
+
+                const varNombre = varNombres[i];
+                procHtml += `Determinante \u0394${varNombre} = ${detAi.toFixed(0)}\n`;
+                solucionesHtml += `<strong>${varNombre} = ${solucion.toFixed(4)}</strong>\n`;
+            }
+            
+            procHtml += "-------------------------------------\n";
+            procHtml += "Solución (x = \u0394x / \u0394, y = \u0394y / \u0394, ...):\n";
+            procHtml += solucionesHtml;
+
+            // Mostrar resultados
+            solucionDiv.innerHTML = solucionesHtml;
+            procedimientoDiv.innerHTML = procHtml;
+        }
+
+        // --- 4. Funciones Auxiliares (Matrices y Determinantes) ---
+
+        function getValores(n) {
+            let A = []; // Matriz de coeficientes
+            let B = []; // Vector de constantes
+            let ecuacionesStr = []; // String de las ecuaciones
+
+            for (let i = 0; i < n; i++) {
+                let fila = [];
+                let eqStr = "";
+                for (let j = 0; j < n; j++) {
+                    const val = parseFloat(document.getElementById(`coef-${i}-${j}`).value);
+                    fila.push(val);
+                    eqStr += `(${val || 0})${varNombres[j]} ${j < n - 1 ? '+ ' : ''}`;
+                }
+                const constVal = parseFloat(document.getElementById(`const-${i}`).value);
+                B.push(constVal);
+                eqStr += ` = ${constVal || 0}`;
+                
+                A.push(fila);
+                ecuacionesStr.push(eqStr);
+            }
+            return { A, B, ecuacionesStr };
+        }
+
+        function calcularDeterminante(matrix) {
+            // Reemplazar valores NaN (campos vacíos) por 0 para el cálculo
+            const m = matrix.map(row => row.map(val => val || 0));
+
+            const n = m.length;
+            // CAMBIO AQUÍ: Eliminado el caso n=1, ya no es posible
+            if (n === 2) {
+                return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+            }
+            let det = 0;
+            for (let j = 0; j < n; j++) {
+                const signo = (j % 2 === 0) ? 1 : -1;
+                const subMatriz = getSubMatriz(m, 0, j);
+                det += signo * m[0][j] * calcularDeterminante(subMatriz);
+            }
+            return det;
+        }
+
+        function getSubMatriz(matrix, filaAQuitar, colAQuitar) {
+            return matrix
+                .filter((fila, i) => i !== filaAQuitar)
+                .map(fila => fila.filter((_, j) => j !== colAQuitar));
+        }
+
+        function reemplazarColumna(matrix, vector, colIndex) {
+            return matrix.map((fila, i) => {
+                let nuevaFila = [...fila];
+                nuevaFila[colIndex] = vector[i] || 0; // Reemplazar NaN por 0
+                return nuevaFila;
+            });
+        }
+        
+        // --- 5. Función Limpiar ---
+        function limpiarCampos() {
+            // Selecciona todos los inputs dentro del contenedor
+            const inputs = container.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.value = ''; // Los pone en blanco
+            });
+            
+            // Resetea las áreas de resultado
+            solucionDiv.innerHTML = 'Aún no se ha calculado...';
+            solucionDiv.classList.remove('error');
+            procedimientoDiv.innerHTML = 'Aún no se ha calculado...';
+        }
+
+        // --- Inicializar la página y listeners ---
+        generarInputs(); // Genera los inputs para 2x2 por defecto
+        varSelect.addEventListener('change', generarInputs);
+        limpiarBtn.addEventListener('click', limpiarCampos); // Listener para el nuevo botón
+
+    </script>
+
+</body>
+</html>
