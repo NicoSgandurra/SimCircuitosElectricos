@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conceptos de Electrotecnia v2</title>
+    
+    <style>
+        /* --- Configuración General --- */
+        :root {
+            --color-bg-dark: #12121e;
+            --color-bg-light: #1e1e2f;
+            --color-card: #2a2a4e;
+            --color-primary: #4a4af5;
+            --color-accent: #7aa2f7; /* Fase T (Azul) */
+            --color-text: #e0e0ff;
+            --color-text-muted: #a0a0c0;
+            --color-danger: #f77272;  /* Fase R (Rojo) */
+            --color-success: #73daca; /* Fase S (Verde) */
+            --color-warning: #ffc777; /* Neutro (N) */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--color-bg-dark);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* --- Contenedor Principal --- */
+        .container {
+            max-width: 1500px;
+            margin: 20px auto;
+            background: var(--color-bg-light);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: fadeInPage 0.8s ease-out;
+        }
+
+        @keyframes fadeInPage {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--color-card);
+            border-bottom: 2px solid var(--color-primary);
+        }
+
+        header h1 {
+            color: var(--color-accent);
+            margin-bottom: 5px;
+        }
+
+        /* --- Pestañas de Navegación --- */
+        .tabs {
+            display: flex;
+            background-color: var(--color-bg-light);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 18px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: var(--color-text-muted);
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background-color: var(--color-card);
+            color: var(--color-accent);
+        }
+
+        .tab-button.active {
+            color: var(--color-text);
+            border-bottom: 3px solid var(--color-primary);
+        }
+
+        /* --- Contenido de las Pestañas --- */
+        .content-section {
+            display: none; /* Oculto por defecto */
+            padding: 30px;
+            animation: fadeInContent 0.5s ease;
+        }
+
+        .content-section.active {
+            display: block; /* Visible cuando está activo */
+        }
+
+        @keyframes fadeInContent {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h2 {
+            color: var(--color-accent);
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: var(--color-text);
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        p, li {
+            font-size: 1.05em;
+            margin-bottom: 15px;
+            color: var(--color-text-muted);
+        }
+
+        ul {
+            padding-left: 25px;
+            list-style-type: '⚡ ';
+        }
+
+        /* Formato de 'math' en HTML */
+        i { font-style: italic; }
+        sub { font-size: 0.75em; vertical-align: sub; }
+        sup { font-size: 0.75em; vertical-align: super; }
+
+        /* --- Diagramas Interactivos --- */
+        .interactive-diagram {
+            background-color: var(--color-bg-dark);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid var(--color-card);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .controls label {
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+        
+        .controls span {
+            color: var(--color-text);
+            font-weight: bold;
+            min-width: 50px;
+            display: inline-block;
+            text-align: left;
+        }
+
+        /* Controles de Carga (Tema 1) */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 15px 0;
+        }
+        
+        .load-control {
+            background: var(--color-card);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .load-control h4 {
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        .load-control-r h4 { color: var(--color-danger); }
+        .load-control-t h4 { color: var(--color-accent); }
+        .load-control-s h4 { color: var(--color-success); }
+        
+        .slider-group {
+            margin-bottom: 10px;
+        }
+        .slider-group label {
+            display: block;
+            font-size: 0.9em;
+            color: var(--color-text-muted);
+        }
+
+        /* Switch para Tema 1 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input { display: none; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--color-success);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--color-danger);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Sliders Generales */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            background: var(--color-bg-light);
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            margin-top: 5px;
+        }
+        input[type="range"]:hover { opacity: 1; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--color-primary);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--color-primary);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        /* Info Box (para ambos temas) */
+        .info-box {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: var(--color-card);
+            border-radius: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .info-box div {
+            text-align: center;
+            margin: 5px 10px;
+        }
+        .info-box span {
+            display: block;
+            font-size: 0.9em;
+            color: var(--color-text-muted);
+        }
+        .info-box strong {
+            font-size: 1.3em;
+            color: var(--color-text);
+            transition: color 0.3s ease;
+        }
+        
+        /* Estilos para el SVG */
+        #star-diagram text {
+            font-family: "Segoe UI", sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.5s ease;
+            pointer-events: none;
+        }
+        #neutral-point-N {
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Animación con rebote */
+        }
+        #line-R, #line-T, #line-S {
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        
+        #power-triangle-diagram polyline, #power-triangle-diagram line {
+            transition: all 0.3s ease;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <header>
+            <h1>Conceptos Clave de Electrotecnia</h1>
+            <p>Explicaciones teóricas y diagramas interactivos</p>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-button active" id="btn-tema1">Tema 1: Neutro Flotante</button>
+            <button class="tab-button" id="btn-tema2">Tema 2: Corrección del F.P.</button>
+        </nav>
+
+        <section class="content-section active" id="content-tema1">
+            <h2>Conexión Estrella sin Neutro (Neutro Flotante)</h2>
+            
+            <h3>Explicación Conceptual</h3>
+            <p>En un sistema trifásico normal en <strong>Estrella (Y)</strong>, el cable <strong>Neutro (N)</strong> actúa como un "ancla". Conecta el punto central de las cargas al punto central del generador.</p>
+            <ul>
+                <li><strong>Función del Neutro:</strong> Garantiza que, aunque las cargas en cada fase sean distintas (sistema desequilibrado), la tensión en cada carga se mantenga estable (ej. 220V). Sirve como camino de retorno para la corriente de desequilibrio.</li>
+            </ul>
+
+            <h3>¿Qué es el "Neutro Flotante"?</h3>
+            <p>Ocurre cuando conectamos las cargas en estrella <strong>PERO no conectamos el cable neutro</strong>. El punto central de la carga (N) queda "flotando".</p>
+            <ul>
+                <li><strong>Sistema Equilibrado:</strong> Si las 3 cargas son idénticas (<i>Z</i><sub>R</sub> = <i>Z</i><sub>T</sub> = <i>Z</i><sub>S</sub>), no hay problema. La suma de corrientes es cero y el punto N se mantiene naturalmente en su lugar.</li>
+                <li><strong>Sistema Desequilibrado:</strong> ¡Aquí está el peligro! Como no hay cable neutro, la suma de corrientes (<i>I</i><sub>R</sub> + <i>I</i><sub>T</sub> + <i>I</i><sub>S</sub>) sigue forzada a ser cero. Para lograrlo, el sistema se "autoajusta" moviendo el potencial del punto N.</li>
+            </ul>
+            
+            <h3>Consecuencias del Desequilibrio</h3>
+            <p>Aparece una <strong>"tensión de desplazamiento del neutro" (<i>V</i><sub>Nn</sub>)</strong>. Esto es catastrófico:</p>
+            <ul>
+                <li>Algunas cargas recibirán <strong>SOBRETENSIÓN</strong> (ej. 235V) y se quemarán.</li>
+                <li>Otras cargas recibirán <strong>SUBTENSIÓN</strong> (ej. 190V) y funcionarán mal o no arrancarán.</li>
+            </ul>
+
+            <div class="interactive-diagram">
+                <h3>Diagrama Interactivo: Desplazamiento del Neutro</h3>
+                
+                <svg id="star-diagram" viewBox="0 0 300 300" width="300" height="300" style="margin: auto; display: block; background: #0c0c14; border-radius: 8px;">
+                    <circle cx="150" cy="150" r="4" fill="white" />
+                    <text x="155" y="155" fill="white">n (0V)</text>
+                    
+                    <line x1="150" y1="150" x2="270" y2="150" stroke="#555" stroke-dasharray="4"/> <line x1="150" y1="150" x2="90" y2="46" stroke="#555" stroke-dasharray="4"/> <line x1="150" y1="150" x2="90" y2="254" stroke="#555" stroke-dasharray="4"/> <text x="275" y="155" fill="#f77272">R (0°)</text>
+                    <text x="85" y="41" fill="#7aa2f7" text-anchor="end">T (120°)</text>
+                    <text x="85" y="259" fill="#73daca" text-anchor="end">S (240°)</text>
+
+                    <line id="line-R" x1="270" y1="150" x2="150" y2="150" stroke-width="3" stroke="var(--color-danger)" />
+                    <line id="line-T" x1="90" y1="46" x2="150" y2="150" stroke-width="3" stroke="var(--color-accent)" />
+                    <line id="line-S" x1="90" y1="254" x2="150" y2="150" stroke-width="3" stroke="var(--color-success)" />
+                    
+                    <text id="text-R" x="210" y="145" fill="#f77272">V_R</text>
+                    <text id="text-T" x="120" y="93" fill="#7aa2f7">V_T</text>
+                    <text id="text-S" x="120" y="207" fill="#73daca">V_S</text>
+
+                    <circle id="neutral-point-N" cx="150" cy="150" r="6" fill="var(--color-warning)" stroke="white" stroke-width="2" />
+                    <text x="160" y="140" fill="var(--color-warning)" id="text-N">N</text>
+                </svg>
+
+                <div class="controls">
+                    <label>Neutro Conectado</label>
+                    <label class="switch">
+                        <input type="checkbox" id="balance-switch">
+                        <span class="slider"></span>
+                    </label>
+                    <label>Neutro Flotante</label>
+                </div>
+
+                <div class="controls-grid">
+                    <div class="load-control load-control-r">
+                        <h4>Carga R</h4>
+                        <div class="slider-group">
+                            <label>|<i>Z</i><sub>R</sub>|: <span id="Zr-mag-val">10</span> Ω</label>
+                            <input type="range" id="Zr-mag" min="1" max="100" value="10">
+                        </div>
+                        <div class="slider-group">
+                            <label>φ<sub>R</sub>: <span id="Zr-ang-val">0</span> °</label>
+                            <input type="range" id="Zr-ang" min="-90" max="90" value="0">
+                        </div>
+                    </div>
+                    <div class="load-control load-control-t">
+                        <h4>Carga T</h4>
+                        <div class="slider-group">
+                            <label>|<i>Z</i><sub>T</sub>|: <span id="Zt-mag-val">10</span> Ω</label>
+                            <input type="range" id="Zt-mag" min="1" max="100" value="10">
+                        </div>
+                        <div class="slider-group">
+                            <label>φ<sub>T</sub>: <span id="Zt-ang-val">0</span> °</label>
+                            <input type="range" id="Zt-ang" min="-90" max="90" value="0">
+                        </div>
+                    </div>
+                    <div class="load-control load-control-s">
+                        <h4>Carga S</h4>
+                        <div class="slider-group">
+                            <label>|<i>Z</i><sub>S</sub>|: <span id="Zs-mag-val">10</span> Ω</label>
+                            <input type="range" id="Zs-mag" min="1" max="100" value="10">
+                        </div>
+                        <div class="slider-group">
+                            <label>φ<sub>S</sub>: <span id="Zs-ang-val">0</span> °</label>
+                            <input type="range" id="Zs-ang" min="-90" max="90" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box" id="info-box-1">
+                    <div>
+                        <span>Tensión <i>V</i><sub>R</sub></span>
+                        <strong id="voltage-R">220 V</strong>
+                    </div>
+                    <div>
+                        <span>Tensión <i>V</i><sub>T</sub></span>
+                        <strong id="voltage-T">220 V</strong>
+                    </div>
+                    <div>
+                        <span>Tensión <i>V</i><sub>S</sub></span>
+                        <strong id="voltage-S">220 V</strong>
+                    </div>
+                    <div>
+                        <span>Desplazamiento <i>V</i><sub>Nn</sub></span>
+                        <strong id="voltage-Nn">0 V</strong>
+                    </div>
+                </div>
+            </div>
+            
+        </section>
+
+        <section class="content-section" id="content-tema2">
+            <h2>Corrección del Factor de Potencia (<i>cos</i> φ)</h2>
+
+            <h3>Explicación Conceptual</h3>
+            <p>Las cargas industriales (motores, bobinas) son <strong>inductivas</strong>. Para funcionar, consumen dos tipos de potencia:</p>
+            <ul>
+                <li><strong>Potencia Activa (P):</strong> La potencia "útil" que realiza trabajo (mover un eje). Se mide en <strong>Watts (W)</strong>.</li>
+                <li><strong>Potencia Reactiva (Q):</strong> La potencia "magnética" para crear los campos magnéticos. No realiza trabajo útil, pero viaja por los cables. Se mide en <strong>Volt-Amper Reactivo (VAr)</strong>.</li>
+            </ul>
+            <p>La suma <strong>vectorial</strong> de ambas es la <strong>Potencia Aparente (S)</strong>, que es la que la red debe transportar. El <strong>Factor de Potencia (<i>cos</i> φ)</strong> es la relación <i>P</i> / <i>S</i>.</p>
+            
+            <h3>El Problema del Bajo <i>cos</i> φ</h3>
+            <p>Un <i>cos</i> φ bajo (ej. 0.7) significa que la Potencia Aparente (S) es muy grande comparada con la Potencia Activa (P) útil. Esto obliga a la compañía eléctrica a usar cables y transformadores más grandes, generando más pérdidas (<i>I</i><sup>2</sup><i>R</i>) en las líneas. Por eso, <strong>se aplican multas</strong> por bajo factor de potencia (generalmente < 0.9).</p>
+
+            <h3>La Solución: Banco de Capacitores</h3>
+            <p>No podemos eliminar la <i>Q</i> (Reactiva) que necesita el motor, pero podemos "inyectarla" localmente. Los <strong>capacitores</strong> hacen lo opuesto: generan potencia reactiva (<i>Q</i><sub>C</sub>).</p>
+            <p>Al instalar un banco de capacitores en paralelo, el motor toma su <i>Q</i><sub>L</sub> y el capacitor le entrega una <i>Q</i><sub>C</sub>. La red eléctrica ahora solo tiene que entregar la diferencia (<i>Q</i><sub>nueva</sub> = <i>Q</i><sub>L</sub> - <i>Q</i><sub>C</sub>), reduciendo la <i>S</i> total y mejorando el <i>cos</i> φ a un valor cercano a 1.</p>
+            
+            <div class="interactive-diagram">
+                <h3>Diagrama Interactivo: Triángulo de Potencias</h3>
+                
+                <div class="controls-grid">
+                    <div class="load-control">
+                        <label>Potencia Activa (P): <span id="power-val">250</span> kW</label>
+                        <input type="range" id="power-slider" min="50" max="1000" value="250" step="10">
+                    </div>
+                    <div class="load-control">
+                        <label><i>cos</i> φ Inicial: <span id="phi-initial-val">0.70</span></label>
+                        <input type="range" id="phi-initial-slider" min="0.5" max="1.0" value="0.7" step="0.01">
+                    </div>
+                     <div class="load-control">
+                        <label><i>cos</i> φ Final: <span id="phi-final-val">0.95</span></label>
+                        <input type="range" id="phi-final-slider" min="0.5" max="1.0" value="0.95" step="0.01">
+                    </div>
+                </div>
+
+                <svg id="power-triangle-diagram" viewBox="0 0 350 300" width="350" height="300" style="margin: auto; display: block; background: #0c0c14; border-radius: 8px;">
+                    <line x1="20" y1="280" x2="330" y2="280" stroke="#555" stroke-width="1" />
+                    <line x1="20" y1="280" x2="20" y2="20" stroke="#555" stroke-width="1" />
+                    <text x="330" y="295" fill="#555">P (kW)</text>
+                    <text x="10" y="20" fill="#555" text-anchor="middle">Q (kVAr)</text>
+                    
+                    <line id="p-line" x1="20" y1="280" x2="270" y2="280" stroke-width="4" stroke="var(--color-text)" />
+                    <text id="p-text" x="145" y="295" fill="#e0e0ff" text-anchor="middle">P = 250 kW</text>
+
+                    <polyline id="triangle-initial"
+                        points="20,280 270,280 270,125 20,280"
+                        fill="rgba(247, 114, 114, 0.3)" 
+                        stroke="var(--color-danger)" 
+                        stroke-width="3" />
+                    <text id="text-S-initial" x="145" y="200" fill="#f77272" text-anchor="middle" transform="rotate(-30 145 200)">S Inicial</text>
+                    <text id="text-Q-initial" x="275" y="200" fill="#f77272" text-anchor="start">Q_L</text>
+
+                    <line id="qc-line"
+                        x1="270" y1="125" x2="270" y2="125"
+                        stroke="var(--color-success)" 
+                        stroke-width="4" 
+                        stroke-dasharray="8 4" />
+                    <text id="text-Qc" x="275" y="100" fill="#73daca" text-anchor="start">Q_C</text>
+                    
+                    <polyline id="triangle-final"
+                        points="20,280 270,280 270,125 20,280"
+                        fill="rgba(122, 162, 247, 0.5)" 
+                        stroke="var(--color-accent)" 
+                        stroke-width="3" />
+                    <text id="text-S-final" x="145" y="240" fill="#7aa2f7" text-anchor="middle" transform="rotate(-15 145 240)">S Final</text>
+                    <text id="text-Q-final" x="275" y="250" fill="#7aa2f7" text-anchor="start">Q_F</text>
+                    
+                </svg>
+
+                <div class="info-box" id="info-box-2">
+                    <div>
+                        <span><i>S</i> Inicial</span>
+                        <strong id="info-s-initial">357 kVA</strong>
+                    </div>
+                    <div>
+                        <span><i>cos</i> φ Inicial</span>
+                        <strong id="info-cos-initial">0.700</strong>
+                    </div>
+                    <div>
+                        <span><i>S</i> Final</span>
+                        <strong id="info-s-final">263 kVA</strong>
+                    </div>
+                    <div>
+                        <span><i>cos</i> φ Final</span>
+                        <strong id="info-cos-final">0.950</strong>
+                    </div>
+                    <div>
+                        <span>Banco <i>Q</i><sub>C</sub></span>
+                        <strong id="info-qc-calc" style="color: var(--color-success);">172.9 kVAr</strong>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </div> <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Lógica de Pestañas (Tabs) ---
+            const btnTema1 = document.getElementById('btn-tema1');
+            const btnTema2 = document.getElementById('btn-tema2');
+            const contentTema1 = document.getElementById('content-tema1');
+            const contentTema2 = document.getElementById('content-tema2');
+
+            function showTema1() {
+                contentTema1.classList.add('active');
+                contentTema2.classList.remove('active');
+                btnTema1.classList.add('active');
+                btnTema2.classList.remove('active');
+            }
+
+            function showTema2() {
+                contentTema1.classList.remove('active');
+                contentTema2.classList.add('active');
+                btnTema1.classList.remove('active');
+                btnTema2.classList.add('active');
+            }
+
+            btnTema1.addEventListener('click', showTema1);
+            btnTema2.addEventListener('click', showTema2);
+            
+            // Estado inicial (Mostrar Tema 1)
+            showTema1();
+
+            // --- Lógica Interactivo 1: Neutro Flotante ---
+
+            // Fuentes de Tensión (Fasores)
+            const V_FASE = 220;
+            const Vrn = { r: V_FASE * Math.cos(0 * Math.PI / 180), i: V_FASE * Math.sin(0 * Math.PI / 180) };       // 0°
+            const Vtn = { r: V_FASE * Math.cos(120 * Math.PI / 180), i: V_FASE * Math.sin(120 * Math.PI / 180) };    // 120°
+            const Vsn = { r: V_FASE * Math.cos(240 * Math.PI / 180), i: V_FASE * Math.sin(240 * Math.PI / 180) };    // 240°
+
+            // Elementos del DOM (Tema 1)
+            const balanceSwitch = document.getElementById('balance-switch');
+            const neutralPointN = document.getElementById('neutral-point-N');
+            const lineR = document.getElementById('line-R');
+            const lineT = document.getElementById('line-T');
+            const lineS = document.getElementById('line-S');
+            const textR = document.getElementById('text-R');
+            const textT = document.getElementById('text-T');
+            const textS = document.getElementById('text-S');
+            const textN = document.getElementById('text-N');
+            
+            const voltageR = document.getElementById('voltage-R');
+            const voltageT = document.getElementById('voltage-T');
+            const voltageS = document.getElementById('voltage-S');
+            const voltageNn = document.getElementById('voltage-Nn');
+
+            // Sliders Cargas
+            const ZrMag = document.getElementById('Zr-mag');
+            const ZrAng = document.getElementById('Zr-ang');
+            const ZtMag = document.getElementById('Zt-mag');
+            const ZtAng = document.getElementById('Zt-ang');
+            const ZsMag = document.getElementById('Zs-mag');
+            const ZsAng = document.getElementById('Zs-ang');
+            
+            // Spans de valores (Cargas)
+            const ZrMagVal = document.getElementById('Zr-mag-val');
+            const ZrAngVal = document.getElementById('Zr-ang-val');
+            const ZtMagVal = document.getElementById('Zt-mag-val');
+            const ZtAngVal = document.getElementById('Zt-ang-val');
+            const ZsMagVal = document.getElementById('Zs-mag-val');
+            const ZsAngVal = document.getElementById('Zs-ang-val');
+
+            // --- Helpers de Números Complejos ---
+            const polarToRect = (mag, angleDeg) => {
+                const angleRad = angleDeg * Math.PI / 180;
+                return { r: mag * Math.cos(angleRad), i: mag * Math.sin(angleRad) };
+            };
+            const cAdd = (a, b) => ({ r: a.r + b.r, i: a.i + b.i });
+            const cSub = (a, b) => ({ r: a.r - b.r, i: a.i - b.i });
+            const cMul = (a, b) => ({ r: a.r * b.r - a.i * b.i, i: a.r * b.i + a.i * b.r });
+            const cDiv = (a, b) => {
+                const den = b.r * b.r + b.i * b.i;
+                if (den === 0) return { r: 0, i: 0 };
+                return {
+                    r: (a.r * b.r + a.i * b.i) / den,
+                    i: (a.i * b.r - a.r * b.i) / den
+                };
+            };
+            const cMag = (a) => Math.sqrt(a.r * a.r + a.i * a.i);
+            const getAdmittance = (mag, angleDeg) => {
+                if (mag === 0) return { r: 0, i: 0 }; // Evitar división por cero
+                const Ymag = 1 / mag;
+                const Yang = -angleDeg;
+                return polarToRect(Ymag, Yang);
+            };
+            // --- Fin Helpers ---
+
+            function updateStarDiagram() {
+                // 1. Leer valores de sliders
+                const Zr_mag = parseFloat(ZrMag.value);
+                const Zr_ang = parseFloat(ZrAng.value);
+                const Zt_mag = parseFloat(ZtMag.value);
+                const Zt_ang = parseFloat(ZtAng.value);
+                const Zs_mag = parseFloat(ZsMag.value);
+                const Zs_ang = parseFloat(ZsAng.value);
+                
+                // Actualizar spans
+                ZrMagVal.textContent = Zr_mag;
+                ZrAngVal.textContent = Zr_ang;
+                ZtMagVal.textContent = Zt_mag;
+                ZtAngVal.textContent = Zt_ang;
+                ZsMagVal.textContent = Zs_mag;
+                ZsAngVal.textContent = Zs_ang;
+
+                // 2. Calcular Admitancias
+                const Yr = getAdmittance(Zr_mag, Zr_ang);
+                const Yt = getAdmittance(Zt_mag, Zt_ang);
+                const Ys = getAdmittance(Zs_mag, Zs_ang);
+
+                // 3. Calcular V_Nn (Millman)
+                let Vnn = { r: 0, i: 0 };
+                const neutralFlotante = balanceSwitch.checked;
+
+                if (neutralFlotante) {
+                    const num = cAdd(cAdd(cMul(Vrn, Yr), cMul(Vtn, Yt)), cMul(Vsn, Ys));
+                    const den = cAdd(cAdd(Yr, Yt), Ys);
+                    Vnn = cDiv(num, den);
+                }
+                // Si no está flotante, Vnn se queda en {0, 0}
+
+                // 4. Calcular Tensiones de Carga
+                const VRN = cSub(Vrn, Vnn);
+                const VTN = cSub(Vtn, Vnn);
+                const VSN = cSub(Vsn, Vnn);
+
+                // 5. Actualizar Info Box
+                const magVRN = cMag(VRN);
+                const magVTN = cMag(VTN);
+                const magVSN = cMag(VSN);
+                const magVnn = cMag(Vnn);
+                
+                voltageR.textContent = `${magVRN.toFixed(1)} V`;
+                voltageT.textContent = `${magVTN.toFixed(1)} V`;
+                voltageS.textContent = `${magVSN.toFixed(1)} V`;
+                voltageNn.textContent = `${magVnn.toFixed(1)} V`;
+                
+                // Colorear voltajes
+                const setVoltageColor = (elem, v) => {
+                    if (v > V_FASE * 1.1) elem.style.color = 'var(--color-danger)'; // +10%
+                    else if (v < V_FASE * 0.9) elem.style.color = 'var(--color-warning)'; // -10%
+                    else elem.style.color = 'var(--color-success)';
+                };
+                setVoltageColor(voltageR, magVRN);
+                setVoltageColor(voltageT, magVTN);
+                setVoltageColor(voltageS, magVSN);
+                voltageNn.style.color = magVnn > 5 ? 'var(--color-danger)' : 'var(--color-success)';
+
+                // 6. Actualizar SVG
+                // Escala: 120px es el radio para 220V
+                const scale = 120 / V_FASE;
+                const cx_N = 150 + Vnn.r * scale;
+                const cy_N = 150 - Vnn.i * scale; // SVG Y-axis está invertido
+
+                // Mover el punto N
+                neutralPointN.setAttribute('cx', cx_N);
+                neutralPointN.setAttribute('cy', cy_N);
+                
+                // Mover las líneas de carga
+                lineR.setAttribute('x2', cx_N);
+                lineR.setAttribute('y2', cy_N);
+                lineT.setAttribute('x2', cx_N);
+                lineT.setAttribute('y2', cy_N);
+                lineS.setAttribute('x2', cx_N);
+                lineS.setAttribute('y2', cy_N);
+                
+                // Mover textos
+                textR.setAttribute('x', (270 + cx_N) / 2 + 5);
+                textR.setAttribute('y', (150 + cy_N) / 2);
+                textT.setAttribute('x', (90 + cx_N) / 2 - 5);
+                textT.setAttribute('y', (46 + cy_N) / 2);
+                textS.setAttribute('x', (90 + cx_N) / 2 - 5);
+                textS.setAttribute('y', (254 + cy_N) / 2);
+                textN.setAttribute('x', cx_N + 10);
+                textN.setAttribute('y', cy_N - 10);
+            }
+
+            // Event Listeners para Tema 1
+            [balanceSwitch, ZrMag, ZrAng, ZtMag, ZtAng, ZsMag, ZsAng].forEach(el => {
+                el.addEventListener('input', updateStarDiagram);
+            });
+            // Carga inicial
+            updateStarDiagram();
+
+            
+            // --- Lógica Interactivo 2: Factor de Potencia ---
+            
+            // Elementos del DOM (Tema 2)
+            const powerSlider = document.getElementById('power-slider');
+            const phiInitialSlider = document.getElementById('phi-initial-slider');
+            const phiFinalSlider = document.getElementById('phi-final-slider');
+            
+            const powerVal = document.getElementById('power-val');
+            const phiInitialVal = document.getElementById('phi-initial-val');
+            const phiFinalVal = document.getElementById('phi-final-val');
+            
+            // Elementos del SVG (Tema 2)
+            const pLineText = document.getElementById('p-text');
+            const triangleInitial = document.getElementById('triangle-initial');
+            const triangleFinal = document.getElementById('triangle-final');
+            const qcLine = document.getElementById('qc-line');
+            const textSInitial = document.getElementById('text-S-initial');
+            const textSFinal = document.getElementById('text-S-final');
+            const textQInitial = document.getElementById('text-Q-initial');
+            const textQFinal = document.getElementById('text-Q-final');
+            const textQc = document.getElementById('text-Qc');
+            
+            // Info Box (Tema 2)
+            const infoSInitial = document.getElementById('info-s-initial');
+            const infoCosInitial = document.getElementById('info-cos-initial');
+            const infoSFinal = document.getElementById('info-s-final');
+            const infoCosFinal = document.getElementById('info-cos-final');
+            const infoQcCalc = document.getElementById('info-qc-calc');
+
+            // Constantes visuales del SVG
+            const X_ORIGIN = 20;
+            const Y_ORIGIN = 280;
+            const P_PIXELS = 250; // Ancho visual fijo para P
+            const P_X = X_ORIGIN + P_PIXELS;
+
+            function updatePowerTriangle() {
+                // 1. Leer valores de sliders
+                const P = parseFloat(powerSlider.value);
+                const cosPhi_i = parseFloat(phiInitialSlider.value);
+                const cosPhi_f = parseFloat(phiFinalSlider.value);
+
+                // 2. Actualizar spans
+                powerVal.textContent = P;
+                phiInitialVal.textContent = cosPhi_i.toFixed(2);
+                phiFinalVal.textContent = cosPhi_f.toFixed(2);
+                
+                // 3. Cálculos
+                const phi_i_rad = Math.acos(cosPhi_i);
+                const phi_f_rad = Math.acos(cosPhi_f);
+                
+                const Q_i = P * Math.tan(phi_i_rad);
+                const Q_f = P * Math.tan(phi_f_rad);
+                
+                // Asegurar que Q_f sea menor que Q_i para corrección
+                const Q_final = (phi_f_rad > phi_i_rad) ? Q_i : Q_f; // Evitar "aumentar" Q
+                const cosPhi_final = (phi_f_rad > phi_i_rad) ? cosPhi_i : cosPhi_f;
+                const phi_f_rad_corr = (phi_f_rad > phi_i_rad) ? phi_i_rad : phi_f_rad;
+                if (phi_f_rad > phi_i_rad) {
+                     phiFinalSlider.value = cosPhi_i;
+                     phiFinalVal.textContent = cosPhi_i.toFixed(2);
+                }
+
+                const Q_c = Q_i - Q_final;
+                const S_i = P / cosPhi_i;
+                const S_f = P / cosPhi_final;
+
+                // 4. Actualizar Info Box
+                infoSInitial.textContent = `${S_i.toFixed(1)} kVA`;
+                infoCosInitial.textContent = cosPhi_i.toFixed(3);
+                infoSFinal.textContent = `${S_f.toFixed(1)} kVA`;
+                infoCosFinal.textContent = cosPhi_final.toFixed(3);
+                infoQcCalc.textContent = `${Q_c.toFixed(1)} kVAr`;
+                
+                // 5. Actualizar SVG
+                // Escalar Qs relativo a P
+                const max_Q_visual = 250; // Altura máx visual de Q
+                const max_Q_calc = P * Math.tan(Math.acos(0.5)); // Q para cos_phi=0.5
+                
+                const y_Q_i = Y_ORIGIN - (Q_i / max_Q_calc) * max_Q_visual;
+                const y_Q_final = Y_ORIGIN - (Q_final / max_Q_calc) * max_Q_visual;
+                
+                // Triángulo Inicial
+                triangleInitial.setAttribute('points', `${X_ORIGIN},${Y_ORIGIN} ${P_X},${Y_ORIGIN} ${P_X},${y_Q_i} ${X_ORIGIN},${Y_ORIGIN}`);
+                
+                // Línea de Corrección QC
+                qcLine.setAttribute('x1', P_X);
+                qcLine.setAttribute('y1', y_Q_i);
+                qcLine.setAttribute('x2', P_X);
+                qcLine.setAttribute('y2', y_Q_final);
+                
+                // Triángulo Final
+                triangleFinal.setAttribute('points', `${X_ORIGIN},${Y_ORIGIN} ${P_X},${Y_ORIGIN} ${P_X},${y_Q_final} ${X_ORIGIN},${Y_ORIGIN}`);
+                
+                // Textos
+                pLineText.textContent = `P = ${P} kW`;
+                textQInitial.setAttribute('y', y_Q_i + (Y_ORIGIN - y_Q_i) / 2);
+                textQFinal.setAttribute('y', y_Q_final + (Y_ORIGIN - y_Q_final) / 2 + 5);
+                textQc.setAttribute('y', y_Q_i + (y_Q_final - y_Q_i) / 2);
+                
+                const angle_i_deg = phi_i_rad * 180 / Math.PI;
+                const angle_f_deg = phi_f_rad_corr * 180 / Math.PI;
+                
+                textSInitial.setAttribute('transform', `rotate(${-angle_i_deg / 2} ${P_X / 2} ${Y_ORIGIN})`);
+                textSInitial.setAttribute('x', (X_ORIGIN + P_X) / 2);
+                textSInitial.setAttribute('y', (Y_ORIGIN + y_Q_i) / 2 - 5);
+                
+                textSFinal.setAttribute('transform', `rotate(${-angle_f_deg / 2} ${P_X / 2} ${Y_ORIGIN})`);
+                textSFinal.setAttribute('x', (X_ORIGIN + P_X) / 2);
+                textSFinal.setAttribute('y', (Y_ORIGIN + y_Q_final) / 2 - 5);
+            }
+
+            // Event Listeners para Tema 2
+            [powerSlider, phiInitialSlider, phiFinalSlider].forEach(el => {
+                el.addEventListener('input', updatePowerTriangle);
+            });
+
+            // Carga inicial del triángulo
+            updatePowerTriangle();
+        });
+    </script>
+
+</body>
+</html>

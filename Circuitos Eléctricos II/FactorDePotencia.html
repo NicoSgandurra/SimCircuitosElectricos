@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conceptos de Electrotecnia - Factor de Potencia</title>
+    <style>
+        :root {
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --text-color: #2e4a4a;
+            --text-light: #6a9c9c;
+            --border-color: #d2f0e0;
+            --primary-color: #5ab17c;
+            --primary-hover: #4a9e6b;
+            --danger-color: #e76f51;
+            --danger-hover: #d05c43;
+            --code-bg: #e0f2f7;
+            --output-bg: #e0f2f7;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-hover: 0 6px 16px rgba(0,0,0,0.1);
+            --color-bg-dark: #12121e;
+            --color-bg-light: #1e1e2f;
+            --color-card: #2a2a4e;
+            --color-primary: #4a4af5;
+            --color-accent: #7aa2f7;
+            --color-text: #e0e0ff;
+            --color-text-muted: #a0a0c0;
+            --color-danger: #f77272;
+            --color-success: #73daca;
+            --color-warning: #ffc777;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1523;
+            --card-bg: #28203d;
+            --text-color: #e6e0f0;
+            --text-light: #afa2c3;
+            --border-color: #43386b;
+            --primary-color: #a78bfa;
+            --primary-hover: #9175d6;
+            --danger-color: #ef778a;
+            --danger-hover: #d56073;
+            --code-bg: #3d305e;
+            --output-bg: #3d305e;
+            --shadow: 0 4px 12px rgba(0,0,0,0.2);
+            --shadow-hover: 0 6px 16px rgba(0,0,0,0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 20px auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .content-section {
+            padding: 10px 30px 30px;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        h3 {
+            color: var(--text-color);
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+        .content-section > h3:first-child {
+            margin-top: 0;
+        }
+
+        p, li {
+            font-size: 1.05em;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+
+        ul {
+            padding-left: 25px;
+            list-style-type: '⚡ ';
+        }
+
+        i { font-style: italic; }
+        sub { font-size: 0.75em; vertical-align: sub; }
+        sup { font-size: 0.75em; vertical-align: super; }
+
+        .interactive-diagram {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 15px 0;
+        }
+        
+        .load-control {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .load-control label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            max-width: 150px;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            background: var(--bg-color);
+            border-radius: 5px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            margin-top: 5px;
+        }
+        input[type="range"]:hover { opacity: 1; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        .info-box {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .info-box div {
+            text-align: center;
+            margin: 5px 10px;
+        }
+        .info-box span {
+            display: block;
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+        .info-box strong {
+            font-size: 1.3em;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+        
+        #power-triangle-diagram {
+            background-color: var(--code-bg);
+        }
+
+        #power-triangle-diagram polyline, #power-triangle-diagram line {
+            transition: all 0.3s ease;
+        }
+
+        #darkModeToggle {
+            background-color: transparent;
+            color: var(--text-color);
+            font-size: 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            padding: 0;
+            cursor: pointer;
+        }
+        #darkModeToggle:hover {
+            background-color: var(--code-bg);
+            transform: translateY(-2px) rotate(15deg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Corrección del Factor de Potencia (cos φ)</h1>
+            <button id="darkModeToggle">🌙</button>
+        </header>
+
+        <section class="content-section" id="content-tema2">
+            <h3>Explicación Conceptual</h3>
+            <p>Las cargas industriales (motores, bobinas) son <strong>inductivas</strong>. Para funcionar, consumen dos tipos de potencia:</p>
+            <ul>
+                <li><strong>Potencia Activa (P):</strong> La potencia "útil" que realiza trabajo (mover un eje). Se mide en <strong>Watts (W)</strong>.</li>
+                <li><strong>Potencia Reactiva (Q):</strong> La potencia "magnética" para crear los campos magnéticos. No realiza trabajo útil, pero viaja por los cables. Se mide en <strong>Volt-Amper Reactivo (VAr)</strong>.</li>
+            </ul>
+            <p>La suma <strong>vectorial</strong> de ambas es la <strong>Potencia Aparente (S)</strong>, que es la que la red debe transportar. El <strong>Factor de Potencia (<i>cos</i> φ)</strong> es la relación <i>P</i> / <i>S</i>.</p>
+            
+            <h3>El Problema del Bajo <i>cos</i> φ</h3>
+            <p>Un <i>cos</i> φ bajo (ej. 0.7) significa que la Potencia Aparente (S) es muy grande comparada con la Potencia Activa (P) útil. Esto obliga a la compañía eléctrica a usar cables y transformadores más grandes, generando más pérdidas (<i>I</i><sup>2</sup><i>R</i>) en las líneas. Por eso, <strong>se aplican multas</strong> por bajo factor de potencia (generalmente < 0.9).</p>
+
+            <h3>La Solución: Banco de Capacitores</h3>
+            <p>No podemos eliminar la <i>Q</i> (Reactiva) que necesita el motor, pero podemos "inyectarla" localmente. Los <strong>capacitores</strong> hacen lo opuesto: generan potencia reactiva (<i>Q</i><sub>C</sub>).</p>
+            <p>Al instalar un banco de capacitores en paralelo, el motor toma su <i>Q</i><sub>L</sub> y el capacitor le entrega una <i>Q</i><sub>C</sub>. La red eléctrica ahora solo tiene que entregar la diferencia (<i>Q</i><sub>nueva</sub> = <i>Q</i><sub>L</sub> - <i>Q</i><sub>C</sub>), reduciendo la <i>S</i> total y mejorando el <i>cos</i> φ a un valor cercano a 1.</p>
+            
+            <div class="interactive-diagram">
+                <h3>Diagrama Interactivo: Triángulo de Potencias</h3>
+                
+                <div class="controls-grid">
+                    <div class="load-control">
+                        <label>Potencia Activa (P): <span id="power-val">250</span> kW</label>
+                        <input type="range" id="power-slider" min="50" max="1000" value="250" step="10">
+                    </div>
+                    <div class="load-control">
+                        <label><i>cos</i> φ Inicial: <span id="phi-initial-val">0.70</span></label>
+                        <input type="range" id="phi-initial-slider" min="0.5" max="1.0" value="0.7" step="0.01">
+                    </div>
+                     <div class="load-control">
+                        <label><i>cos</i> φ Final: <span id="phi-final-val">0.95</span></label>
+                        <input type="range" id="phi-final-slider" min="0.5" max="1.0" value="0.95" step="0.01">
+                    </div>
+                    <div class="load-control">
+                        <label for="voltage-input">Tensión de Línea (V)</label>
+                        <input type="number" id="voltage-input" value="380" step="1">
+                    </div>
+                    <div class="load-control">
+                        <label for="freq-input">Frecuencia (Hz)</label>
+                        <input type="number" id="freq-input" value="50" step="1">
+                    </div>
+                </div>
+
+                <svg id="power-triangle-diagram" viewBox="-30 -20 420 340" width="350" height="300" style="margin: auto; display: block; border-radius: 8px;">
+                    <line x1="20" y1="280" x2="330" y2="280" stroke="#555" stroke-width="1" />
+                    <line x1="20" y1="280" x2="20" y2="20" stroke="#555" stroke-width="1" />
+                    <text x="330" y="295" fill="#555">P (kW)</text>
+                    <text x="10" y="20" fill="#555" text-anchor="middle">Q (kVAr)</text>
+                    
+                    <line id="p-line" x1="20" y1="280" x2="270" y2="280" stroke-width="4" stroke="var(--text-color)" />
+                    <text id="p-text" x="145" y="295" fill="#e0e0ff" text-anchor="middle">P = 250 kW</text>
+
+                    <polyline id="triangle-initial"
+                        points="20,280 270,280 270,125 20,280"
+                        fill="rgba(247, 114, 114, 0.3)" 
+                        stroke="var(--danger-color)" 
+                        stroke-width="3" />
+                    <text id="text-S-initial" x="145" y="200" fill="#f77272" text-anchor="middle" transform="rotate(-30 145 200)">S Inicial</text>
+                    <text id="text-Q-initial" x="275" y="200" fill="#f77272" text-anchor="start">Q_L</text>
+
+                    <line id="qc-line"
+                        x1="270" y1="125" x2="270" y2="125"
+                        stroke="var(--color-success)" 
+                        stroke-width="4" 
+                        stroke-dasharray="8 4" />
+                    <text id="text-Qc" x="275" y="100" fill="#73daca" text-anchor="start">Q_C</text>
+                    
+                    <polyline id="triangle-final"
+                        points="20,280 270,280 270,125 20,280"
+                        fill="rgba(122, 162, 247, 0.5)" 
+                        stroke="var(--primary-color)" 
+                        stroke-width="3" />
+                    <text id="text-S-final" x="145" y="240" fill="#7aa2f7" text-anchor="middle" transform="rotate(-15 145 240)">S Final</text>
+                    <text id="text-Q-final" x="275" y="250" fill="#7aa2f7" text-anchor="start">Q_F</text>
+                    
+                </svg>
+
+                <div class="info-box" id="info-box-2">
+                    <div>
+                        <span><i>S</i> Inicial</span>
+                        <strong id="info-s-initial">357 kVA</strong>
+                    </div>
+                    <div>
+                        <span><i>cos</i> φ Inicial</span>
+                        <strong id="info-cos-initial">0.700</strong>
+                    </div>
+                    <div>
+                        <span><i>S</i> Final</span>
+                        <strong id="info-s-final">263 kVA</strong>
+                    </div>
+                    <div>
+                        <span><i>cos</i> φ Final</span>
+                        <strong id="info-cos-final">0.950</strong>
+                    </div>
+                    <div>
+                        <span>Banco <i>Q</i><sub>C</sub></span>
+                        <strong id="info-qc-calc" style="color: var(--color-success);">172.9 kVAr</strong>
+                    </div>
+                    <div>
+                        <span>I Inicial</span>
+                        <strong id="info-i-initial">0 A</strong>
+                    </div>
+                    <div>
+                        <span>I Final</span>
+                        <strong id="info-i-final">0 A</strong>
+                    </div>
+                </div>
+
+                <div class="info-box" id="info-box-caps">
+                    <div>
+                        <span>C (Estrella)</span>
+                        <strong id="info-c-star">0 µF</strong>
+                    </div>
+                    <div>
+                        <span>C (Triángulo)</span>
+                        <strong id="info-c-delta">0 µF</strong>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            const body = document.body;
+
+            function setDarkMode(isDark) {
+                if (isDark) {
+                    body.classList.add('dark-mode');
+                    darkModeToggle.textContent = '☀️';
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    body.classList.remove('dark-mode');
+                    darkModeToggle.textContent = '🌙';
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            }
+
+            const currentMode = localStorage.getItem('darkMode');
+            let prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (currentMode === 'enabled') {
+                setDarkMode(true);
+            } else if (currentMode === 'disabled') {
+                setDarkMode(false);
+            } else {
+                setDarkMode(prefersDark);
+            }
+
+            darkModeToggle.addEventListener('click', () => {
+                setDarkMode(!body.classList.contains('dark-mode'));
+            });
+
+            const powerSlider = document.getElementById('power-slider');
+            const phiInitialSlider = document.getElementById('phi-initial-slider');
+            const phiFinalSlider = document.getElementById('phi-final-slider');
+            const voltageInput = document.getElementById('voltage-input');
+            const freqInput = document.getElementById('freq-input');
+            
+            const powerVal = document.getElementById('power-val');
+            const phiInitialVal = document.getElementById('phi-initial-val');
+            const phiFinalVal = document.getElementById('phi-final-val');
+            
+            const pLineText = document.getElementById('p-text');
+            const triangleInitial = document.getElementById('triangle-initial');
+            const triangleFinal = document.getElementById('triangle-final');
+            const qcLine = document.getElementById('qc-line');
+            const textSInitial = document.getElementById('text-S-initial');
+            const textSFinal = document.getElementById('text-S-final');
+            const textQInitial = document.getElementById('text-Q-initial');
+            const textQFinal = document.getElementById('text-Q-final');
+            const textQc = document.getElementById('text-Qc');
+            
+            const infoSInitial = document.getElementById('info-s-initial');
+            const infoCosInitial = document.getElementById('info-cos-initial');
+            const infoSFinal = document.getElementById('info-s-final');
+            const infoCosFinal = document.getElementById('info-cos-final');
+            const infoQcCalc = document.getElementById('info-qc-calc');
+            const infoIInitial = document.getElementById('info-i-initial');
+            const infoIFinal = document.getElementById('info-i-final');
+            const infoCStar = document.getElementById('info-c-star');
+            const infoCDelta = document.getElementById('info-c-delta');
+
+
+            const X_ORIGIN = 20;
+            const Y_ORIGIN = 280;
+            const P_PIXELS = 250;
+            const P_X = X_ORIGIN + P_PIXELS;
+
+            function updatePowerTriangle() {
+                const P = parseFloat(powerSlider.value);
+                const cosPhi_i = parseFloat(phiInitialSlider.value);
+                const cosPhi_f = parseFloat(phiFinalSlider.value);
+                const Vl = parseFloat(voltageInput.value) || 380;
+                const freq = parseFloat(freqInput.value) || 50;
+
+                powerVal.textContent = P;
+                phiInitialVal.textContent = cosPhi_i.toFixed(2);
+                phiFinalVal.textContent = cosPhi_f.toFixed(2);
+                
+                const phi_i_rad = Math.acos(cosPhi_i);
+                const phi_f_rad = Math.acos(cosPhi_f);
+                
+                const Q_i = P * Math.tan(phi_i_rad);
+                const Q_f = P * Math.tan(phi_f_rad);
+                
+                const Q_final = (phi_f_rad > phi_i_rad) ? Q_i : Q_f;
+                const cosPhi_final = (phi_f_rad > phi_i_rad) ? cosPhi_i : cosPhi_f;
+                const phi_f_rad_corr = (phi_f_rad > phi_i_rad) ? phi_i_rad : phi_f_rad;
+                if (phi_f_rad > phi_i_rad) {
+                     phiFinalSlider.value = cosPhi_i;
+                     phiFinalVal.textContent = cosPhi_i.toFixed(2);
+                }
+
+                const Q_c = Q_i - Q_final;
+                const S_i = P / cosPhi_i;
+                const S_f = P / cosPhi_final;
+
+                const I_i = (S_i * 1000) / (Vl * Math.sqrt(3));
+                const I_f = (S_f * 1000) / (Vl * Math.sqrt(3));
+
+                const Qc_var = Q_c * 1000;
+                const C_star = Qc_var / (2 * Math.PI * freq * Vl * Vl);
+                const C_delta = C_star / 3;
+
+
+                infoSInitial.textContent = `${S_i.toFixed(1)} kVA`;
+                infoCosInitial.textContent = cosPhi_i.toFixed(3);
+                infoSFinal.textContent = `${S_f.toFixed(1)} kVA`;
+                infoCosFinal.textContent = cosPhi_final.toFixed(3);
+                infoQcCalc.textContent = `${Q_c.toFixed(1)} kVAr`;
+                infoIInitial.textContent = `${I_i.toFixed(1)} A`;
+                infoIFinal.textContent = `${I_f.toFixed(1)} A`;
+                infoCStar.textContent = `${(C_star * 1e6).toFixed(1)} µF`;
+                infoCDelta.textContent = `${(C_delta * 1e6).toFixed(1)} µF`;
+
+                
+                const max_Q_visual = 250;
+                const max_Q_calc = P * Math.tan(Math.acos(0.5));
+                
+                const y_Q_i = Y_ORIGIN - (Q_i / max_Q_calc) * max_Q_visual;
+                const y_Q_final = Y_ORIGIN - (Q_final / max_Q_calc) * max_Q_visual;
+                
+                triangleInitial.setAttribute('points', `${X_ORIGIN},${Y_ORIGIN} ${P_X},${Y_ORIGIN} ${P_X},${y_Q_i} ${X_ORIGIN},${Y_ORIGIN}`);
+                
+                qcLine.setAttribute('x1', P_X);
+                qcLine.setAttribute('y1', y_Q_i);
+                qcLine.setAttribute('x2', P_X);
+                qcLine.setAttribute('y2', y_Q_final);
+                
+                triangleFinal.setAttribute('points', `${X_ORIGIN},${Y_ORIGIN} ${P_X},${Y_ORIGIN} ${P_X},${y_Q_final} ${X_ORIGIN},${Y_ORIGIN}`);
+                
+                pLineText.textContent = `P = ${P} kW`;
+                textQInitial.setAttribute('y', y_Q_i + (Y_ORIGIN - y_Q_i) / 2);
+                textQFinal.setAttribute('y', y_Q_final + (Y_ORIGIN - y_Q_final) / 2 + 5);
+                textQc.setAttribute('y', y_Q_i + (y_Q_final - y_Q_i) / 2);
+                
+                const angle_i_deg = phi_i_rad * 180 / Math.PI;
+                const angle_f_deg = phi_f_rad_corr * 180 / Math.PI;
+                
+                textSInitial.setAttribute('transform', `rotate(${-angle_i_deg / 2} ${P_X / 2} ${Y_ORIGIN})`);
+                textSInitial.setAttribute('x', (X_ORIGIN + P_X) / 2);
+                textSInitial.setAttribute('y', (Y_ORIGIN + y_Q_i) / 2 - 5);
+                
+                textSFinal.setAttribute('transform', `rotate(${-angle_f_deg / 2} ${P_X / 2} ${Y_ORIGIN})`);
+                textSFinal.setAttribute('x', (X_ORIGIN + P_X) / 2);
+                textSFinal.setAttribute('y', (Y_ORIGIN + y_Q_final) / 2 - 5);
+            }
+
+            [powerSlider, phiInitialSlider, phiFinalSlider, voltageInput, freqInput].forEach(el => {
+                el.addEventListener('input', updatePowerTriangle);
+            });
+
+            updatePowerTriangle();
+        });
+    </script>
+
+</body>
+</html>
