@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Avanzado de Motor PaP (v3)</title>
+    <title>Simulador Avanzado de Motor PaP (v4)</title>
     
     <style>
         /* --- 1. TU CÓDIGO CSS (PASTELES) --- */
@@ -25,10 +25,15 @@
             /* --- Colores Personalizados del Motor --- */
             --motor-estator: #eceff1;
             --motor-estator-borde: var(--border-color);
-            --motor-rotor-norte: var(--danger-color);
-            --motor-rotor-sur: #3498db;
+            
+            /* Colores del Rotor (coinciden con peligro/info) */
+            --motor-rotor-norte: var(--danger-color); 
+            --motor-rotor-sur: #3498db; /* Un azul claro */
+            
+            /* --- CAMBIO CLAVE: Colores de Polaridad Pastel --- */
+            --motor-polo-norte: #f5b7b1; /* Rojo Pastel (lighten danger) */
+            --motor-polo-sur: #a9cce3; /* Celeste Pastel (lighten sur) */
             --motor-bobina-off: #dfe6e9;
-            --motor-bobina-on: #f1c40f; /* Amarillo eléctrico */
         }
 
         body.dark-mode {
@@ -50,6 +55,10 @@
             --motor-estator: #3d305e;
             --motor-estator-borde: var(--border-color);
             --motor-bobina-off: #5b517d;
+
+            /* --- CAMBIO CLAVE: Colores de Polaridad (Oscuro) --- */
+            --motor-polo-norte: #d98880; /* Rojo Pastel (darken danger) */
+            --motor-polo-sur: #74a4c4; /* Celeste Pastel (darken sur) */
         }
 
         body {
@@ -62,10 +71,7 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        h1, h2, h3 {
-            color: var(--primary-color);
-            transition: color 0.3s ease;
-        }
+        h1, h2, h3 { color: var(--primary-color); transition: color 0.3s ease; }
         h1 { text-align: center; }
         h2 { border-bottom: 2px solid var(--border-color); padding-bottom: 5px; }
         
@@ -155,6 +161,7 @@
             position: absolute;
             width: 200px;
             height: 40px;
+            /* Rotor con colores Norte (Rojo) y Sur (Azul) */
             background: linear-gradient(90deg, var(--motor-rotor-norte) 48%, #333 48%, #333 52%, var(--motor-rotor-sur) 52%);
             border: 4px solid #333;
             border-radius: 8px;
@@ -163,9 +170,6 @@
             left: 50%;
             margin-left: -100px;
             margin-top: -20px; 
-            
-            /* --- CAMBIO CLAVE --- */
-            /* Transición más rápida para un "paso" más nítido */
             transition: transform 0.15s ease-in-out; 
             transform-origin: center;
             transform: rotate(0deg);
@@ -184,18 +188,24 @@
             justify-content: center;
             font-weight: bold;
             font-size: 1.2em;
-            transition: all 0.15s ease;
+            /* Transición rápida para el cambio de polaridad */
+            transition: background-color 0.1s ease, border-color 0.3s ease, color 0.3s ease, transform 0.1s ease;
             top: 50%;
             left: 50%;
             margin: -30px;
         }
         
-        /* Clase para energizar */
-        .energizada {
-            background-color: var(--motor-bobina-on);
-            border-color: #c79a00;
+        /* --- CAMBIO CLAVE: Clases de Polaridad --- */
+        .energizada-norte {
+            background-color: var(--motor-polo-norte);
+            border-color: var(--motor-rotor-norte);
             color: #333;
-            box-shadow: 0 0 15px var(--motor-bobina-on), 0 0 25px var(--motor-bobina-on);
+            transform: scale(1.05);
+        }
+        .energizada-sur {
+            background-color: var(--motor-polo-sur);
+            border-color: var(--motor-rotor-sur);
+            color: #333;
             transform: scale(1.05);
         }
         
@@ -223,7 +233,7 @@
 </head>
 <body>
 
-    <h1>Simulador Motor PaP (Paso Completo)</h1>
+    <h1>Simulador PaP (Bipolar / Medio Paso)</h1>
 
     <div class="simulador-card">
         <div id="estator">
@@ -248,9 +258,9 @@
     
     <div class="estado-card">
         <h2>Estado Actual</h2>
-        <div>Paso: <strong id="estado-paso">0</strong></div>
+        <div>Pasos: <strong id="estado-paso">0 (Paso 0)</strong></div>
         <div>Ángulo: <strong id="estado-angulo">0</strong>°</div>
-        <div>Fase Activa: <strong id="estado-fases">---</strong></div>
+        <div>Fases Activas: <strong id="estado-fases">---</strong></div>
     </div>
 
     <script>
@@ -278,66 +288,114 @@
         const listaBotones = [btnPasoIzq, btnPasoDer, btnGirarIzq, btnGirarDer];
 
         // --- 2. ESTADO DEL MOTOR Y SECUENCIA ---
-        const TOTAL_PASOS = 6;
-        const ANGULO_POR_PASO = 60; // 360 / 6
-
-        // --- CAMBIO CLAVE ---
-        // Nueva secuencia de Paso Completo (Full-Step)
-        // Coincide con el nombre de la bobina que se debe encender.
-        const secuenciaPasos = ['a1', 'b1', 'c1', 'a2', 'b2', 'c2'];
         
-        // --- CAMBIO CLAVE ---
-        // Los ángulos del rotor ahora coinciden 1 a 1 con las bobinas
-        const angulosPasos = [0, 60, 120, 180, 240, 300];
+        // --- CAMBIO CLAVE: Secuencia de 12 pasos (Half-Step) ---
+        const TOTAL_PASOS = 12;
+        const ANGULO_POR_PASO = 30; // 360 / 12
+
+        // Secuencia Bipolar de Medio Paso
+        // 0 = OFF, 1 = NORTE (+), -1 = SUR (-)
+        // El rotor (Norte/Rojo) será ATRAÍDO por el SUR (Celeste).
+        // Por lo tanto, el ángulo del rotor = ángulo de la bobina SUR.
+        const secuenciaPasos = [
+            // {a, b, c}
+            { a: -1, b: 0,  c: 0  }, // Paso 0: A+ es SUR. Rotor a 0°
+            { a: -1, b: -1, c: 0  }, // Paso 1: A+ y B+ son SUR. Rotor a 30°
+            { a: 0,  b: -1, c: 0  }, // Paso 2: B+ es SUR. Rotor a 60°
+            { a: 0,  b: -1, c: -1 }, // Paso 3: B+ y C+ son SUR. Rotor a 90°
+            { a: 0,  b: 0,  c: -1 }, // Paso 4: C+ es SUR. Rotor a 120°
+            { a: 1,  b: 0,  c: -1 }, // Paso 5: C+ es SUR, A+ es NORTE. Rotor a 150°
+            { a: 1,  b: 0,  c: 0  }, // Paso 6: A+ es NORTE. Rotor a 180°
+            { a: 1,  b: 1,  c: 0  }, // Paso 7: A+ y B+ son NORTE. Rotor a 210°
+            { a: 0,  b: 1,  c: 0  }, // Paso 8: B+ es NORTE. Rotor a 240°
+            { a: 0,  b: 1,  c: 1  }, // Paso 9: B+ y C+ son NORTE. Rotor a 270°
+            { a: 0,  b: 0,  c: 1  }, // Paso 10: C+ es NORTE. Rotor a 300°
+            { a: -1, b: 0,  c: 1  }  // Paso 11: C+ es NORTE, A+ es SUR. Rotor a 330°
+        ];
 
         // La "memoria" del motor
-        let pasoActual = 0; // Índice de la 'secuenciaPasos' (0 a 5)
-        
-        // --- CAMBIO CLAVE ---
-        // Un ángulo físico que se acumula, no se resetea.
-        let anguloFisico = 0; 
+        let pasoActual = 0; // Índice del ciclo (0 a 11)
+        let anguloFisico = 0; // Ángulo acumulativo
+        let pasosTotales = 0; // Contador de pasos acumulativo
         
         let intervaloGiro = null;
-        const VELOCIDAD_GIRO = 250; // ms por paso
+        const VELOCIDAD_GIRO = 200; // ms por paso (más rápido)
 
         // --- 3. FUNCIONES DEL MOTOR ---
 
-        function actualizarMotor() {
-            // 1. Obtener nombre de la bobina y ángulo
-            const bobinaActiva = secuenciaPasos[pasoActual]; // ej: "a1"
-            const anguloTeorico = angulosPasos[pasoActual]; // ej: 0
+        /** Apaga todas las bobinas (quita ambas clases) */
+        function apagarTodasLasBobinas() {
+            listaBobinas.forEach(bobina => {
+                bobina.classList.remove('energizada-norte');
+                bobina.classList.remove('energizada-sur');
+            });
+        }
 
+        /**
+         * Función Central: Actualiza el estado visual del motor
+         * basado en las variables de estado.
+         */
+        function actualizarMotor() {
+            // 1. Obtener la configuración del paso actual
+            const paso = secuenciaPasos[pasoActual];
+            let fasesTexto = [];
+            
             // 2. Girar el rotor al ángulo físico acumulado
             rotor.style.transform = `rotate(${anguloFisico}deg)`;
             
             // 3. Energizar/Desenergizar bobinas (Lógica Bipolar)
-            // Primero, apaga todas
-            listaBobinas.forEach(bobina => bobina.classList.remove('energizada'));
+            apagarTodasLasBobinas();
+
+            // Fase A
+            if (paso.a === 1) { // A+ es NORTE, A- es SUR
+                bobinas.a1.classList.add('energizada-norte');
+                bobinas.a2.classList.add('energizada-sur');
+                fasesTexto.push("A+ (N)");
+            } else if (paso.a === -1) { // A+ es SUR, A- es NORTE
+                bobinas.a1.classList.add('energizada-sur');
+                bobinas.a2.classList.add('energizada-norte');
+                fasesTexto.push("A- (N)");
+            }
             
-            // Segundo, enciende solo la activa
-            if (bobinas[bobinaActiva]) {
-                bobinas[bobinaActiva].classList.add('energizada');
+            // Fase B
+            if (paso.b === 1) { // B+ es NORTE, B- es SUR
+                bobinas.b1.classList.add('energizada-norte');
+                bobinas.b2.classList.add('energizada-sur');
+                fasesTexto.push("B+ (N)");
+            } else if (paso.b === -1) { // B+ es SUR, B- es NORTE
+                bobinas.b1.classList.add('energizada-sur');
+                bobinas.b2.classList.add('energizada-norte');
+                fasesTexto.push("B- (N)");
+            }
+            
+            // Fase C
+            if (paso.c === 1) { // C+ es NORTE, C- es SUR
+                bobinas.c1.classList.add('energizada-norte');
+                bobinas.c2.classList.add('energizada-sur');
+                fasesTexto.push("C+ (N)");
+            } else if (paso.c === -1) { // C+ es SUR, C- es NORTE
+                bobinas.c1.classList.add('energizada-sur');
+                bobinas.c2.classList.add('energizada-norte');
+                fasesTexto.push("C- (N)");
             }
             
             // 4. Actualizar el texto de estado
-            estadoPaso.textContent = pasoActual;
+            estadoPaso.textContent = `${pasosTotales} (Paso ${pasoActual})`;
             estadoAngulo.textContent = `${anguloFisico}°`;
-            estadoFases.textContent = bobinaActiva.toUpperCase(); // ej: "A1"
+            estadoFases.textContent = fasesTexto.join(', ') || '---';
         }
         
         function pasoDerecha() {
             pasoActual = (pasoActual + 1) % TOTAL_PASOS;
-            // --- CAMBIO CLAVE ---
-            // Suma al ángulo físico
             anguloFisico += ANGULO_POR_PASO;
+            pasosTotales++;
             actualizarMotor();
         }
         
         function pasoIzquierda() {
             pasoActual = (pasoActual - 1 + TOTAL_PASOS) % TOTAL_PASOS;
-            // --- CAMBIO CLAVE ---
-            // Resta del ángulo físico
             anguloFisico -= ANGULO_POR_PASO;
+            pasosTotales--;
             actualizarMotor();
         }
         
