@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Avanzado de Motor PaP</title>
+    
+    <style>
+        /* --- 1. TU CÓDIGO CSS (PASTELES) --- */
+        /* (Todo el CSS que proporcionaste) */
+        :root {
+            /* Modo Claro (Verde Agua/Menta Pastel) */
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --text-color: #2e4a4a;
+            --text-light: #6a9c9c;
+            --border-color: #d2f0e0;
+            --primary-color: #5ab17c;
+            --primary-hover: #4a9e6b;
+            --danger-color: #e76f51;
+            --danger-hover: #d05c43;
+            --code-bg: #e0f2f7;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-hover: 0 6px 16px rgba(0,0,0,0.1);
+            
+            /* --- Colores Personalizados del Motor --- */
+            --motor-estator: #eceff1;
+            --motor-estator-borde: var(--border-color);
+            --motor-rotor-norte: var(--danger-color);
+            --motor-rotor-sur: #3498db;
+            --motor-bobina-off: #dfe6e9;
+            --motor-bobina-on: #f1c40f; /* Amarillo eléctrico */
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro (Morado/Lavanda Pastel) */
+            --bg-color: #1a1523;
+            --card-bg: #28203d;
+            --text-color: #e6e0f0;
+            --text-light: #afa2c3;
+            --border-color: #43386b;
+            --primary-color: #a78bfa;
+            --primary-hover: #9175d6;
+            --danger-color: #ef778a;
+            --danger-hover: #d56073;
+            --code-bg: #3d305e;
+            --shadow: 0 4px 12px rgba(0,0,0,0.2);
+            --shadow-hover: 0 6px 16px rgba(0,0,0,0.3);
+
+            /* --- Colores Motor (Oscuro) --- */
+            --motor-estator: #3d305e;
+            --motor-estator-borde: var(--border-color);
+            --motor-bobina-off: #5b517d;
+            /* El resto se mantiene (Norte, Sur, On) */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+            transition: color 0.3s ease;
+        }
+        h1 { text-align: center; }
+        h2 { border-bottom: 2px solid var(--border-color); padding-bottom: 5px; }
+        
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, color 0.3s ease;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        button:disabled {
+            background-color: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Botón Detener (usa --danger-color) */
+        button.danger { background-color: var(--danger-color); }
+        button.danger:hover { background-color: var(--danger-hover); }
+
+        /* --- 3. Contenedores (Tarjetas) --- */
+        .simulador-card, .controles, .estado-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .controles {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        /* Botón Modo Oscuro */
+        #darkModeToggle {
+            background-color: transparent;
+            color: var(--text-color);
+            font-size: 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            padding: 0;
+            margin-left: auto;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        #darkModeToggle:hover {
+            background-color: var(--code-bg);
+            transform: translateY(-2px) rotate(15deg);
+        }
+        /* --- FIN DE TU CSS BASE --- */
+
+
+        /* --- 4. NUEVOS ESTILOS PARA EL SIMULADOR "LINDO" --- */
+
+        .simulador-card {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            overflow: hidden; /* Para que las sombras no se corten */
+        }
+        
+        #estator {
+            position: relative;
+            width: 320px; /* Un poco más grande */
+            height: 320px;
+            border: 10px solid var(--motor-estator-borde);
+            border-radius: 50%;
+            background-color: var(--motor-estator);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #rotor {
+            position: absolute;
+            width: 200px; /* 80% de 250px (ancho interno) */
+            height: 40px;
+            /* Un gradiente para simular un imán Norte/Sur */
+            background: linear-gradient(90deg, var(--motor-rotor-norte) 48%, #333 48%, #333 52%, var(--motor-rotor-sur) 52%);
+            border: 4px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            
+            /* Centrado */
+            top: 50%;
+            left: 50%;
+            margin-left: -100px;
+            margin-top: -20px; 
+            
+            /* Transición suave para el giro */
+            transition: transform 0.2s linear; 
+            transform-origin: center;
+            transform: rotate(0deg); /* Posición inicial */
+        }
+        
+        .bobina {
+            position: absolute;
+            width: 60px; /* Bobinas más grandes */
+            height: 60px;
+            background-color: var(--motor-bobina-off);
+            border: 4px solid var(--motor-estator-borde);
+            border-radius: 15px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: all 0.15s ease;
+            
+            /* Centrado de las bobinas */
+            top: 50%;
+            left: 50%;
+            margin: -30px; /* Mitad de width/height */
+        }
+        
+        /* Clase para energizar */
+        .energizada {
+            background-color: var(--motor-bobina-on);
+            border-color: #c79a00;
+            color: #333;
+            box-shadow: 0 0 15px var(--motor-bobina-on), 0 0 25px var(--motor-bobina-on);
+            transform: scale(1.05); /* Efecto "pulsante" */
+        }
+        
+        /* --- Posicionamiento Trigonométrico de las 6 bobinas --- */
+        /* (360 / 6 = 60 grados por bobina). Radio = 140px */
+        
+        #bobina-a1 { /* 0 deg */
+            transform: translate(140px); 
+        }
+        #bobina-b1 { /* 60 deg */
+            transform: rotate(60deg) translate(140px) rotate(-60deg);
+        }
+        #bobina-c1 { /* 120 deg */
+            transform: rotate(120deg) translate(140px) rotate(-120deg);
+        }
+        #bobina-a2 { /* 180 deg */
+            transform: translate(-140px);
+        }
+        #bobina-b2 { /* 240 deg */
+            transform: rotate(240deg) translate(140px) rotate(-240deg);
+        }
+        #bobina-c2 { /* 300 deg */
+            transform: rotate(300deg) translate(140px) rotate(-300deg);
+        }
+        
+        /* Tarjeta de Estado (para depuración) */
+        .estado-card {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+        .estado-card strong {
+            color: var(--primary-color);
+            font-weight: 900;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Simulador Motor PaP (3 Fases / 6 Pasos)</h1>
+
+    <div class="simulador-card">
+        <div id="estator">
+            <div class="bobina" id="bobina-a1">A+</div>
+            <div class="bobina" id="bobina-b1">B+</div>
+            <div class="bobina" id="bobina-c1">C+</div>
+            <div class="bobina" id="bobina-a2">A-</div>
+            <div class="bobina" id="bobina-b2">B-</div>
+            <div class="bobina" id="bobina-c2">C-</div>
+            
+            <div id="rotor"></div>
+        </div>
+    </div>
+
+    <div class="controles">
+        <button id="btn-paso-izq">Paso Izquierda</button>
+        <button id="btn-paso-der">Paso Derecha</button>
+        
+        <button id="btn-girar-izq">Girar Izquierda</button>
+        <button id="btn-girar-der">Girar Derecha</button>
+        
+        <button id="btn-detener" class="danger" disabled>Detener</button>
+        
+        <button id="darkModeToggle">🌙</button>
+    </div>
+    
+    <div class="estado-card">
+        <h2>Estado Actual</h2>
+        <div>Paso: <strong id="estado-paso">0</strong></div>
+        <div>Ángulo: <strong id="estado-angulo">0</strong>°</div>
+        <div>Fases Activas: <strong id="estado-fases">---</strong></div>
+    </div>
+
+
+    <script>
+        // --- 1. CAPTURAR ELEMENTOS ---
+        // Elementos visuales
+        const rotor = document.getElementById('rotor');
+        const modoOscuroBtn = document.getElementById('darkModeToggle');
+
+        // Elementos de estado (para mostrar info)
+        const estadoPaso = document.getElementById('estado-paso');
+        const estadoAngulo = document.getElementById('estado-angulo');
+        const estadoFases = document.getElementById('estado-fases');
+
+        // Controles
+        const btnPasoIzq = document.getElementById('btn-paso-izq');
+        const btnPasoDer = document.getElementById('btn-paso-der');
+        const btnGirarIzq = document.getElementById('btn-girar-izq');
+        const btnGirarDer = document.getElementById('btn-girar-der');
+        const btnDetener = document.getElementById('btn-detener');
+
+        // Bobinas (las guardamos en un objeto para fácil acceso)
+        const bobinas = {
+            a1: document.getElementById('bobina-a1'),
+            a2: document.getElementById('bobina-a2'),
+            b1: document.getElementById('bobina-b1'),
+            b2: document.getElementById('bobina-b2'),
+            c1: document.getElementById('bobina-c1'),
+            c2: document.getElementById('bobina-c2')
+        };
+        // Un array para iterar más fácil
+        const listaBotones = [btnPasoIzq, btnPasoDer, btnGirarIzq, btnGirarDer];
+
+        // --- 2. ESTADO DEL MOTOR Y SECUENCIA ---
+        // Usaremos una secuencia de 6 pasos (Half-Step para 3 fases)
+        const TOTAL_PASOS = 6;
+
+        // La secuencia nos dice qué fases energizar en cada paso.
+        // El ángulo del rotor se alinea *entre* las fases activas.
+        // A(0°), B(60°), C(120°), A-(180°), B-(240°), C-(300°)
+        const secuenciaPasos = [
+            // {a, b, c, angulo, textoFases}
+            { a: true,  b: false, c: false, angulo: 0,   texto: "A" },   // Paso 0: Atrae a A+
+            { a: true,  b: true,  c: false, angulo: 30,  texto: "A, B" }, // Paso 1: Atrae entre A+ y B+
+            { a: false, b: true,  c: false, angulo: 60,  texto: "B" },   // Paso 2: Atrae a B+
+            { a: false, b: true,  c: true,  angulo: 90,  texto: "B, C" }, // Paso 3: Atrae entre B+ y C+
+            { a: false, b: false, c: true,  angulo: 120, texto: "C" },   // Paso 4: Atrae a C+
+            { a: true,  b: false, c: true,  angulo: 330, texto: "C, A" }  // Paso 5: Atrae entre C+ y A+ (cruzando el 0)
+        ];
+        // Nota: Esta secuencia es una simplificación visual.
+        // Una secuencia bipolar real alternaría A+ y A-
+        // Pero para un unipolar de 3 fases, esto es conceptualmente claro.
+        // Vamos a usar los 6 pasos que giran 360 grados.
+        const anguloPorPasoReal = 360 / TOTAL_PASOS;
+        const secuenciaReal = [
+           // {a, b, c, textoFases}
+           { a: true,  b: false, c: false, texto: "A" },   // Paso 0
+           { a: true,  b: true,  c: false, texto: "A, B" }, // Paso 1
+           { a: false, b: true,  c: false, texto: "B" },   // Paso 2
+           { a: false, b: true,  c: true,  texto: "B, C" }, // Paso 3
+           { a: false, b: false, c: true,  texto: "C" },   // Paso 4
+           { a: true,  b: false, c: true,  texto: "C, A" }  // Paso 5
+        ];
+
+        // La "memoria" del motor
+        let pasoActual = 0; // Estamos en el paso 0
+        let anguloActual = 0; // Ángulo físico del rotor
+        let intervaloGiro = null; // Para guardar el ID del setInterval
+        const VELOCIDAD_GIRO = 250; // ms por paso
+
+        // --- 3. FUNCIONES DEL MOTOR ---
+
+        /**
+         * Función Central: Actualiza el estado visual del motor
+         * basado en la variable `pasoActual`.
+         */
+        function actualizarMotor() {
+            // 1. Obtener la configuración del paso actual
+            const paso = secuenciaReal[pasoActual];
+            
+            // 2. Calcular el nuevo ángulo
+            // El ángulo es simplemente el paso actual * el ángulo por paso
+            anguloActual = pasoActual * anguloPorPasoReal;
+            
+            // 3. Girar el rotor
+            rotor.style.transform = `rotate(${anguloActual}deg)`;
+            
+            // 4. Energizar/Desenergizar bobinas
+            // Usamos .toggle(clase, booleano)
+            bobinas.a1.classList.toggle('energizada', paso.a);
+            bobinas.a2.classList.toggle('energizada', paso.a); // Polo opuesto
+            
+            bobinas.b1.classList.toggle('energizada', paso.b);
+            bobinas.b2.classList.toggle('energizada', paso.b); // Polo opuesto
+            
+            bobinas.c1.classList.toggle('energizada', paso.c);
+            bobinas.c2.classList.toggle('energizada', paso.c); // Polo opuesto
+            
+            // 5. Actualizar el texto de estado
+            estadoPaso.textContent = pasoActual;
+            estadoAngulo.textContent = `${anguloActual}°`;
+            estadoFases.textContent = paso.texto;
+        }
+        
+        /** Mueve un paso a la derecha (sentido horario) */
+        function pasoDerecha() {
+            // (0 + 1) % 6 = 1
+            // (5 + 1) % 6 = 0 (vuelve al inicio)
+            pasoActual = (pasoActual + 1) % TOTAL_PASOS;
+            actualizarMotor();
+        }
+        
+        /** Mueve un paso a la izquierda (sentido antihorario) */
+        function pasoIzquierda() {
+            // (0 - 1 + 6) % 6 = 5 (vuelve al final)
+            // (5 - 1 + 6) % 6 = 4
+            pasoActual = (pasoActual - 1 + TOTAL_PASOS) % TOTAL_PASOS;
+            actualizarMotor();
+        }
+        
+        /** Habilita/Deshabilita los controles */
+        function toggleControles(girando) {
+            if (girando) {
+                // Deshabilitar todos los botones menos "Detener"
+                listaBotones.forEach(btn => btn.disabled = true);
+                btnDetener.disabled = false;
+            } else {
+                // Habilitar todos los botones menos "Detener"
+                listaBotones.forEach(btn => btn.disabled = false);
+                btnDetener.disabled = true;
+            }
+        }
+        
+        /** Inicia el giro automático a la derecha */
+        function girarDerecha() {
+            detenerGiro(); // Asegurarse de que no haya otro giro activo
+            toggleControles(true);
+            // Llama a pasoDerecha() repetidamente
+            intervaloGiro = setInterval(pasoDerecha, VELOCIDAD_GIRO);
+        }
+
+        /** Inicia el giro automático a la izquierda */
+        function girarIzquierda() {
+            detenerGiro();
+            toggleControles(true);
+            // Llama a pasoIzquierda() repetidamente
+            intervaloGiro = setInterval(pasoIzquierda, VELOCIDAD_GIRO);
+        }
+        
+        /** Detiene cualquier giro automático */
+        function detenerGiro() {
+            clearInterval(intervaloGiro);
+            intervaloGiro = null;
+            toggleControles(false);
+        }
+
+        // --- 4. LÓGICA DEL MODO OSCURO ---
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            // Cambiar ícono del botón
+            const esModoOscuro = document.body.classList.contains('dark-mode');
+            modoOscuroBtn.textContent = esModoOscuro ? '☀️' : '🌙';
+        }
+
+        // --- 5. ASIGNAR EVENTOS (Event Listeners) ---
+        
+        // Botones de control
+        btnPasoDer.addEventListener('click', pasoDerecha);
+        btnPasoIzq.addEventListener('click', pasoIzquierda);
+        btnGirarDer.addEventListener('click', girarDerecha);
+        btnGirarIzq.addEventListener('click', girarIzquierda);
+        btnDetener.addEventListener('click', detenerGiro);
+        
+        // Botón de tema
+        modoOscuroBtn.addEventListener('click', toggleDarkMode);
+
+        // --- 6. INICIALIZACIÓN ---
+        // Al cargar la página, llamar a actualizarMotor() una vez
+        // para establecer el estado inicial (Paso 0).
+        actualizarMotor();
+
+    </script>
+</body>
+</html>
