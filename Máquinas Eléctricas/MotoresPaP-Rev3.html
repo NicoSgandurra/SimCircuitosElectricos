@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Avanzado de Motor PaP (v13)</title>
+    <title>Simulador Avanzado de Motor PaP (Release Rev 3)</title>
     
     <style>
         /* --- 1. ESTÉTICA PASTELES MEJORADA --- */
@@ -29,9 +29,9 @@
             --motor-rotor-sur: #3498db; 
             --motor-rotor-central: #333; 
 
-            /* Colores de polaridad de la bobina (Tu lógica v9) */
-            --motor-bobina-crea-norte: #f5b7b1; /* Rojo Pastel (Atrae Sur-Azul) */
-            --motor-bobina-crea-sur: #a9cce3; /* Celeste Pastel (Atrae Norte-Rojo) */
+            /* Colores de polaridad de la bobina (Lógica Correcta) */
+            --motor-bobina-crea-norte: #f5b7b1; /* Rojo Pastel (Atrae Sur-Azul del rotor) */
+            --motor-bobina-crea-sur: #a9cce3; /* Celeste Pastel (Atrae Norte-Rojo del rotor) */
             --motor-bobina-off: #dfe6e9;
         }
 
@@ -294,22 +294,12 @@
         
         /* --- LÓGICA DE COLOR DE POLARIDAD (Tu corrección v9) --- */
         /* Clase 'energizada-norte' usa color SUR (celeste) para ATRAER al NORTE del rotor */
-        /*
-            ESTA ES LA LÓGICA DE TU CÓDIGO v9.
-            CLASE JS: .energizada-norte
-            CLASE CSS: .energizada-norte { background-color: var(--motor-bobina-crea-sur); }
-        */
         .energizada-norte {
             background-color: var(--motor-bobina-crea-sur);
             border-color: var(--motor-rotor-sur); /* Borde azul */
             color: #333;
         }
         /* Clase 'energizada-sur' usa color NORTE (rojo) para ATRAER al SUR del rotor */
-        /*
-            ESTA ES LA LÓGICA DE TU CÓDIGO v9.
-            CLASE JS: .energizada-sur
-            CLASE CSS: .energizada-sur { background-color: var(--motor-bobina-crea-norte); }
-        */
         .energizada-sur {
             background-color: var(--motor-bobina-crea-norte);
             border-color: var(--motor-rotor-norte); /* Borde rojo */
@@ -343,7 +333,7 @@
 </head>
 <body>
 
-    <h1>Simulador PaP (Bipolar / Varios Modos)</h1>
+    <h1>Simulador de Motores Paso a Paso</h1>
 
     <div class="simulador-card">
         <div id="estator">
@@ -463,25 +453,22 @@
             { fA: 0,  fB: 0,  fC: 1,  anguloRotor: 300, texto: "C (N)" }
         ];
 
-        // --- ¡¡¡AQUÍ ESTÁ LA CORRECCIÓN!!! ---
-        // Se cambió el desfase de B y C para que coincidan con la
-        // posición física de las bobinas (60° y 120°).
+        // LÓGICA DE MICROSTEPPING CORREGIDA (v13)
         const TOTAL_PASOS_MICRO = 60;
         const secuenciaMicrostep = [];
         for (let i = 0; i < TOTAL_PASOS_MICRO; i++) {
             const anguloGrados = i * (360 / TOTAL_PASOS_MICRO);
             const anguloRads = anguloGrados * (Math.PI / 180);
             
+            // Para que el rotor (Norte/Rojo) apunte a `anguloRads`,
+            // necesitamos crear un polo SUR (Celeste) en esa dirección.
             // fA = Polaridad de la fase A (eje 0°)
             // fB = Polaridad de la fase B (eje 60°)
             // fC = Polaridad de la fase C (eje 120°)
-            
-            // Para que el rotor (Norte/Rojo) apunte a `anguloRads`,
-            // necesitamos crear un polo SUR (Celeste) en esa dirección.
-            // La fórmula de proyección de un vector SUR giratorio es:
-            const fA = -Math.cos(anguloRads);                         // Proyección en eje 0°
-            const fB = -Math.cos(anguloRads - (Math.PI / 3));      // Proyección en eje 60°
-            const fC = -Math.cos(anguloRads - (2 * Math.PI / 3));  // Proyección en eje 120°
+            // El polo SUR se crea con -1.
+            const fA = -Math.cos(anguloRads);                         
+            const fB = -Math.cos(anguloRads - (Math.PI / 3));      // Fase B desfasada 60°
+            const fC = -Math.cos(anguloRads - (2 * Math.PI / 3));  // Fase C desfasada 120°
             
             secuenciaMicrostep.push({
                 fA: fA, fB: fB, fC: fC,
@@ -527,18 +514,23 @@
             }
         }
         
-        /** Energiza un par de bobinas (Microstepping) - Tu Lógica v9 */
+        /** Energiza un par de bobinas (Microstepping) - ¡CORREGIDO! */
         function energizarFaseMicro(polaridad, bobinaPrincipal, bobinaOpuesta) {
             const absPolaridad = Math.abs(polaridad);
-            if (absPolaridad < 0.05) return; 
+            
+            // --- ¡ESTA ES LA CORRECCIÓN! ---
+            // Se quita el `return` para permitir que la opacidad llegue a 0.
+            // if (absPolaridad < 0.05) return; // <-- ESTA LÍNEA SE FUE
 
             if (polaridad > 0) { // NORTE en principal
                 bobinaPrincipal.classList.add('energizada-norte');
                 bobinaOpuesta.classList.add('energizada-sur');
-            } else { // SUR en principal
+            } else { // SUR en principal (incluye 0)
                 bobinaPrincipal.classList.add('energizada-sur');
                 bobinaOpuesta.classList.add('energizada-norte');
             }
+            
+            // Siempre se aplica la opacidad, incluso si es 0
             bobinaPrincipal.style.opacity = absPolaridad;
             bobinaOpuesta.style.opacity = absPolaridad;
         }
