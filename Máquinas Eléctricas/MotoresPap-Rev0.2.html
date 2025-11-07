@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Avanzado de Motor PaP (v9)</title>
+    
+    <style>
+        /* --- 1. TU CÓDIGO CSS (PASTELES) --- */
+        :root {
+            /* Modo Claro (Verde Agua/Menta Pastel) */
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --text-color: #2e4a4a;
+            --text-light: #6a9c9c;
+            --border-color: #d2f0e0;
+            --primary-color: #5ab17c;
+            --primary-hover: #4a9e6b;
+            --danger-color: #e76f51; /* Rojo brillante para el polo Norte del rotor */
+            --danger-hover: #d05c43;
+            --code-bg: #e0f2f7;
+            --shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-hover: 0 6px 16px rgba(0,0,0,0.1);
+            
+            /* --- Colores Personalizados del Motor --- */
+            --motor-estator: #eceff1;
+            --motor-estator-borde: var(--border-color);
+            --motor-rotor-norte: var(--danger-color); 
+            --motor-rotor-sur: #3498db; /* Un azul claro */
+            --motor-bobina-crea-norte: #f5b7b1; /* Rojo Pastel (Atrae Sur-Azul) */
+            --motor-bobina-crea-sur: #a9cce3; /* Celeste Pastel (Atrae Norte-Rojo) */
+            --motor-bobina-off: #dfe6e9;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro (Morado/Lavanda Pastel) */
+            --bg-color: #1a1523;
+            --card-bg: #28203d;
+            --text-color: #e6e0f0;
+            --text-light: #afa2c3;
+            --border-color: #43386b;
+            --primary-color: #a78bfa;
+            --primary-hover: #9175d6;
+            --danger-color: #ef778a;
+            --danger-hover: #d56073;
+            --code-bg: #3d305e;
+            --shadow: 0 4px 12px rgba(0,0,0,0.2);
+            --shadow-hover: 0 6px 16px rgba(0,0,0,0.3);
+
+            /* --- Colores Motor (Oscuro) --- */
+            --motor-estator: #3d305e;
+            --motor-estator-borde: var(--border-color);
+            --motor-bobina-off: #5b517d;
+            --motor-bobina-crea-norte: #d98880; /* Rojo Pastel (oscuro) */
+            --motor-bobina-crea-sur: #74a4c4; /* Celeste Pastel (oscuro) */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3 { color: var(--primary-color); transition: color 0.3s ease; }
+        h1 { text-align: center; }
+        h2 { border-bottom: 2px solid var(--border-color); padding-bottom: 5px; }
+        
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, color 0.3s ease;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        button:disabled {
+            background-color: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button.danger { background-color: var(--danger-color); }
+        button.danger:hover { background-color: var(--danger-hover); }
+
+        /* --- 3. Contenedores (Tarjetas) --- */
+        .simulador-card, .controles, .estado-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .controles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .control-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* Espacio entre los toggles */
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+        .control-grupo h3 {
+            margin: 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .control-fila {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        #darkModeToggle {
+            background-color: transparent;
+            color: var(--text-color);
+            font-size: 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            padding: 0;
+            grid-column: 2; 
+            justify-self: end;
+            align-self: start;
+        }
+        #darkModeToggle:hover {
+            background-color: var(--code-bg);
+            transform: translateY(-2px) rotate(15deg);
+        }
+
+        /* --- NUEVO: Estilo de Toggle iOS --- */
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+        .switch-container span {
+            font-size: 0.9em;
+            transition: color 0.3s ease;
+        }
+        .switch-container input:disabled + .switch-slider {
+            background-color: var(--motor-estator);
+            cursor: not-allowed;
+        }
+        .switch-container input:disabled + .switch-slider::before {
+            background-color: var(--text-light);
+        }
+        
+        .switch-label {
+            position: relative;
+            display: inline-block;
+            width: 50px; /* Ancho del track */
+            height: 28px; /* Alto del track */
+        }
+        .switch-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--motor-bobina-off);
+            transition: 0.4s;
+            border-radius: 28px;
+        }
+        .switch-slider::before {
+            position: absolute;
+            content: "";
+            height: 20px; /* Alto del knob */
+            width: 20px; /* Ancho del knob */
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .switch-slider {
+            background-color: var(--primary-color);
+        }
+        input:checked + .switch-slider::before {
+            transform: translateX(22px); /* Movimiento del knob */
+        }
+        /* Fin de Estilo de Toggle iOS */
+
+
+        /* --- 4. ESTILOS DEL SIMULADOR --- */
+        .simulador-card {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            overflow: hidden;
+        }
+        
+        #estator {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            border: 10px solid var(--motor-estator-borde);
+            border-radius: 50%;
+            background-color: var(--motor-estator);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+
+        #rotor {
+            position: absolute;
+            width: 200px;
+            height: 40px;
+            background: linear-gradient(90deg, var(--motor-rotor-norte) 48%, #333 48%, #333 52%, var(--motor-rotor-sur) 52%);
+            border: 4px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            top: 50%;
+            left: 50%;
+            margin-left: -100px;
+            margin-top: -20px; 
+            /* La duración y tipo de transición se manejarán con JS */
+            transition: transform 0.15s ease-in-out; 
+            transform-origin: center;
+            transform: rotate(0deg);
+        }
+        
+        .bobina {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: var(--motor-bobina-off);
+            border: 4px solid var(--motor-estator-borde);
+            border-radius: 15px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            transition: background-color 0.1s ease, border-color 0.3s ease, color 0.3s ease, opacity 0.1s ease, transform 0.1s ease;
+            top: 50%;
+            left: 50%;
+            margin: -30px;
+        }
+        
+        .energizada-norte {
+            background-color: var(--motor-bobina-crea-sur);
+            border-color: var(--motor-rotor-sur); /* Borde azul */
+            color: #333;
+        }
+        .energizada-sur {
+            background-color: var(--motor-bobina-crea-norte);
+            border-color: var(--motor-rotor-norte); /* Borde rojo */
+            color: #333;
+        }
+        
+        .popped {
+             transform: scale(1.05);
+        }
+
+        #bobina-a1 { transform: translate(140px); } 
+        #bobina-b1 { transform: rotate(60deg) translate(140px) rotate(-60deg); }
+        #bobina-c1 { transform: rotate(120deg) translate(140px) rotate(-120deg); }
+        #bobina-a2 { transform: translate(-140px); }
+        #bobina-b2 { transform: rotate(240deg) translate(140px) rotate(-240deg); }
+        #bobina-c2 { transform: rotate(300deg) translate(140px) rotate(-300deg); }
+        
+        .estado-card {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            color: var(--text-color);
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+        .estado-card strong {
+            color: var(--primary-color);
+            font-weight: 900;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Simulador PaP (Bipolar / Varios Modos)</h1>
+
+    <div class="simulador-card">
+        <div id="estator">
+            <div class="bobina" id="bobina-a1">A</div>
+            <div class="bobina" id="bobina-b1">B</div>
+            <div class="bobina" id="bobina-c1">C</div>
+            <div class="bobina" id="bobina-a2">A</div>
+            <div class="bobina" id="bobina-b2">B</div>
+            <div class="bobina" id="bobina-c2">C</div>
+            <div id="rotor"></div>
+        </div>
+    </div>
+
+    <div class="controles">
+        <div class="control-grupo" style="grid-column: 1 / -1;">
+            <h3>Movimiento</h3>
+            <div class="control-fila">
+                <button id="btn-paso-izq">Paso Izquierda</button>
+                <button id="btn-paso-der">Paso Derecha</button>
+                <button id="btn-girar-izq">Girar Izquierda</button>
+                <button id="btn-girar-der">Girar Derecha</button>
+                <button id="btn-detener" class="danger" disabled>Detener</button>
+            </div>
+        </div>
+
+        <div class="control-grupo">
+            <h3>Modo de Paso</h3>
+            <div class="switch-container">
+                <span id="label-modo-half">Medio Paso</span>
+                <label class="switch-label">
+                    <input type="checkbox" id="switch-modo">
+                    <span class="switch-slider"></span>
+                </label>
+                <span id="label-modo-full">P. Completo</span>
+            </div>
+        </div>
+
+        <div class="control-grupo">
+            <h3>Simulación</h3>
+             <div class="switch-container">
+                <span id="label-micro-off">OFF</span>
+                <label class="switch-label">
+                    <input type="checkbox" id="switch-micro">
+                    <span class="switch-slider"></span>
+                </label>
+                <span id="label-micro-on">Microstepping</span>
+            </div>
+        </div>
+        
+        <button id="darkModeToggle">🌙</button>
+    </div>
+    
+    <div class="estado-card">
+        <h2>Estado Actual</h2>
+        <div>Modo: <strong id="estado-modo">---</strong></div>
+        <div>Pasos: <strong id="estado-paso">0 (Paso 0)</strong></div>
+        <div>Ángulo: <strong id="estado-angulo">0</strong>°</div>
+        <div>Fases Activas: <strong id="estado-fases">---</strong></div>
+    </div>
+
+    <script>
+        // --- 1. CAPTURAR ELEMENTOS ---
+        const rotor = document.getElementById('rotor');
+        const modoOscuroBtn = document.getElementById('darkModeToggle');
+        
+        // Tarjeta de estado
+        const estadoModo = document.getElementById('estado-modo');
+        const estadoPaso = document.getElementById('estado-paso');
+        const estadoAngulo = document.getElementById('estado-angulo');
+        const estadoFases = document.getElementById('estado-fases');
+        
+        // Botones de movimiento
+        const btnPasoIzq = document.getElementById('btn-paso-izq');
+        const btnPasoDer = document.getElementById('btn-paso-der');
+        const btnGirarIzq = document.getElementById('btn-girar-izq');
+        const btnGirarDer = document.getElementById('btn-girar-der');
+        const btnDetener = document.getElementById('btn-detener');
+        const listaBotonesMovimiento = [btnPasoIzq, btnPasoDer, btnGirarIzq, btnGirarDer];
+
+        // NUEVOS: Toggles de Modo
+        const switchModo = document.getElementById('switch-modo');
+        const switchMicro = document.getElementById('switch-micro');
+        const labelModoHalf = document.getElementById('label-modo-half');
+        const labelModoFull = document.getElementById('label-modo-full');
+        const labelMicroOff = document.getElementById('label-micro-off');
+        const labelMicroOn = document.getElementById('label-micro-on');
+
+
+        // Bobinas
+        const bobinas = {
+            a1: document.getElementById('bobina-a1'), b1: document.getElementById('bobina-b1'), c1: document.getElementById('bobina-c1'),
+            a2: document.getElementById('bobina-a2'), b2: document.getElementById('bobina-b2'), c2: document.getElementById('bobina-c2')
+        };
+        const listaBobinas = Object.values(bobinas);
+
+        // --- 2. ESTADO DEL MOTOR Y SECUENCIAS ---
+        
+        // Secuencias de Paso (Half y Full)
+        const secuenciaHalfStep = [
+            { fA: -1, fB: 0,  fC: 0,  anguloRotor: 0,   texto: "A (S)" }, 
+            { fA: -1, fB: -1, fC: 0,  anguloRotor: 30,  texto: "A (S), B (S)" }, 
+            { fA: 0,  fB: -1, fC: 0,  anguloRotor: 60,  texto: "B (S)" }, 
+            { fA: 0,  fB: -1, fC: -1, anguloRotor: 90,  texto: "B (S), C (S)" }, 
+            { fA: 0,  fB: 0,  fC: -1, anguloRotor: 120, texto: "C (S)" }, 
+            { fA: 1,  fB: 0,  fC: -1, anguloRotor: 150, texto: "C (S), A (N)" }, 
+            { fA: 1,  fB: 0,  fC: 0,  anguloRotor: 180, texto: "A (N)" }, 
+            { fA: 1,  fB: 1,  fC: 0,  anguloRotor: 210, texto: "A (N), B (N)" }, 
+            { fA: 0,  fB: 1,  fC: 0,  anguloRotor: 240, texto: "B (N)" }, 
+            { fA: 0,  fB: 1,  fC: 1,  anguloRotor: 270, texto: "B (N), C (N)" }, 
+            { fA: 0,  fB: 0,  fC: 1,  anguloRotor: 300, texto: "C (N)" }, 
+            { fA: -1, fB: 0,  fC: 1,  anguloRotor: 330, texto: "C (N), A (S)" }  
+        ];
+        const secuenciaFullStep = [
+            { fA: -1, fB: 0,  fC: 0,  anguloRotor: 0,   texto: "A (S)" },
+            { fA: 0,  fB: -1, fC: 0,  anguloRotor: 60,  texto: "B (S)" },
+            { fA: 0,  fB: 0,  fC: -1, anguloRotor: 120, texto: "C (S)" },
+            { fA: 1,  fB: 0,  fC: 0,  anguloRotor: 180, texto: "A (N)" },
+            { fA: 0,  fB: 1,  fC: 0,  anguloRotor: 240, texto: "B (N)" },
+            { fA: 0,  fB: 0,  fC: 1,  anguloRotor: 300, texto: "C (N)" }
+        ];
+
+        // Secuencia de Microstepping (60 pasos, 6 grados/paso)
+        const TOTAL_PASOS_MICRO = 60;
+        const secuenciaMicrostep = [];
+        for (let i = 0; i < TOTAL_PASOS_MICRO; i++) {
+            const anguloGrados = i * (360 / TOTAL_PASOS_MICRO);
+            const anguloRads = anguloGrados * (Math.PI / 180);
+            
+            // 3 fases senoidales desfasadas 120° (Pi/3 * 2)
+            // El rotor (anguloRotor) se alinea con el vector de campo magnético.
+            // Para que el rotor esté en `anguloRads`, el campo debe atraerlo allí.
+            // Un campo SUR (atractivo) en `anguloRads`
+            // fA crea campo en 0°, fB en 120°, fC en 240°
+            // Usamos Coseno para la proyección de un vector de campo giratorio.
+            // Para alinear el rotor (Norte) en anguloRads, necesitamos un Sur allí.
+            // La bobina A (0°) debe ser -cos(anguloRads)
+            // La bobina B (120°) debe ser -cos(anguloRads - 120°)
+            // La bobina C (240°) debe ser -cos(anguloRads - 240°)
+            
+            const fA = -Math.cos(anguloRads);
+            const fB = -Math.cos(anguloRads - (2 * Math.PI / 3));
+            const fC = -Math.cos(anguloRads - (4 * Math.PI / 3));
+            
+            secuenciaMicrostep.push({
+                fA: fA, fB: fB, fC: fC,
+                anguloRotor: anguloGrados
+            });
+        }
+        
+        // "Memoria" del motor (Variables de estado)
+        let modoPaso = 'half'; // 'half', 'full', o 'micro'
+        let secuenciaActual = secuenciaHalfStep;
+        let totalPasosCiclo = 12;
+        let anguloPorPaso = 30;
+        
+        let pasoActualCiclo = 0; // Índice del ciclo
+        let anguloFisico = 0; // Ángulo acumulativo del rotor
+        let pasosTotales = 0; // Contador de pasos acumulativo
+        
+        let intervaloGiro = null;
+        // NUEVO: Velocidades separadas
+        const VELOCIDAD_GIRO_STEP = 500; // 500ms para pasos
+        const VELOCIDAD_GIRO_MICRO = 50;  // 50ms para microstepping (movimiento suave)
+        let velocidadGiroActual = VELOCIDAD_GIRO_STEP;
+        const RETARDO_MOVIMIENTO_ROTOR = 150; 
+
+        // --- 3. FUNCIONES DEL MOTOR ---
+
+        function apagarTodasLasBobinas() {
+            listaBobinas.forEach(bobina => {
+                bobina.classList.remove('energizada-norte', 'energizada-sur', 'popped');
+                bobina.style.opacity = ''; 
+            });
+        }
+
+        /** Energiza un par de bobinas (Half/Full) */
+        function energizarFase(polaridad, bobinaPrincipal, bobinaOpuesta, fasesActivasArray, nombreFase) {
+            if (polaridad === 1) { // NORTE en principal
+                bobinaPrincipal.classList.add('energizada-norte', 'popped');
+                bobinaOpuesta.classList.add('energizada-sur', 'popped');
+                fasesActivasArray.push(`${nombreFase} (N)`);
+            } else if (polaridad === -1) { // SUR en principal
+                bobinaPrincipal.classList.add('energizada-sur', 'popped');
+                bobinaOpuesta.classList.add('energizada-norte', 'popped');
+                fasesActivasArray.push(`${nombreFase} (S)`);
+            }
+        }
+        
+        /** Energiza un par de bobinas (Microstepping) */
+        function energizarFaseMicro(polaridad, bobinaPrincipal, bobinaOpuesta) {
+            const absPolaridad = Math.abs(polaridad);
+            if (absPolaridad < 0.05) return; // No energizar si es casi cero
+
+            if (polaridad > 0) { // NORTE en principal
+                bobinaPrincipal.classList.add('energizada-norte');
+                bobinaOpuesta.classList.add('energizada-sur');
+            } else { // SUR en principal
+                bobinaPrincipal.classList.add('energizada-sur');
+                bobinaOpuesta.classList.add('energizada-norte');
+            }
+            bobinaPrincipal.style.opacity = absPolaridad;
+            bobinaOpuesta.style.opacity = absPolaridad;
+        }
+
+        /** Actualiza las bobinas y el texto de estado */
+        function actualizarMotorVisual() {
+            const paso = secuenciaActual[pasoActualCiclo];
+            let fasesTexto = [];
+            
+            apagarTodasLasBobinas();
+
+            if (modoPaso === 'micro') {
+                energizarFaseMicro(paso.fA, bobinas.a1, bobinas.a2);
+                energizarFaseMicro(paso.fB, bobinas.b1, bobinas.b2);
+                energizarFaseMicro(paso.fC, bobinas.c1, bobinas.c2);
+            } else { // 'half' o 'full'
+                energizarFase(paso.fA, bobinas.a1, bobinas.a2, fasesTexto, 'A');
+                energizarFase(paso.fB, bobinas.b1, bobinas.b2, fasesTexto, 'B');
+                energizarFase(paso.fC, bobinas.c1, bobinas.c2, fasesTexto, 'C');
+            }
+            
+            // Actualizar texto de estado
+            if (modoPaso === 'half') estadoModo.textContent = "Medio Paso (12)";
+            else if (modoPaso === 'full') estadoModo.textContent = "Paso Completo (6)";
+            else estadoModo.textContent = `Microstepping (${TOTAL_PASOS_MICRO})`;
+            
+            estadoPaso.textContent = `${pasosTotales} (Paso ${pasoActualCiclo})`;
+            estadoAngulo.textContent = `${anguloFisico.toFixed(0)}°`;
+            
+            if (modoPaso === 'micro') {
+                 estadoFases.textContent = "Control Sinusoidal (ver opacidad)";
+            } else {
+                 estadoFases.textContent = fasesTexto.join(', ') || '---';
+            }
+        }
+        
+        /** Mueve el rotor al ángulo físico actual */
+        function moverRotor() {
+            rotor.style.transform = `rotate(${anguloFisico}deg)`;
+        }
+
+        /** Lógica para un paso a la derecha */
+        function pasoDerecha() {
+            pasoActualCiclo = (pasoActualCiclo + 1) % totalPasosCiclo;
+            anguloFisico += anguloPorPaso;
+            pasosTotales++;
+            
+            actualizarMotorVisual(); 
+            // NUEVO: Movimiento inmediato para micro, retardado para step
+            if (modoPaso === 'micro') {
+                moverRotor();
+            } else {
+                setTimeout(moverRotor, RETARDO_MOVIMIENTO_ROTOR);
+            }
+        }
+        
+        /** Lógica para un paso a la izquierda */
+        function pasoIzquierda() {
+            pasoActualCiclo = (pasoActualCiclo - 1 + totalPasosCiclo) % totalPasosCiclo;
+            anguloFisico -= anguloPorPaso;
+            pasosTotales--;
+            
+            actualizarMotorVisual(); 
+            // NUEVO: Movimiento inmediato para micro, retardado para step
+            if (modoPaso === 'micro') {
+                moverRotor();
+            } else {
+                setTimeout(moverRotor, RETARDO_MOVIMIENTO_ROTOR);
+            }
+        }
+        
+        /** Habilita/Deshabilita los botones de movimiento */
+        function toggleControlesMovimiento(girando) {
+            listaBotonesMovimiento.forEach(btn => btn.disabled = girando);
+            btnDetener.disabled = !girando;
+        }
+        
+        /** Inicia el giro a la derecha */
+        function girarDerecha() {
+            detenerGiro();
+            toggleControlesMovimiento(true);
+            intervaloGiro = setInterval(pasoDerecha, velocidadGiroActual);
+        }
+
+        /** Inicia el giro a la izquierda */
+        function girarIzquierda() {
+            detenerGiro();
+            toggleControlesMovimiento(true);
+            intervaloGiro = setInterval(pasoIzquierda, velocidadGiroActual);
+        }
+        
+        /** Detiene cualquier giro */
+        function detenerGiro() {
+            clearInterval(intervaloGiro);
+            intervaloGiro = null;
+            toggleControlesMovimiento(false);
+        }
+
+        /** NUEVO: Función centralizada para cambiar de modo */
+        function setModoPaso() {
+            detenerGiro();
+            
+            const esMicro = switchMicro.checked;
+            const esFull = switchModo.checked;
+
+            if (esMicro) {
+                modoPaso = 'micro';
+                secuenciaActual = secuenciaMicrostep;
+                totalPasosCiclo = TOTAL_PASOS_MICRO;
+                anguloPorPaso = 360 / TOTAL_PASOS_MICRO;
+                velocidadGiroActual = VELOCIDAD_GIRO_MICRO;
+                rotor.style.transition = `transform ${VELOCIDAD_GIRO_MICRO}ms linear`; // Animación suave
+                
+                // Deshabilitar el otro slider
+                switchModo.disabled = true;
+                labelModoHalf.style.color = 'var(--motor-bobina-off)';
+                labelModoFull.style.color = 'var(--motor-bobina-off)';
+
+            } else {
+                // No es micro, es half o full
+                switchModo.disabled = false;
+                labelModoHalf.style.color = 'var(--text-light)';
+                labelModoFull.style.color = 'var(--text-light)';
+                velocidadGiroActual = VELOCIDAD_GIRO_STEP;
+                rotor.style.transition = 'transform 0.15s ease-in-out'; // Animación "step"
+
+                if (esFull) {
+                    modoPaso = 'full';
+                    secuenciaActual = secuenciaFullStep;
+                    totalPasosCiclo = 6;
+                    anguloPorPaso = 60;
+                } else {
+                    modoPaso = 'half';
+                    secuenciaActual = secuenciaHalfStep;
+                    totalPasosCiclo = 12;
+                    anguloPorPaso = 30;
+                }
+            }
+            
+            // Resetear el motor a la posición 0
+            pasoActualCiclo = 0;
+            anguloFisico = 0;
+            pasosTotales = 0;
+            actualizarMotorVisual();
+            moverRotor();
+        }
+
+        // --- 4. LÓGICA DEL MODO OSCURO ---
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const esModoOscuro = document.body.classList.contains('dark-mode');
+            modoOscuroBtn.textContent = esModoOscuro ? '☀️' : '🌙';
+        }
+
+        // --- 5. ASIGNAR EVENTOS (Event Listeners) ---
+        
+        // Movimiento
+        btnPasoDer.addEventListener('click', pasoDerecha);
+        btnPasoIzq.addEventListener('click', pasoIzquierda);
+        btnGirarDer.addEventListener('click', girarDerecha);
+        btnGirarIzq.addEventListener('click', girarIzquierda);
+        btnDetener.addEventListener('click', detenerGiro);
+        
+        // Modo Oscuro
+        modoOscuroBtn.addEventListener('click', toggleDarkMode);
+
+        // NUEVO: Toggles de Modo
+        switchModo.addEventListener('change', setModoPaso);
+        switchMicro.addEventListener('change', setModoPaso);
+
+        // --- 6. INICIALIZACIÓN ---
+        setModoPaso(); // Iniciar en Modo "Medio Paso"
+
+    </script>
+</body>
+</html>
