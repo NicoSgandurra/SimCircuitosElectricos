@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Avanzado de Motor PaP (v12)</title>
+    <title>Simulador Avanzado de Motor PaP (v13)</title>
     
     <style>
         /* --- 1. ESTÉTICA PASTELES MEJORADA --- */
@@ -30,8 +30,8 @@
             --motor-rotor-central: #333; 
 
             /* Colores de polaridad de la bobina (Tu lógica v9) */
-            --motor-bobina-crea-norte: #f5b7b1; /* Rojo Pastel */
-            --motor-bobina-crea-sur: #a9cce3; /* Celeste Pastel */
+            --motor-bobina-crea-norte: #f5b7b1; /* Rojo Pastel (Atrae Sur-Azul) */
+            --motor-bobina-crea-sur: #a9cce3; /* Celeste Pastel (Atrae Norte-Rojo) */
             --motor-bobina-off: #dfe6e9;
         }
 
@@ -114,7 +114,7 @@
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
         
-        /* --- NUEVO: Controles Reorganizados --- */
+        /* --- Controles Reorganizados --- */
         .controles {
             display: grid;
             grid-template-columns: 1fr auto 1fr; /* 3 columnas */
@@ -142,7 +142,7 @@
             flex-wrap: wrap;
         }
         
-        /* --- NUEVO: Estilo para el botón de DarkMode --- */
+        /* --- Estilo para el botón de DarkMode --- */
         #darkModeToggle {
             background-color: transparent;
             color: var(--text-color);
@@ -228,7 +228,7 @@
         /* Fin de Estilo de Toggle iOS */
 
 
-        /* --- 4. ESTILOS DEL SIMULADOR MEJORADOS --- */
+        /* --- 4. ESTILOS DEL SIMULADOR --- */
         .simulador-card {
             display: flex;
             justify-content: center;
@@ -249,7 +249,7 @@
             transition: background-color 0.3s ease, border-color 0.3s ease;
         }
 
-        /* --- NUEVO: Estilo de Rotor Revertido --- */
+        /* --- Estilo de Rotor Revertido --- */
         #rotor {
             position: absolute;
             width: 200px;
@@ -294,12 +294,22 @@
         
         /* --- LÓGICA DE COLOR DE POLARIDAD (Tu corrección v9) --- */
         /* Clase 'energizada-norte' usa color SUR (celeste) para ATRAER al NORTE del rotor */
+        /*
+            ESTA ES LA LÓGICA DE TU CÓDIGO v9.
+            CLASE JS: .energizada-norte
+            CLASE CSS: .energizada-norte { background-color: var(--motor-bobina-crea-sur); }
+        */
         .energizada-norte {
             background-color: var(--motor-bobina-crea-sur);
             border-color: var(--motor-rotor-sur); /* Borde azul */
             color: #333;
         }
         /* Clase 'energizada-sur' usa color NORTE (rojo) para ATRAER al SUR del rotor */
+        /*
+            ESTA ES LA LÓGICA DE TU CÓDIGO v9.
+            CLASE JS: .energizada-sur
+            CLASE CSS: .energizada-sur { background-color: var(--motor-bobina-crea-norte); }
+        */
         .energizada-sur {
             background-color: var(--motor-bobina-crea-norte);
             border-color: var(--motor-rotor-norte); /* Borde rojo */
@@ -370,6 +380,7 @@
                 <span id="label-modo-full">Completo</span>
             </div>
         </div>
+        
         
         <button id="darkModeToggle">🌙</button>
 
@@ -452,15 +463,25 @@
             { fA: 0,  fB: 0,  fC: 1,  anguloRotor: 300, texto: "C (N)" }
         ];
 
+        // --- ¡¡¡AQUÍ ESTÁ LA CORRECCIÓN!!! ---
+        // Se cambió el desfase de B y C para que coincidan con la
+        // posición física de las bobinas (60° y 120°).
         const TOTAL_PASOS_MICRO = 60;
         const secuenciaMicrostep = [];
         for (let i = 0; i < TOTAL_PASOS_MICRO; i++) {
             const anguloGrados = i * (360 / TOTAL_PASOS_MICRO);
             const anguloRads = anguloGrados * (Math.PI / 180);
             
-            const fA = -Math.cos(anguloRads);
-            const fB = -Math.cos(anguloRads - (2 * Math.PI / 3)); 
-            const fC = -Math.cos(anguloRads - (4 * Math.PI / 3)); 
+            // fA = Polaridad de la fase A (eje 0°)
+            // fB = Polaridad de la fase B (eje 60°)
+            // fC = Polaridad de la fase C (eje 120°)
+            
+            // Para que el rotor (Norte/Rojo) apunte a `anguloRads`,
+            // necesitamos crear un polo SUR (Celeste) en esa dirección.
+            // La fórmula de proyección de un vector SUR giratorio es:
+            const fA = -Math.cos(anguloRads);                         // Proyección en eje 0°
+            const fB = -Math.cos(anguloRads - (Math.PI / 3));      // Proyección en eje 60°
+            const fC = -Math.cos(anguloRads - (2 * Math.PI / 3));  // Proyección en eje 120°
             
             secuenciaMicrostep.push({
                 fA: fA, fB: fB, fC: fC,
@@ -538,7 +559,7 @@
 
             if (modoPaso === 'micro') {
                 energizarFaseMicro(paso.fA, bobinas.a1, bobinas.a2);
-                energizarFaseMicro(paso.fB, bobinas.b2, bobinas.b1);
+                energizarFaseMicro(paso.fB, bobinas.b1, bobinas.b2);
                 energizarFaseMicro(paso.fC, bobinas.c1, bobinas.c2);
             } else { 
                 energizarFase(paso.fA, bobinas.a1, bobinas.a2, fasesTexto, 'A');
