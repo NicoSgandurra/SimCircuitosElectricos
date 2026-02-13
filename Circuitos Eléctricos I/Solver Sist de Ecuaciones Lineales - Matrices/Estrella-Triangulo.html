@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador Estrella-Triángulo (Y-Δ)</title>
     <script>
         MathJax = {
-          tex: {
-            inlineMath: [['$', '$'], ['\\(', '\\)']],
-            displayMath: [['$$', '$$'], ['\\[', '\\]']]
-          },
-          svg: {
-            fontCache: 'global'
-          }
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
         };
     </script>
     <script type="text/javascript" id="MathJax-script" async
         src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-    </script>
+        </script>
     <style>
         /* --- 1. Variables de Color y Tema (TONOS PASTEL) --- */
         :root {
@@ -32,9 +33,10 @@
             --danger-color: #e76f51;
             --danger-hover: #d05c43;
             --code-bg: #e0f2f7;
-            --output-bg: #e0f2f7; /* Fondo para outputs */
-            --shadow: 0 4px 12px rgba(0,0,0,0.05);
-            --shadow-hover: 0 6px 16px rgba(0,0,0,0.1);
+            --output-bg: #e0f2f7;
+            /* Fondo para outputs */
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
         }
 
         body.dark-mode {
@@ -49,34 +51,41 @@
             --danger-color: #ef778a;
             --danger-hover: #d56073;
             --code-bg: #3d305e;
-            --output-bg: #3d305e; /* Fondo para outputs */
-            --shadow: 0 4px 12px rgba(0,0,0,0.2);
-            --shadow-hover: 0 6px 16px rgba(0,0,0,0.3);
+            --output-bg: #3d305e;
+            /* Fondo para outputs */
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.3);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            max-width: 900px; /* Un poco más ancho para dos columnas */
+            max-width: 900px;
+            /* Un poco más ancho para dos columnas */
             margin: 20px auto;
             padding: 20px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* --- 2. Estilos Generales y Animaciones --- */
-        h1, h2, h3 {
+        h1,
+        h2,
+        h3 {
             color: var(--primary-color);
             transition: color 0.3s ease;
         }
+
         h1 {
             text-align: center;
         }
+
         h2 {
             border-bottom: 2px solid var(--primary-color);
             padding-bottom: 5px;
             margin-top: 0;
         }
+
         button {
             padding: 10px 15px;
             font-size: 16px;
@@ -87,9 +96,11 @@
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, color 0.3s ease;
-            width: 100%; /* Botones ocupan todo el ancho de su contenedor */
+            width: 100%;
+            /* Botones ocupan todo el ancho de su contenedor */
             margin-top: 10px;
         }
+
         button:hover {
             background-color: var(--primary-hover);
             transform: translateY(-2px);
@@ -99,14 +110,18 @@
         /* Botón Limpiar */
         #limpiarBtn {
             background-color: var(--danger-color);
-            width: auto; /* Ancho automático para botones de control */
+            width: auto;
+            /* Ancho automático para botones de control */
         }
+
         #limpiarBtn:hover {
             background-color: var(--danger-hover);
         }
 
         /* --- 3. Contenedores (Tarjetas) --- */
-        .controles, .teoria, .simulador-card {
+        .controles,
+        .teoria,
+        .simulador-card {
             background: var(--card-bg);
             padding: 25px;
             border-radius: 8px;
@@ -114,10 +129,11 @@
             margin-top: 20px;
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
-        
+
         .simuladores-container {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Dos columnas para los simuladores */
+            grid-template-columns: 1fr 1fr;
+            /* Dos columnas para los simuladores */
             gap: 20px;
         }
 
@@ -127,7 +143,7 @@
             gap: 20px;
             flex-wrap: wrap;
         }
-        
+
         /* Botón Modo Oscuro */
         #darkModeToggle {
             background-color: transparent;
@@ -138,10 +154,13 @@
             width: 45px;
             height: 45px;
             padding: 0;
-            margin-left: auto; /* Empuja el botón a la derecha */
+            margin-left: auto;
+            /* Empuja el botón a la derecha */
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            width: 45px; /* Ancho fijo */
+            width: 45px;
+            /* Ancho fijo */
         }
+
         #darkModeToggle:hover {
             background-color: var(--code-bg);
             transform: translateY(-2px) rotate(15deg);
@@ -155,12 +174,14 @@
             gap: 10px;
             margin-bottom: 15px;
         }
+
         .input-group label {
             font-weight: 600;
             font-size: 1.1rem;
             color: var(--text-light);
             text-align: right;
         }
+
         .input-group input {
             width: 100%;
             padding: 8px;
@@ -172,17 +193,21 @@
             text-align: right;
             font-weight: bold;
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            box-sizing: border-box; /* Para que el padding no rompa el ancho */
+            box-sizing: border-box;
+            /* Para que el padding no rompa el ancho */
         }
-        
+
         /* Ocultar flechas en inputs numéricos */
-        input[type=number] { -moz-appearance: textfield; }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        
+
         /* Estilo para outputs (inputs de solo lectura) */
         input[readonly] {
             background-color: var(--output-bg);
@@ -190,7 +215,7 @@
             border-style: dashed;
             cursor: not-allowed;
         }
-        
+
         .output-group {
             margin-top: 20px;
             border-top: 2px dashed var(--border-color);
@@ -201,14 +226,17 @@
         .teoria {
             line-height: 1.7;
         }
+
         .teoria h3 {
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 5px;
         }
+
         .teoria h4 {
             color: var(--text-color);
             margin-bottom: 5px;
         }
+
         .teoria code {
             font-family: 'Courier New', Courier, monospace;
             background-color: var(--code-bg);
@@ -218,6 +246,7 @@
             color: var(--primary-color);
             transition: background-color 0.3s ease, color 0.3s ease;
         }
+
         .teoria .formula {
             font-weight: bold;
             font-family: 'Courier New', Courier, monospace;
@@ -231,7 +260,10 @@
             border-radius: 5px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .teoria ul { margin-left: 20px; }
+
+        .teoria ul {
+            margin-left: 20px;
+        }
 
         /* --- 6. Estilos para Gráficos --- */
         .graficos-container {
@@ -244,18 +276,21 @@
             border-radius: 8px;
             box-shadow: var(--shadow);
         }
+
         .grafico-placeholder {
             border: 2px dashed var(--border-color);
             border-radius: 8px;
             padding: 20px;
             text-align: center;
             color: var(--text-light);
-            min-height: 200px; /* Altura mínima para el placeholder */
+            min-height: 200px;
+            /* Altura mínima para el placeholder */
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
+
         .grafico-placeholder h4 {
             color: var(--primary-color);
             margin-top: 0;
@@ -264,13 +299,16 @@
 
         /* Media query para pantallas pequeñas (móviles) */
         @media (max-width: 768px) {
-            .simuladores-container, .graficos-container {
-                grid-template-columns: 1fr; /* Una columna en móviles */
+
+            .simuladores-container,
+            .graficos-container {
+                grid-template-columns: 1fr;
+                /* Una columna en móviles */
             }
         }
-
     </style>
 </head>
+
 <body>
 
     <h1>Simulador de Transformación Y-Δ</h1>
@@ -297,9 +335,9 @@
                     <input type="number" id="rca" step="any" value="30">
                 </div>
             </div>
-            
+
             <button id="calcDeltaAEstrellaBtn">Calcular Estrella (Y)</button>
-            
+
             <div class="output-group">
                 <div class="input-group">
                     <label for="ra">$R_A$ (Ω):</label>
@@ -332,9 +370,9 @@
                     <input type="number" id="rc_in" step="any" value="10">
                 </div>
             </div>
-            
+
             <button id="calcEstrellaADeltaBtn">Calcular Triángulo ($\Delta$)</button>
-            
+
             <div class="output-group">
                 <div class="input-group">
                     <label for="rab_out">$R_{AB}$ (Ω):</label>
@@ -356,29 +394,39 @@
 
     <div class="teoria">
         <h2>Marco Teórico (Y-Δ)</h2>
-        
+
         <h3>¿Qué es y para qué sirve?</h3>
-        <p>En el análisis de circuitos, a menudo te encontrarás con redes de resistencias que no están conectadas ni en serie simple ni en paralelo simple (ej. un "puente"). La transformación Estrella-Triángulo nos permite "reorganizar" las conexiones de tres resistencias sin cambiar el comportamiento eléctrico visto desde los tres terminales (A, B, C).</p>
+        <p>En el análisis de circuitos, a menudo te encontrarás con redes de resistencias que no están conectadas ni en
+            serie simple ni en paralelo simple (ej. un "puente"). La transformación Estrella-Triángulo nos permite
+            "reorganizar" las conexiones de tres resistencias sin cambiar el comportamiento eléctrico visto desde los
+            tres terminales (A, B, C).</p>
         <ul>
-            <li><b>Configuración Estrella (Y) (o T):</b> Tres resistencias ($R_A, R_B, R_C$) conectadas a un nodo central común.</li>
-            <li><b>Configuración Triángulo ($\Delta$) (o Pi, $\Pi$):</b> Tres resistencias ($R_{AB}, R_{BC}, R_{CA}$) conectadas en un bucle entre tres terminales.</li>
+            <li><b>Configuración Estrella (Y) (o T):</b> Tres resistencias ($R_A, R_B, R_C$) conectadas a un nodo
+                central común.</li>
+            <li><b>Configuración Triángulo ($\Delta$) (o Pi, $\Pi$):</b> Tres resistencias ($R_{AB}, R_{BC}, R_{CA}$)
+                conectadas en un bucle entre tres terminales.</li>
         </ul>
 
         <hr>
 
         <h3>¿Cómo identificar una conexión Triángulo?</h3>
         <p>
-            Una conexión en Triángulo (o Delta, $\Delta$) se reconoce visualmente porque tres componentes (en este caso, resistencias) están conectados uno tras otro formando un bucle cerrado. Imagina tres nodos A, B y C. La resistencia $R_{AB}$ conecta el nodo A con el B, la resistencia $R_{BC}$ conecta el nodo B con el C, y la resistencia $R_{CA}$ cierra el bucle conectando el nodo C de vuelta al A.
+            Una conexión en Triángulo (o Delta, $\Delta$) se reconoce visualmente porque tres componentes (en este caso,
+            resistencias) están conectados uno tras otro formando un bucle cerrado. Imagina tres nodos A, B y C. La
+            resistencia $R_{AB}$ conecta el nodo A con el B, la resistencia $R_{BC}$ conecta el nodo B con el C, y la
+            resistencia $R_{CA}$ cierra el bucle conectando el nodo C de vuelta al A.
         </p>
         <p>
-            La característica principal es que <b>no hay un punto o nodo central común</b>. Cada conexión es directamente entre dos de los tres terminales principales, formando los lados de un triángulo.
+            La característica principal es que <b>no hay un punto o nodo central común</b>. Cada conexión es
+            directamente entre dos de los tres terminales principales, formando los lados de un triángulo.
         </p>
 
         <hr>
 
         <h3>1. Pasaje de Triángulo ($\Delta$) a Estrella (Y)</h3>
         <p><b>Datos:</b> $R_{AB}, R_{BC}, R_{CA}$ <br> <b>Objetivo:</b> $R_A, R_B, R_C$</p>
-        <p>La resistencia de la estrella (ej. $R_A$) es el <b>producto de las dos resistencias del triángulo que se conectan a su mismo nodo</b>, dividido por la <b>suma de las tres resistencias</b> del triángulo.</p>
+        <p>La resistencia de la estrella (ej. $R_A$) es el <b>producto de las dos resistencias del triángulo que se
+                conectan a su mismo nodo</b>, dividido por la <b>suma de las tres resistencias</b> del triángulo.</p>
         $$R_A = \frac{R_{AB} \cdot R_{CA}}{R_{AB} + R_{BC} + R_{CA}}$$
         $$R_B = \frac{R_{AB} \cdot R_{BC}}{R_{AB} + R_{BC} + R_{CA}}$$
         $$R_C = \frac{R_{BC} \cdot R_{CA}}{R_{AB} + R_{BC} + R_{CA}}$$
@@ -387,22 +435,24 @@
 
         <h3>2. Pasaje de Estrella (Y) a Triángulo ($\Delta$)</h3>
         <p><b>Datos:</b> $R_A, R_B, R_C$ <br> <b>Objetivo:</b> $R_{AB}, R_{BC}, R_{CA}$</p>
-        <p>Primero, se calcula un "numerador común" ($N_p$), que es la suma de los productos de todos los pares de la estrella.</p>
+        <p>Primero, se calcula un "numerador común" ($N_p$), que es la suma de los productos de todos los pares de la
+            estrella.</p>
         $$N_p = (R_A \cdot R_B) + (R_B \cdot R_C) + (R_C \cdot R_A)$$
-        <p>La resistencia del triángulo (ej. $R_{AB}$) es este numerador común, dividido por la <b>resistencia de la estrella "opuesta"</b> (la que no está conectada a los nodos A o B, o sea $R_C$).</p>
+        <p>La resistencia del triángulo (ej. $R_{AB}$) es este numerador común, dividido por la <b>resistencia de la
+                estrella "opuesta"</b> (la que no está conectada a los nodos A o B, o sea $R_C$).</p>
         $$R_{AB} = \frac{N_p}{R_C}$$
         $$R_{BC} = \frac{N_p}{R_A}$$
         $$R_{CA} = \frac{N_p}{R_B}$$
 
         <hr>
-        
+
         <h3>Caso Especial: Resistencias Iguales</h3>
         <ul>
             <li><b>$\Delta \rightarrow Y$ (Balanceado):</b> $R_Y = R_\Delta / 3$</li>
             <li><b>$Y \rightarrow \Delta$ (Balanceado):</b> $R_\Delta = 3 \cdot R_Y$</li>
         </ul>
     </div>
-    
+
     <script>
         // --- 1. Selectores de Elementos ---
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -417,7 +467,7 @@
         const rab_in = document.getElementById('rab');
         const rbc_in = document.getElementById('rbc');
         const rca_in = document.getElementById('rca');
-        
+
         // Outputs Estrella (Y)
         const ra_out = document.getElementById('ra');
         const rb_out = document.getElementById('rb');
@@ -449,7 +499,7 @@
         // Cargar preferencia al iniciar
         const currentMode = localStorage.getItem('darkMode');
         let prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
+
         if (currentMode === 'enabled') {
             setDarkMode(true);
         } else if (currentMode === 'disabled') {
@@ -521,7 +571,7 @@
             ra_out.value = '';
             rb_out.value = '';
             rc_out.value = '';
-            
+
             // Limpiar inputs de Y -> Delta
             ra_in.value = '';
             rb_in.value = '';
@@ -543,4 +593,5 @@
     </script>
 
 </body>
+
 </html>

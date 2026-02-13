@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simuladores de Ingeniería - Hub</title>
+    <meta name="description" content="Hub central para acceder a los simuladores de Circuitos Eléctricos y Máquinas.">
+
+    <!-- Google Fonts (Optional but recommended for consistency if available, likely system fonts are fine given offline context) -->
+
+    <style>
+        /* --- 1. Variables de Color y Tema (Consistente con simuladores existentes) --- */
+        :root {
+            /* Modo Claro (Verde Agua/Menta Pastel) */
+            --bg-color: #f0fdf4;
+            --card-bg: #ffffff;
+            --text-color: #2e4a4a;
+            --text-light: #6a9c9c;
+            --border-color: #d2f0e0;
+            --primary-color: #5ab17c;
+            --primary-hover: #4a9e6b;
+            --secondary-color: #e0f2f7;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro (Morado/Lavanda Pastel) */
+            --bg-color: #1a1523;
+            --card-bg: #28203d;
+            --text-color: #e6e0f0;
+            --text-light: #afa2c3;
+            --border-color: #43386b;
+            --primary-color: #a78bfa;
+            --primary-hover: #9175d6;
+            --secondary-color: #3d305e;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- 2. Reset y Estilos Base --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- 3. Header --- */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* Botón Modo Oscuro */
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        /* --- 4. Main Content (Grid) --- */
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .subject-section {
+            margin-bottom: 3rem;
+        }
+
+        .subject-title {
+            font-size: 1.8rem;
+            color: var(--text-light);
+            /* Subtle header color */
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        /* --- 5. Cards --- */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            /* For links wrapping the card */
+            color: inherit;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-color);
+        }
+
+        .card-header {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .card-body p {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .card-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* --- 6. Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        /* --- Responsive Tweaks --- */
+        @media (max-width: 600px) {
+            header {
+                padding: 1rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🔬 Laboratorio de Ingeniería</h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <main>
+
+        <!-- Circuitos Eléctricos I -->
+        <section class="subject-section">
+            <h2 class="subject-title">Circuitos Eléctricos I</h2>
+            <div class="grid">
+
+                <a href="../Circuitos Eléctricos I/Solver Sist de Ecuaciones Lineales - Matrices/Eqn.html" class="card">
+                    <div class="card-header">
+                        <span>Sist. de Ecuaciones</span>
+                        <span>🧮</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Resolución de sistemas de ecuaciones lineales mediante matrices y método de Cramer. Ideal
+                            para mallas y nodos.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="btn">Abrir Simulador ➔</span>
+                    </div>
+                </a>
+
+                <a href="../Circuitos Eléctricos I/Solver Sist de Ecuaciones Lineales - Matrices/Estrella-Triangulo.html"
+                    class="card">
+                    <div class="card-header">
+                        <span>Estrella - Triángulo</span>
+                        <span>⚡</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Simulador para conversión y cálculo de transformaciones Estrella-Triángulo en redes de
+                            resistencias.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="btn">Abrir Simulador ➔</span>
+                    </div>
+                </a>
+
+                <a href="../Circuitos Eléctricos I/Solver Sist de Ecuaciones Lineales - Matrices/ejercicio 31-10.html"
+                    class="card">
+                    <div class="card-header">
+                        <span>Ejercicio 31-10</span>
+                        <span>📝</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Resolución específica del ejercicio 31-10. Análisis detallado de circuito.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="btn">Abrir Simulador ➔</span>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Circuitos Eléctricos II -->
+        <section class="subject-section">
+            <h2 class="subject-title">Circuitos Eléctricos II</h2>
+            <div class="grid">
+
+                <a href="../Circuitos Eléctricos II/FactorDePotencia.html" class="card">
+                    <div class="card-header">
+                        <span>Factor de Potencia</span>
+                        <span>🔋</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Análisis y corrección del factor de potencia en circuitos de corriente alterna.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="btn">Abrir Simulador ➔</span>
+                    </div>
+                </a>
+
+                <a href="../Circuitos Eléctricos II/NeutroFlotante.html" class="card">
+                    <div class="card-header">
+                        <span>Neutro Flotante</span>
+                        <span>⚠️</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Simulación del comportamiento del neutro flotante en sistemas trifásicos desequilibrados.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="btn">Abrir Simulador ➔</span>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Máquinas Eléctricas -->
+        <section class="subject-section">
+            <h2 class="subject-title">Máquinas Eléctricas</h2>
+            <div class="grid">
+
+                <a href="../Máquinas Eléctricas/MotoresPaP-Rev4.html" class="card">
+                    <div class="card-header">
+                        <span>Motores Paso a Paso</span>
+                        <span>⚙️</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Control y visualización de secuencias de conmutación para motores paso a paso unipolares y
+                            bipolares.</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="btn">Abrir Simulador ➔</span>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Máquinas Térmicas -->
+        <section class="subject-section">
+            <h2 class="subject-title">Máquinas Térmicas</h2>
+            <div class="grid">
+
+                <a href="../Máquinas Térmicas/oswald.html" class="card">
+                    <div class="card-header">
+                        <span>Diagrama de Oswald</span>
+                        <span>🔥</span>
+                    </div>
+                    <div class="card-body">
+                        <p>Cálculo y representación del diagrama de combustión (Oswald).</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="btn">Abrir Simulador ➔</span>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Simuladores de Ingeniería</p>
+    </footer>
+
+    <script>
+        // --- Dark Mode Logic (Shared with Simulators) ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        // Initialize based on preference or system
+        const currentMode = localStorage.getItem('darkMode');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (currentMode === 'enabled') {
+            setDarkMode(true);
+        } else if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(prefersDark);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+
+</html>
