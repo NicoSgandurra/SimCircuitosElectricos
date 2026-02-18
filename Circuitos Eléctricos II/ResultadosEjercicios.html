@@ -344,7 +344,7 @@
 
     <div class="container">
         <div class="header">
-            <h1>Corrector de Ejercicios - CE I</h1>
+            <h1>Corrector de Ejercicios - CE II</h1>
             <p>Selecciona un Trabajo Práctico y un ejercicio e introduce tus resultados</p>
         </div>
 
@@ -384,32 +384,74 @@
                         id: "ej1",
                         title: "Ejercicio 1",
                         inputs: [
-                            { id: "Nodos", label: "Nodos", placeholder: "Ej: 5", expected: 0, type: "simple" },
-                            { id: "Mallas", label: "Mallas", placeholder: "Ej: 6", expected: 1, type: "simple" },
-                            { id: "Ramas", label: "Ramas", placeholder: "Ej: 6", expected: 1, type: "simple" },
-                            { id: "Resistencia", label: "R<sub>T>/sub>/R<sub>eq>/sub>", placeholder: "Ej: 100", expected: 1080, type: "tolerance", tolerance: 0.05 },
+                            { id: "1-Real", label: "1<sub>Real</sub>", placeholder: "Ej: 5", expected: 12, type: "tolerance", tolerance: 0.05 },
+                            { id: "1-Imaginario", label: "1<sub>Imaginario</sub>", placeholder: "Ej: 6", expected: 2, type: "tolerance", tolerance: 0.05 },
+                            { id: "2-Real", label: "2<sub>Real</sub>", placeholder: "Ej: 6", expected: 90, type: "tolerance", tolerance: 0.05 },
+                            { id: "2-Imaginario", label: "2<sub>Imaginario</sub>", placeholder: "Ej: 1", expected: 60, type: "tolerance", tolerance: 0.05 },
+                            { id: "3-Real", label: "3<sub>Real</sub>", placeholder: "Ej: 4", expected: -0.277, type: "tolerance", tolerance: 0.05 },
+                            { id: "3-Imaginario", label: "3<sub>Imaginario</sub>", placeholder: "Ej: -2", expected: 0.785, type: "tolerance", tolerance: 0.05 },
+                            { id: "4-Real", label: "4<sub>Real</sub>", placeholder: "Ej: 7", expected: 3, type: "tolerance", tolerance: 0.05 },
+                            { id: "4-Imaginario", label: "4<sub>Imaginario</sub>", placeholder: "Ej: 0", expected: 6, type: "tolerance", tolerance: 0.05 },
+                            { id: "5-Real", label: "5<sub>Real</sub>", placeholder: "Ej: 8", expected: -15, type: "tolerance", tolerance: 0.05 },
+                            { id: "5-Imaginario", label: "5<sub>Imaginario</sub>", placeholder: "Ej: 7", expected: -144, type: "tolerance", tolerance: 0.05 },
+                            { id: "6-Real", label: "6<sub>Real</sub>", placeholder: "Ej: 2", expected: 3.274, type: "tolerance", tolerance: 0.05 },
+                            { id: "6-Imaginario", label: "6<sub>Imaginario</sub>", placeholder: "Ej: 8", expected: 16.397, type: "tolerance", tolerance: 0.05 },
+                            { id: "7-Real", label: "7<sub>Real</sub>", placeholder: "Ej: 1", expected: 0, type: "tolerance", tolerance: 0.05 },
+                            { id: "7-Imaginario", label: "7<sub>Imaginario</sub>", placeholder: "Ej: 1", expected: 0, type: "tolerance", tolerance: 0.05 },
+                            { id: "8-Real", label: "8<sub>Real</sub>", placeholder: "Ej: 4", expected: 18, type: "tolerance", tolerance: 0.05 },
+                            { id: "8-Imaginario", label: "8<sub>Imaginario</sub>", placeholder: "Ej: 7", expected: -9, type: "tolerance", tolerance: 0.05 },
+                            { id: "9-Real", label: "9<sub>Real</sub>", placeholder: "Ej: 6", expected: 8.723, type: "tolerance", tolerance: 0.05 },
+                            { id: "9-Imaginario", label: "9<sub>Imaginario</sub>", placeholder: "Ej: -4", expected: -6.215, type: "tolerance", tolerance: 0.05 },
+                            { id: "10-Real", label: "10<sub>Real</sub>", placeholder: "Ej: 8", expected: 51, type: "tolerance", tolerance: 0.05 },
+                            { id: "10-Imaginario", label: "10<sub>Imaginario</sub>", placeholder: "Ej: 5", expected: 65, type: "tolerance", tolerance: 0.05 },
                         ]
                     },
                     {
                         id: "ej2",
                         title: "Ejercicio 2",
                         inputs: [
-                            { id: "Nodos", label: "Nodos", placeholder: "Ej: 5", expected: 2, type: "simple" },
-                            { id: "Mallas", label: "Mallas", placeholder: "Ej: 6", expected: 3, type: "simple" },
-                            { id: "Ramas", label: "Ramas", placeholder: "Ej: 6", expected: 4, type: "simple" },
-                            { id: "Resistencia", label: "R<sub>T>/sub>/R<sub>eq>/sub>", placeholder: "Ej: 100", expected: 90, type: "tolerance", tolerance: 0.05 },
+                            { id: "Corriente-R", label: "Corriente(I<sub>Real</sub>)", placeholder: "Ej: 5", expected: 8.978, type: "tolerance", tolerance: 0.05 },
+                            { id: "Corriente-I", label: "Corriente(I<sub>Imaginario</sub>)", placeholder: "Ej: 9", expected: 20.085, type: "tolerance", tolerance: 0.05 },
                         ]
                     },
                     {
                         id: "ej3",
                         title: "Ejercicio 3",
                         inputs: [
-                            { id: "Nodos", label: "Nodos", placeholder: "Ej: 5", expected: 2, type: "simple" },
-                            { id: "Mallas", label: "Mallas", placeholder: "Ej: 6", expected: 2, type: "simple" },
-                            { id: "Ramas", label: "Ramas", placeholder: "Ej: 6", expected: 3, type: "simple" },
-                            { id: "Resistencia", label: "R<sub>T>/sub>/R<sub>eq>/sub>", placeholder: "Ej: 100", expected: 428.571, type: "tolerance", tolerance: 0.05 },
+                            { id: "Tensión-R", label: "Tensión(V<sub>Real</sub>)", placeholder: "Ej: 3", expected: 8.162, type: "tolerance", tolerance: 0.05 },
+                            { id: "Tensión-I", label: "Tensión(V<sub>Imaginario</sub>)", placeholder: "Ej: 5", expected: 18.259, type: "tolerance", tolerance: 0.05 },
                         ]
                     },
+                    {
+                        id: "ej4",
+                        title: "Ejercicio 4",
+                        inputs: [
+                            { id: "Polar-Módulo", label: "(Polar<sub>Módulo</sub>)", placeholder: "Ej: 5", expected: 17, type: "tolerance", tolerance: 0.05 },
+                            { id: "Polar-Ángulo", label: "(Polar<sub>Ángulo</sub>)", placeholder: "Ej: 9", expected: -28.072, type: "tolerance", tolerance: 0.05 },
+                            { id: "Exponencial-Módulo", label: "(Exponencial<sub>Módulo</sub>)", placeholder: "Ej: 6", expected: 17, type: "tolerance", tolerance: 0.05 },
+                            { id: "Exponencial-Exponente", label: "(Exponencial<sub>Exponente</sub>)", placeholder: "Ej: 7", expected: -0.49, type: "tolerance", tolerance: 0.05 },
+                        ]
+                    },
+                    {
+                        id: "ej5",
+                        title: "Ejercicio 5",
+                        inputs: [
+                            { id: "Rectangular-Real", label: "(Rectangular<sub>Real</sub>)", placeholder: "Ej: 5", expected: 3, type: "tolerance", tolerance: 0.05 },
+                            { id: "Rectangular-Imaginario", label: "(Rectangular<sub>Imaginario</sub>)", placeholder: "Ej: 9", expected: 4, type: "tolerance", tolerance: 0.05 },
+                            { id: "Exponencial-Módulo", label: "(Exponencial<sub>Módulo</sub>)", placeholder: "Ej: 2", expected: 5, type: "tolerance", tolerance: 0.05 },
+                            { id: "Exponencial-Exponente", label: "(Exponencial<sub>Exponente</sub>)", placeholder: "Ej: 7", expected: 0.927, type: "tolerance", tolerance: 0.05 },
+                        ]
+                    },
+                    {
+                        id: "ej6",
+                        title: "Ejercicio 6",
+                        inputs: [
+                            { id: "Rectangular-Real", label: "(Rectangular<sub>Real</sub>)", placeholder: "Ej: 5", expected: -8.391, type: "tolerance", tolerance: 0.05 },
+                            { id: "Rectangular-Imaginario", label: "(Rectangular<sub>Imaginario</sub>)", placeholder: "Ej: 9", expected: -5.44, type: "tolerance", tolerance: 0.05 },
+                            { id: "Polar-Módulo", label: "(Polar<sub>Módulo</sub>)", placeholder: "Ej: 2", expected: 10, type: "tolerance", tolerance: 0.05 },
+                            { id: "Polar-Ángulo", label: "(Polar<sub>Ángulo</sub>)", placeholder: "Ej: 7", expected: -147.042, type: "tolerance", tolerance: 0.05 },
+                        ]
+                    }
                 ]
             }
         };
