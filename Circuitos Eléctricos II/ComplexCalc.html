@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es" class="transition-colors duration-300">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompleX - Conversor y Operaciones</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        pastel: {
+                            bg: '#fdf4f6',
+                            card: '#ffffff',
+                            blue: '#e0f2fe',
+                            green: '#d1fae5',
+                            purple: '#f3e8ff',
+                            orange: '#ffedd5',
+                            text: '#475569'
+                        },
+                        night: {
+                            bg: '#0f172a',
+                            card: '#1e293b',
+                            blue: '#1e3a8a',
+                            green: '#064e3b',
+                            purple: '#4c1d95',
+                            orange: '#7c2d12',
+                            text: '#f8fafc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-pastel-bg text-pastel-text dark:bg-night-bg dark:text-night-text min-h-screen flex flex-col font-sans transition-colors duration-300">
+
+    <header class="p-4 flex justify-between items-center max-w-5xl w-full mx-auto">
+        <h1 class="text-2xl font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+            <svg class="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5">
+                </path>
+            </svg>
+            CompleX Pro
+        </h1>
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition">
+            <svg id="moonIcon" class="w-6 h-6 hidden dark:block text-yellow-300" fill="currentColor"
+                viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+            <svg id="sunIcon" class="w-6 h-6 block dark:hidden text-orange-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 2.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.415l-.708-.708a1 1 0 010-1.414zM16 10a1 1 0 011 1h1a1 1 0 110-2h-1a1 1 0 01-1 1zm-1.414 4.243a1 1 0 010 1.415l-.707.707a1 1 0 01-1.415-1.414l.707-.707a1 1 0 011.415 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-2.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.415l.708.708a1 1 0 010 1.414zM4 10a1 1 0 01-1-1H2a1 1 0 110 2h1a1 1 0 011-1zm1.414-4.243a1 1 0 010-1.415l.707-.707a1 1 0 011.415 1.414l-.707.707a1 1 0 01-1.415 0zM10 5a5 5 0 100 10 5 5 0 000-10z"
+                    clip-rule="evenodd"></path>
+            </svg>
+        </button>
+    </header>
+
+    <main class="flex-grow flex flex-col items-center justify-start p-4 gap-8 max-w-5xl w-full mx-auto">
+
+        <!-- SECCIÓN 1: CONVERSOR Y GRÁFICO -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+
+            <!-- Card Conversor -->
+            <div
+                class="bg-pastel-card dark:bg-night-card rounded-3xl shadow-xl overflow-hidden transition-colors duration-300">
+                <div class="flex border-b border-gray-100 dark:border-slate-700">
+                    <button onclick="setMode('rect')" id="tab-rect"
+                        class="flex-1 py-4 font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20 transition-colors">Rectangular</button>
+                    <button onclick="setMode('polar')" id="tab-polar"
+                        class="flex-1 py-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">Polar</button>
+                    <button onclick="setMode('exp')" id="tab-exp"
+                        class="flex-1 py-4 font-semibold text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors">Exponencial</button>
+                </div>
+
+                <div class="p-6 space-y-6">
+                    <div>
+                        <h2 class="text-xs uppercase tracking-widest font-bold text-slate-400 mb-4">Entrada</h2>
+
+                        <div id="input-rect" class="flex items-center justify-center gap-3 text-2xl font-medium">
+                            <input type="number" id="rect-a" placeholder="0"
+                                class="w-24 bg-gray-50 dark:bg-slate-900/50 rounded-xl p-2 text-center outline-none border border-gray-200 dark:border-slate-700 focus:ring-2 ring-indigo-200 dark:ring-indigo-800">
+                            <span class="text-slate-400">+</span>
+                            <div
+                                class="flex items-center gap-1 bg-gray-50 dark:bg-slate-900/50 rounded-xl p-2 border border-gray-200 dark:border-slate-700 focus-within:ring-2 ring-indigo-200 dark:ring-indigo-800">
+                                <input type="number" id="rect-b" placeholder="0"
+                                    class="w-24 bg-transparent text-center outline-none">
+                                <span class="text-indigo-400 pr-1">i</span>
+                            </div>
+                        </div>
+
+                        <div id="input-polar" class="hidden flex flex-col items-center justify-center gap-4">
+                            <div class="flex items-center justify-center gap-3 text-2xl font-medium">
+                                <input type="number" id="polar-r" min="0" placeholder="r"
+                                    class="w-24 bg-gray-50 dark:bg-slate-900/50 rounded-xl p-2 text-center outline-none border border-gray-200 dark:border-slate-700">
+                                <span class="text-slate-400">∠</span>
+                                <input type="number" id="polar-theta" placeholder="θ"
+                                    class="w-24 bg-gray-50 dark:bg-slate-900/50 rounded-xl p-2 text-center outline-none border border-gray-200 dark:border-slate-700">
+                            </div>
+                            <div class="flex bg-gray-100 dark:bg-slate-800 rounded-lg p-1 text-xs justify-center">
+                                <button onclick="setAngleUnit('deg')" id="unit-deg"
+                                    class="px-3 py-1 font-medium rounded-md bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-indigo-200">Grados</button>
+                                <button onclick="setAngleUnit('rad')" id="unit-rad"
+                                    class="px-3 py-1 font-medium rounded-md text-gray-500">Radianes</button>
+                            </div>
+                        </div>
+
+                        <div id="input-exp" class="hidden flex items-center justify-center gap-2 text-2xl font-medium">
+                            <input type="number" id="exp-r" min="0" placeholder="r"
+                                class="w-24 bg-gray-50 dark:bg-slate-900/50 rounded-xl p-2 text-center outline-none border border-gray-200 dark:border-slate-700">
+                            <span class="text-slate-400">· e<sup>i</sup></span>
+                            <div class="flex flex-col items-center">
+                                <input type="number" id="exp-theta" placeholder="rad"
+                                    class="w-20 text-sm bg-gray-50 dark:bg-slate-900/50 rounded-lg p-1 text-center border border-gray-200 dark:border-slate-700 transform -translate-y-2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2 class="text-xs uppercase tracking-widest font-bold text-slate-400">Resultados</h2>
+                        <div class="grid grid-cols-1 gap-3">
+                            <div
+                                class="bg-pastel-blue dark:bg-night-blue p-3 rounded-xl flex justify-between items-center">
+                                <span class="text-[10px] font-bold uppercase opacity-60">Binómica</span>
+                                <span id="out-rect" class="font-mono text-lg font-bold">0 + 0i</span>
+                            </div>
+                            <div
+                                class="bg-pastel-green dark:bg-night-green p-3 rounded-xl flex justify-between items-center">
+                                <span class="text-[10px] font-bold uppercase opacity-60">Polar</span>
+                                <span id="out-polar-deg" class="font-mono text-lg font-bold">0 ∠ 0°</span>
+                            </div>
+                            <div
+                                class="bg-pastel-purple dark:bg-night-purple p-3 rounded-xl flex justify-between items-center">
+                                <span class="text-[10px] font-bold uppercase opacity-60">Exponencial</span>
+                                <span id="out-exp" class="font-mono text-lg font-bold">0 e^(0i)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Gráfico -->
+            <div
+                class="bg-pastel-card dark:bg-night-card rounded-3xl shadow-xl p-6 transition-colors duration-300 flex flex-col items-center justify-center">
+                <h2 class="text-xs uppercase tracking-widest font-bold text-slate-400 mb-4 self-start">Plano de Argand
+                </h2>
+                <div
+                    class="bg-gray-50 dark:bg-slate-900/30 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 w-full flex justify-center items-center overflow-hidden">
+                    <canvas id="argandCanvas" width="300" height="300"></canvas>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-4 italic text-center">Visualización del vector en el plano
+                    complejo (Eje Real vs Eje Imaginario)</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN 2: CALCULADORA DE OPERACIONES -->
+        <div
+            class="bg-pastel-card dark:bg-night-card w-full rounded-3xl shadow-xl p-6 md:p-8 transition-colors duration-300">
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                    </path>
+                </svg>
+                Operaciones entre Números Complejos
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                <!-- Inputs z1 y z2 -->
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div
+                        class="space-y-4 bg-gray-50/50 dark:bg-slate-800/30 p-4 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
+                        <h3 class="text-sm font-bold text-indigo-500 uppercase">Número z₁</h3>
+                        <div class="flex items-center gap-2 text-xl">
+                            <input type="number" id="z1-a" placeholder="a"
+                                class="w-full bg-white dark:bg-slate-900 rounded-lg p-2 text-center border border-gray-200 dark:border-slate-700 outline-none">
+                            <span>+</span>
+                            <div
+                                class="flex items-center gap-1 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700 px-2">
+                                <input type="number" id="z1-b" placeholder="b"
+                                    class="w-full p-2 text-center bg-transparent outline-none">
+                                <span class="text-indigo-400">i</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="space-y-4 bg-gray-50/50 dark:bg-slate-800/30 p-4 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
+                        <h3 class="text-sm font-bold text-emerald-500 uppercase">Número z₂</h3>
+                        <div class="flex items-center gap-2 text-xl">
+                            <input type="number" id="z2-a" placeholder="c"
+                                class="w-full bg-white dark:bg-slate-900 rounded-lg p-2 text-center border border-gray-200 dark:border-slate-700 outline-none">
+                            <span>+</span>
+                            <div
+                                class="flex items-center gap-1 bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-700 px-2">
+                                <input type="number" id="z2-b" placeholder="d"
+                                    class="w-full p-2 text-center bg-transparent outline-none">
+                                <span class="text-emerald-400">i</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selector de Operación -->
+                <div class="flex flex-col gap-3">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase text-center">Seleccionar Operación</h3>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="setOp('+')" id="op-add"
+                            class="py-3 rounded-xl font-bold bg-indigo-500 text-white shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:scale-105">+</button>
+                        <button onclick="setOp('-')" id="op-sub"
+                            class="py-3 rounded-xl font-bold bg-gray-200 dark:bg-slate-700 hover:bg-indigo-400 hover:text-white transition-all hover:scale-105">-</button>
+                        <button onclick="setOp('*')" id="op-mul"
+                            class="py-3 rounded-xl font-bold bg-gray-200 dark:bg-slate-700 hover:bg-indigo-400 hover:text-white transition-all hover:scale-105">×</button>
+                        <button onclick="setOp('/')" id="op-div"
+                            class="py-3 rounded-xl font-bold bg-gray-200 dark:bg-slate-700 hover:bg-indigo-400 hover:text-white transition-all hover:scale-105">÷</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultado de Operación -->
+            <div class="mt-8 bg-pastel-orange dark:bg-night-orange rounded-2xl p-6 text-center shadow-inner">
+                <p class="text-[10px] font-bold uppercase opacity-60 mb-2">Resultado de la Operación</p>
+                <div id="op-result" class="text-3xl font-mono font-bold tracking-tight">0 + 0i</div>
+                <div id="op-details" class="text-xs opacity-60 mt-2 font-medium italic">Suma de complejos (z₁ + z₂)
+                </div>
+            </div>
+        </div>
+
+        <!-- Zona de Teoría y Conversiones -->
+        <div
+            class="bg-pastel-card dark:bg-night-card w-full rounded-3xl shadow-xl p-6 md:p-8 transition-colors duration-300 text-slate-700 dark:text-slate-300">
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
+                <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                    </path>
+                </svg>
+                Teoría, Conversiones y Operaciones
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Rectangular a Polar/Exp -->
+                <div class="space-y-3">
+                    <h3
+                        class="text-lg font-semibold text-indigo-600 dark:text-indigo-400 border-b border-indigo-100 dark:border-indigo-900 pb-2">
+                        De Rectangular a Polar/Exp</h3>
+                    <p class="text-sm">Para convertir un número rectangular (<span class="font-mono">a + bi</span>) a
+                        polar (<span class="font-mono">r ∠ θ</span>) o exponencial (<span
+                            class="font-mono">r·e<sup>iθ</sup></span>):</p>
+                    <ul class="list-disc list-inside text-sm space-y-2 ml-2">
+                        <li><strong>Magnitud (r):</strong> <br><span
+                                class="font-mono bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 px-2 py-1 rounded inline-block mt-1">r
+                                = √(a² + b²)</span></li>
+                        <li><strong>Ángulo (θ):</strong> <br><span
+                                class="font-mono bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 px-2 py-1 rounded inline-block mt-1">θ
+                                = arctan(b / a)</span></li>
+                    </ul>
+                </div>
+
+                <!-- Polar/Exp a Rectangular -->
+                <div class="space-y-3">
+                    <h3
+                        class="text-lg font-semibold text-emerald-600 dark:text-emerald-400 border-b border-emerald-100 dark:border-emerald-900 pb-2">
+                        De Polar/Exp a Rectangular</h3>
+                    <p class="text-sm">Para pasar de polar (<span class="font-mono">r ∠ θ</span>) o exponencial (<span
+                            class="font-mono">r·e<sup>iθ</sup></span>) a rectangular (<span class="font-mono">a +
+                            bi</span>):</p>
+                    <ul class="list-disc list-inside text-sm space-y-2 ml-2">
+                        <li><strong>Parte real (a):</strong> <br><span
+                                class="font-mono bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 px-2 py-1 rounded inline-block mt-1">a
+                                = r · cos(θ)</span></li>
+                        <li><strong>Parte imaginaria (b):</strong> <br><span
+                                class="font-mono bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 px-2 py-1 rounded inline-block mt-1">b
+                                = r · sin(θ)</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Operaciones Básicas -->
+            <div class="space-y-4 mb-8">
+                <h3
+                    class="text-lg font-semibold text-orange-600 dark:text-orange-400 border-b border-orange-100 dark:border-orange-900 pb-2">
+                    Operaciones Básicas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Suma y Resta:</strong> Se suman/restan las partes reales entre sí y las partes
+                            imaginarias entre sí.</p>
+                        <div
+                            class="font-mono bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 px-3 py-2 rounded">
+                            (a+bi) ± (c+di) = (a±c) + (b±d)i
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <p><strong>Multiplicación:</strong> Se aplica propiedad distributiva y se recuerda que <span
+                                class="font-mono">i² = -1</span>.</p>
+                        <div
+                            class="font-mono bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 px-3 py-2 rounded">
+                            (a+bi)(c+di) = (ac-bd) + (ad+bc)i
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm md:col-span-2">
+                        <p><strong>División:</strong> Se multiplica numerador y denominador por el <em>conjugado</em>
+                            del denominador (<span class="font-mono">c - di</span>) para transformar el denominador en
+                            un número real.</p>
+                        <div
+                            class="font-mono bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700 px-3 py-2 rounded">
+                            (a+bi) / (c+di) = [(ac+bd) / (c²+d²)] + [(bc-ad) / (c²+d²)]i
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consideraciones -->
+            <div
+                class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl p-5">
+                <h3 class="text-md font-bold text-amber-800 dark:text-amber-400 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                    Consideraciones Importantes
+                </h3>
+                <ul class="list-disc list-inside text-sm text-amber-900 dark:text-amber-200/80 space-y-3">
+                    <li>
+                        <strong>Ajuste de Cuadrantes:</strong> Al calcular el ángulo con la calculadora (<span
+                            class="font-mono">arctan</span>), si la componente real (<strong>a</strong>) es negativa,
+                        debes <strong>sumar 180°</strong> (o π rad) al resultado. <em>Esta aplicación lo ajusta
+                            automáticamente.</em>
+                    </li>
+                    <li>
+                        <strong>Unidades del Ángulo:</strong> La forma exponencial requiere
+                        <strong>estrictamente</strong> que el ángulo (θ) esté expresado en <strong>radianes</strong>.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center p-6 text-xs opacity-40">
+        CompleX Pro Engine • Matemáticas Aplicadas
+    </footer>
+
+    <script>
+        // ESTADO GLOBAL
+        let currentMode = 'rect';
+        let polarAngleUnit = 'deg';
+        let currentOp = '+';
+        let currentZ = { a: 0, b: 0 }; // Para el gráfico
+
+        // CANVAS
+        const canvas = document.getElementById('argandCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawGraph(a, b) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const center = w / 2;
+            const isDark = document.documentElement.classList.contains('dark');
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Ejes
+            ctx.strokeStyle = isDark ? '#475569' : '#cbd5e1';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, center); ctx.lineTo(w, center); // Eje X
+            ctx.moveTo(center, 0); ctx.lineTo(center, h); // Eje Y
+            ctx.stroke();
+
+            // Escala dinámica (simplificada)
+            const maxVal = Math.max(Math.abs(a), Math.abs(b), 1);
+            const scale = (center - 20) / maxVal;
+
+            const targetX = center + (a * scale);
+            const targetY = center - (b * scale);
+
+            // Vector
+            ctx.strokeStyle = '#6366f1';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(center, center);
+            ctx.lineTo(targetX, targetY);
+            ctx.stroke();
+
+            // Punto en la punta
+            ctx.fillStyle = '#6366f1';
+            ctx.beginPath();
+            ctx.arc(targetX, targetY, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Arco de ángulo si existe magnitud
+            if (a !== 0 || b !== 0) {
+                const radius = 30;
+                const angle = Math.atan2(-b, a);
+                ctx.strokeStyle = '#fbbf24';
+                ctx.setLineDash([2, 2]);
+                ctx.beginPath();
+                ctx.arc(center, center, radius, 0, angle, b > 0);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        // CONVERSOR
+        const inputs = {
+            rect: { a: document.getElementById('rect-a'), b: document.getElementById('rect-b') },
+            polar: { r: document.getElementById('polar-r'), theta: document.getElementById('polar-theta') },
+            exp: { r: document.getElementById('exp-r'), theta: document.getElementById('exp-theta') }
+        };
+
+        const outputs = {
+            rect: document.getElementById('out-rect'),
+            polarDeg: document.getElementById('out-polar-deg'),
+            exp: document.getElementById('out-exp')
+        };
+
+        function round(num) { return Math.round(num * 10000) / 10000; }
+
+        function calculate() {
+            let a = 0, b = 0;
+            try {
+                if (currentMode === 'rect') {
+                    a = parseFloat(inputs.rect.a.value) || 0;
+                    b = parseFloat(inputs.rect.b.value) || 0;
+                } else if (currentMode === 'polar') {
+                    const r = parseFloat(inputs.polar.r.value) || 0;
+                    let th = parseFloat(inputs.polar.theta.value) || 0;
+                    if (polarAngleUnit === 'deg') th *= (Math.PI / 180);
+                    a = r * Math.cos(th);
+                    b = r * Math.sin(th);
+                } else {
+                    const r = parseFloat(inputs.exp.r.value) || 0;
+                    const th = parseFloat(inputs.exp.theta.value) || 0;
+                    a = r * Math.cos(th);
+                    b = r * Math.sin(th);
+                }
+
+                currentZ = { a, b };
+                drawGraph(a, b);
+
+                const r = Math.sqrt(a * a + b * b);
+                const thRad = Math.atan2(b, a);
+                const thDeg = thRad * (180 / Math.PI);
+
+                outputs.rect.innerText = `${round(a)} ${b >= 0 ? '+' : '-'} ${Math.abs(round(b))}i`;
+                outputs.polarDeg.innerText = `${round(r)} ∠ ${round(thDeg)}°`;
+                outputs.exp.innerText = `${round(r)} e^(${round(thRad)}i)`;
+            } catch (e) { }
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            ['rect', 'polar', 'exp'].forEach(m => {
+                document.getElementById(`input-${m}`).classList.toggle('hidden', m !== mode);
+                const tab = document.getElementById(`tab-${m}`);
+                if (m === mode) {
+                    tab.className = "flex-1 py-4 font-semibold text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20";
+                } else {
+                    tab.className = "flex-1 py-4 font-semibold text-gray-500 hover:text-indigo-500";
+                }
+            });
+            calculate();
+        }
+
+        function setAngleUnit(unit) {
+            polarAngleUnit = unit;
+            document.getElementById('unit-deg').className = unit === 'deg' ? "px-3 py-1 font-medium rounded-md bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-indigo-200" : "px-3 py-1 font-medium rounded-md text-gray-500";
+            document.getElementById('unit-rad').className = unit === 'rad' ? "px-3 py-1 font-medium rounded-md bg-white dark:bg-slate-600 shadow-sm text-indigo-600 dark:text-indigo-200" : "px-3 py-1 font-medium rounded-md text-gray-500";
+            calculate();
+        }
+
+        // OPERACIONES
+        const opInputs = {
+            z1a: document.getElementById('z1-a'), z1b: document.getElementById('z1-b'),
+            z2a: document.getElementById('z2-a'), z2b: document.getElementById('z2-b')
+        };
+
+        function setOp(op) {
+            currentOp = op;
+            const ops = { '+': 'add', '-': 'sub', '*': 'mul', '/': 'div' };
+            Object.keys(ops).forEach(key => {
+                const btn = document.getElementById(`op-${ops[key]}`);
+                if (key === op) btn.className = "py-3 rounded-xl font-bold bg-indigo-500 text-white shadow-lg transition-all scale-105";
+                else btn.className = "py-3 rounded-xl font-bold bg-gray-200 dark:bg-slate-700 hover:bg-indigo-400 hover:text-white transition-all";
+            });
+            calculateOp();
+        }
+
+        function calculateOp() {
+            const a = parseFloat(opInputs.z1a.value) || 0;
+            const b = parseFloat(opInputs.z1b.value) || 0;
+            const c = parseFloat(opInputs.z2a.value) || 0;
+            const d = parseFloat(opInputs.z2b.value) || 0;
+
+            let resA = 0, resB = 0;
+            let detail = "";
+
+            switch (currentOp) {
+                case '+': resA = a + c; resB = b + d; detail = "Suma de complejos (z₁ + z₂)"; break;
+                case '-': resA = a - c; resB = b - d; detail = "Resta de complejos (z₁ - z₂)"; break;
+                case '*': resA = (a * c - b * d); resB = (a * d + b * c); detail = "Multiplicación distributiva (z₁ × z₂)"; break;
+                case '/':
+                    const den = c * c + d * d;
+                    if (den === 0) {
+                        document.getElementById('op-result').innerText = "Error: Div por 0";
+                        return;
+                    }
+                    resA = (a * c + b * d) / den;
+                    resB = (b * c - a * d) / den;
+                    detail = "División por conjugado (z₁ / z₂)";
+                    break;
+            }
+
+            document.getElementById('op-result').innerText = `${round(resA)} ${resB >= 0 ? '+' : '-'} ${Math.abs(round(resB))}i`;
+            document.getElementById('op-details').innerText = detail;
+        }
+
+        // LISTENERS
+        Object.values(inputs).forEach(g => Object.values(g).forEach(el => el.addEventListener('input', calculate)));
+        Object.values(opInputs).forEach(el => el.addEventListener('input', calculateOp));
+
+        const themeToggleBtn = document.getElementById('themeToggle');
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            drawGraph(currentZ.a, currentZ.b);
+        });
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Iniciar
+        window.onload = () => {
+            calculate();
+            calculateOp();
+        };
+    </script>
+</body>
+
+</html>
