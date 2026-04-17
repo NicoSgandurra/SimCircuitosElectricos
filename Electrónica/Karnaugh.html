@@ -1,506 +1,633 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Sun, Moon, Trash2, Layers, Zap } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="es">
 
-// --- LÓGICA DEL SOLUCIONADOR ---
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solucionador Karnaugh Pro</title>
 
-const getVars = (n) => ['A', 'B', 'C', 'D', 'E', 'F'].slice(0, n);
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
 
-// Genera términos dinámicamente para N variables (Quine-McCluskey base)
-const generateAllTerms = (numVars) => {
-    const terms = [];
-    const vars = getVars(numVars);
-    const totalTerms = Math.pow(3, numVars);
+    <!-- React & ReactDOM (Producción) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    for (let i = 0; i < totalTerms; i++) {
-        let temp = i;
-        let mask = 0;
-        let val = 0;
-        let nameParts = [];
+    <!-- Babel (Compila JSX a JS nativo en tiempo real) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-        for (let v = numVars - 1; v >= 0; v--) {
-            let state = temp % 3;
-            temp = Math.floor(temp / 3);
-            let bit = 1 << v;
-            if (state === 1) { // 0 lógico
-                mask |= bit;
-                nameParts.push(vars[numVars - 1 - v] + "'");
-            } else if (state === 2) { // 1 lógico
-                mask |= bit;
-                val |= bit;
-                nameParts.push(vars[numVars - 1 - v]);
+    <!-- Estilos Personalizados y Animaciones -->
+    <style>
+        @keyframes overlayPop {
+            0% {
+                transform: scale(0.85);
+                opacity: 0;
             }
-        }
-        let name = nameParts.join('');
-        if (name === "") name = "1";
 
-        let cells = [];
-        const numCells = 1 << numVars;
-        for (let c = 0; c < numCells; c++) {
-            if ((c & mask) === val) cells.push(c);
-        }
-        terms.push({ name, mask, val, cells, size: cells.length });
-    }
-    // Ordenar para priorizar los términos que cubren más celdas (implicantes primos más grandes)
-    terms.sort((a, b) => b.size - a.size);
-    return terms;
-};
-
-const solveKMap = (cellsArray, allTerms, numVars) => {
-    const minterms = [];
-    const allowed = [];
-    const numCells = 1 << numVars;
-
-    for (let i = 0; i < numCells; i++) {
-        if (cellsArray[i] === 1) {
-            minterms.push(i);
-            allowed.push(i);
-        } else if (cellsArray[i] === 'X') {
-            allowed.push(i);
-        }
-    }
-
-    if (minterms.length === 0) return { expression: "0", terms: [] };
-    if (allowed.length === numCells) {
-        const fullTerm = allTerms.find(t => t.size === numCells);
-        return { expression: "1", terms: [fullTerm] };
-    }
-
-    const validTerms = allTerms.filter(t =>
-        t.cells.some(c => minterms.includes(c)) &&
-        t.cells.every(c => allowed.includes(c))
-    );
-
-    let uncoveredMinterms = new Set(minterms);
-    const selectedTerms = [];
-
-    // 1. Implicantes Primos Esenciales
-    for (let m of minterms) {
-        if (!uncoveredMinterms.has(m)) continue;
-        const coveringTerms = validTerms.filter(t => t.cells.includes(m));
-        if (coveringTerms.length === 1) {
-            const epi = coveringTerms[0];
-            selectedTerms.push(epi);
-            epi.cells.forEach(c => uncoveredMinterms.delete(c));
-        }
-    }
-
-    // 2. Cobertura Restante (Greedy)
-    while (uncoveredMinterms.size > 0) {
-        let bestTerm = null;
-        let maxCovered = 0;
-
-        for (const term of validTerms) {
-            if (selectedTerms.includes(term)) continue;
-            let covered = 0;
-            for (const c of term.cells) {
-                if (uncoveredMinterms.has(c)) covered++;
-            }
-            if (covered > maxCovered) {
-                maxCovered = covered;
-                bestTerm = term;
+            100% {
+                transform: scale(1);
+                opacity: 1;
             }
         }
 
-        if (bestTerm) {
-            selectedTerms.push(bestTerm);
-            bestTerm.cells.forEach(c => uncoveredMinterms.delete(c));
-        } else break;
-    }
-
-    const expression = selectedTerms.map(t => t.name).join(' + ');
-    return { expression, terms: selectedTerms };
-};
-
-// --- CONFIGURACIÓN GRÁFICA DE MATRICES POR VARIABLE ---
-const MAP_CONFIGS = {
-    2: [{ matrix: [[0, 1], [2, 3]], rowLabels: ['0', '1'], colLabels: ['0', '1'], label: 'A\\B' }],
-    3: [{ matrix: [[0, 1, 3, 2], [4, 5, 7, 6]], rowLabels: ['0', '1'], colLabels: ['00', '01', '11', '10'], label: 'A\\BC' }],
-    4: [{ matrix: [[0, 1, 3, 2], [4, 5, 7, 6], [12, 13, 15, 14], [8, 9, 11, 10]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: 'AB\\CD' }],
-    5: [
-        { title: 'A = 0', matrix: [[0, 1, 3, 2], [4, 5, 7, 6], [12, 13, 15, 14], [8, 9, 11, 10]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: 'BC\\DE' },
-        { title: 'A = 1', matrix: [[16, 17, 19, 18], [20, 21, 23, 22], [28, 29, 31, 30], [24, 25, 27, 26]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: 'BC\\DE' }
-    ],
-    6: [
-        { title: 'AB = 00', matrix: [[0, 1, 3, 2], [4, 5, 7, 6], [12, 13, 15, 14], [8, 9, 11, 10]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: 'CD\\EF' },
-        { title: 'AB = 01', matrix: [[16, 17, 19, 18], [20, 21, 23, 22], [28, 29, 31, 30], [24, 25, 27, 26]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: 'CD\\EF' },
-        { title: 'AB = 11', matrix: [[48, 49, 51, 50], [52, 53, 55, 54], [60, 61, 63, 62], [56, 57, 59, 58]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: 'CD\\EF' },
-        { title: 'AB = 10', matrix: [[32, 33, 35, 34], [36, 37, 39, 38], [44, 45, 47, 46], [40, 41, 43, 42]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: 'CD\\EF' }
-    ]
-};
-
-// Colores más vibrantes para los bordes
-const termColors = [
-    { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.25)', text: 'text-red-500' },
-    { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.25)', text: 'text-blue-500' },
-    { border: '#10b981', bg: 'rgba(16, 185, 129, 0.25)', text: 'text-emerald-500' },
-    { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.25)', text: 'text-amber-500' },
-    { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.25)', text: 'text-purple-500' },
-    { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.25)', text: 'text-pink-500' },
-    { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.25)', text: 'text-cyan-500' },
-    { border: '#f97316', bg: 'rgba(249, 115, 22, 0.25)', text: 'text-orange-500' },
-    { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.25)', text: 'text-indigo-500' },
-    { border: '#14b8a6', bg: 'rgba(20, 184, 166, 0.25)', text: 'text-teal-500' }
-];
-
-// --- COMPONENTES UI ---
-
-const TermDisplay = ({ termStr, className }) => {
-    const parts = [];
-    for (let i = 0; i < termStr.length; i++) {
-        if (termStr[i + 1] === "'") {
-            parts.push(<span key={i} className="overline decoration-2 font-bold">{termStr[i]}</span>);
-            i++;
-        } else {
-            parts.push(<span key={i} className="font-bold">{termStr[i]}</span>);
+        /* Scrollbar Personalizada Claro */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-    }
-    return <span className={className}>{parts}</span>;
-};
 
-const KMapMatrix = ({ config, values, toggleValue, solvedData, darkMode }) => {
-    const { matrix, rowLabels, colLabels, label, title } = config;
-    const rows = matrix.length;
-    const cols = matrix[0].length;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
 
-    return (
-        <div className={`flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] ${darkMode ? 'bg-[#0f0f0f] border border-[#222] shadow-2xl shadow-black/50' : 'bg-white/40 backdrop-blur-3xl border border-white/60 shadow-xl shadow-slate-200/50'}`}>
-            {title && (
-                <h4 className={`mb-8 font-mono text-xs tracking-widest uppercase font-bold py-1.5 px-4 rounded-full ${darkMode ? 'bg-[#222] text-gray-300' : 'bg-white shadow-sm text-slate-600 border border-slate-100'}`}>
-                    {title}
-                </h4>
-            )}
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
 
-            <div className="relative w-full max-w-[340px]">
-                {/* Cabeceras Superiores */}
-                <div className="flex ml-[12%] w-[88%] mb-3 text-center text-[11px] font-mono opacity-70 font-semibold tracking-wider">
-                    {colLabels.map((l, i) => <div key={i} className="flex justify-center items-center" style={{ width: `${100 / cols}%` }}><span className={darkMode ? 'bg-[#222] px-2 py-0.5 rounded text-gray-300' : 'bg-white/80 px-2 py-0.5 rounded text-slate-600 shadow-sm'}>{l}</span></div>)}
-                </div>
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #94a3b8;
+        }
 
-                <div className="flex relative">
-                    <div className="absolute -top-7 -left-5 text-[10px] font-mono font-bold uppercase tracking-widest bg-gradient-to-br from-indigo-500 to-purple-500 text-transparent bg-clip-text drop-shadow-sm">{label}</div>
+        /* Scrollbar Personalizada Oscuro (Vercel Style) */
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #222;
+            border: 2px solid #0a0a0a;
+        }
 
-                    {/* Cabeceras Laterales */}
-                    <div className="w-[12%] flex flex-col justify-around text-[11px] font-mono opacity-70 text-right pr-3 font-semibold tracking-wider">
-                        {rowLabels.map((l, i) => <div key={i} style={{ height: `${100 / rows}%` }} className="flex items-center justify-end"><span className={darkMode ? 'bg-[#222] px-1.5 py-0.5 rounded text-gray-300' : 'bg-white/80 px-1.5 py-0.5 rounded text-slate-600 shadow-sm'}>{l}</span></div>)}
-                    </div>
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
 
-                    {/* Grid Principal (La Matriz) */}
-                    <div className="w-[88%] relative" style={{ aspectRatio: `${cols}/${rows}` }}>
+<body class="bg-slate-50">
+    <div id="root"></div>
 
-                        {/* Contenedor con grid lines finas (1px) */}
-                        <div
-                            className={`grid w-full h-full gap-[1px] relative z-10 rounded-xl overflow-hidden border shadow-inner ${darkMode ? 'bg-[#333] border-[#333]' : 'bg-slate-200 border-slate-200'}`}
-                            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}
-                        >
-                            {matrix.flat().map((logicalIndex) => (
-                                <button
-                                    key={`cell-${logicalIndex}`}
-                                    onClick={() => toggleValue(logicalIndex)}
-                                    className={`
-                    relative flex items-center justify-center font-mono transition-all duration-300 group
-                    ${darkMode ? 'bg-[#0a0a0a] hover:bg-[#151515]' : 'bg-white hover:bg-slate-50/80'}
-                  `}
+    <!-- CÓDIGO DE LA APLICACIÓN -->
+    <script type="text/babel">
+        const { useState, useMemo, useEffect, Fragment } = React;
+
+        // --- ICONOS INLINE (Reemplazo de Lucide para HTML puro) ---
+        const Icon = ({ children, size = 24, className = "", title }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {title && <title>{title}</title>}
+                {children}
+            </svg>
+        );
+        const Sun = (p) => <Icon {...p}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></Icon>;
+        const Moon = (p) => <Icon {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></Icon>;
+        const Trash2 = (p) => <Icon {...p}><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6" /></Icon>;
+        const Layers = (p) => <Icon {...p}><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /></Icon>;
+        const Zap = (p) => <Icon {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></Icon>;
+        const Plus = (p) => <Icon {...p}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></Icon>;
+
+        // --- LÓGICA DEL SOLUCIONADOR ---
+
+        const generateAllTerms = (numVars, inputNames) => {
+            const terms = [];
+            const totalTerms = Math.pow(3, numVars);
+
+            for (let i = 0; i < totalTerms; i++) {
+                let temp = i;
+                let mask = 0;
+                let val = 0;
+                let termParts = [];
+
+                for (let v = numVars - 1; v >= 0; v--) {
+                    let state = temp % 3;
+                    temp = Math.floor(temp / 3);
+                    let bit = 1 << v;
+                    if (state === 1) {
+                        mask |= bit;
+                        termParts.push({ varName: inputNames[numVars - 1 - v] || '?', isNegated: true });
+                    } else if (state === 2) {
+                        mask |= bit;
+                        val |= bit;
+                        termParts.push({ varName: inputNames[numVars - 1 - v] || '?', isNegated: false });
+                    }
+                }
+
+                let cells = [];
+                const numCells = 1 << numVars;
+                for (let c = 0; c < numCells; c++) {
+                    if ((c & mask) === val) cells.push(c);
+                }
+                terms.push({ termParts, mask, val, cells, size: cells.length });
+            }
+            terms.sort((a, b) => b.size - a.size);
+            return terms;
+        };
+
+        const solveKMap = (cellsArray, allTerms, numVars) => {
+            const minterms = [];
+            const allowed = [];
+            const numCells = 1 << numVars;
+
+            for (let i = 0; i < numCells; i++) {
+                if (cellsArray[i] === 1) {
+                    minterms.push(i);
+                    allowed.push(i);
+                } else if (cellsArray[i] === 'X') {
+                    allowed.push(i);
+                }
+            }
+
+            if (minterms.length === 0) return { isZero: true, isOne: false, terms: [] };
+            if (allowed.length === numCells) {
+                const fullTerm = allTerms.find(t => t.size === numCells);
+                return { isZero: false, isOne: true, terms: [fullTerm] };
+            }
+
+            const validTerms = allTerms.filter(t =>
+                t.cells.some(c => minterms.includes(c)) &&
+                t.cells.every(c => allowed.includes(c))
+            );
+
+            let uncoveredMinterms = new Set(minterms);
+            const selectedTerms = [];
+
+            for (let m of minterms) {
+                if (!uncoveredMinterms.has(m)) continue;
+                const coveringTerms = validTerms.filter(t => t.cells.includes(m));
+                if (coveringTerms.length === 1) {
+                    const epi = coveringTerms[0];
+                    selectedTerms.push(epi);
+                    epi.cells.forEach(c => uncoveredMinterms.delete(c));
+                }
+            }
+
+            while (uncoveredMinterms.size > 0) {
+                let bestTerm = null;
+                let maxCovered = 0;
+
+                for (const term of validTerms) {
+                    if (selectedTerms.includes(term)) continue;
+                    let covered = 0;
+                    for (const c of term.cells) {
+                        if (uncoveredMinterms.has(c)) covered++;
+                    }
+                    if (covered > maxCovered) {
+                        maxCovered = covered;
+                        bestTerm = term;
+                    }
+                }
+
+                if (bestTerm) {
+                    selectedTerms.push(bestTerm);
+                    bestTerm.cells.forEach(c => uncoveredMinterms.delete(c));
+                } else break;
+            }
+
+            return { isZero: false, isOne: false, terms: selectedTerms };
+        };
+
+        const getMapConfigs = (numVars, names) => {
+            const s = names.map(n => n || '?');
+            switch (numVars) {
+                case 2: return [{ matrix: [[0, 1], [2, 3]], rowLabels: ['0', '1'], colLabels: ['0', '1'], label: `${s[0]}\\${s[1]}` }];
+                case 3: return [{ matrix: [[0, 1, 3, 2], [4, 5, 7, 6]], rowLabels: ['0', '1'], colLabels: ['00', '01', '11', '10'], label: `${s[0]}\\${s[1]}${s[2]}` }];
+                case 4: return [{ matrix: [[0, 1, 3, 2], [4, 5, 7, 6], [12, 13, 15, 14], [8, 9, 11, 10]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: `${s[0]}${s[1]}\\${s[2]}${s[3]}` }];
+                case 5: return [
+                    { title: `${s[0]} = 0`, matrix: [[0, 1, 3, 2], [4, 5, 7, 6], [12, 13, 15, 14], [8, 9, 11, 10]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: `${s[1]}${s[2]}\\${s[3]}${s[4]}` },
+                    { title: `${s[0]} = 1`, matrix: [[16, 17, 19, 18], [20, 21, 23, 22], [28, 29, 31, 30], [24, 25, 27, 26]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: `${s[1]}${s[2]}\\${s[3]}${s[4]}` }
+                ];
+                case 6: return [
+                    { title: `${s[0]}${s[1]} = 00`, matrix: [[0, 1, 3, 2], [4, 5, 7, 6], [12, 13, 15, 14], [8, 9, 11, 10]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: `${s[2]}${s[3]}\\${s[4]}${s[5]}` },
+                    { title: `${s[0]}${s[1]} = 01`, matrix: [[16, 17, 19, 18], [20, 21, 23, 22], [28, 29, 31, 30], [24, 25, 27, 26]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: `${s[2]}${s[3]}\\${s[4]}${s[5]}` },
+                    { title: `${s[0]}${s[1]} = 11`, matrix: [[48, 49, 51, 50], [52, 53, 55, 54], [60, 61, 63, 62], [56, 57, 59, 58]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: `${s[2]}${s[3]}\\${s[4]}${s[5]}` },
+                    { title: `${s[0]}${s[1]} = 10`, matrix: [[32, 33, 35, 34], [36, 37, 39, 38], [44, 45, 47, 46], [40, 41, 43, 42]], rowLabels: ['00', '01', '11', '10'], colLabels: ['00', '01', '11', '10'], label: `${s[2]}${s[3]}\\${s[4]}${s[5]}` }
+                ];
+                default: return [];
+            }
+        };
+
+        const termColors = [
+            { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.25)', text: 'text-red-500' },
+            { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.25)', text: 'text-blue-500' },
+            { border: '#10b981', bg: 'rgba(16, 185, 129, 0.25)', text: 'text-emerald-500' },
+            { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.25)', text: 'text-amber-500' },
+            { border: '#a855f7', bg: 'rgba(168, 85, 247, 0.25)', text: 'text-purple-500' },
+            { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.25)', text: 'text-pink-500' },
+            { border: '#06b6d4', bg: 'rgba(6, 182, 212, 0.25)', text: 'text-cyan-500' },
+            { border: '#f97316', bg: 'rgba(249, 115, 22, 0.25)', text: 'text-orange-500' },
+            { border: '#6366f1', bg: 'rgba(99, 102, 241, 0.25)', text: 'text-indigo-500' },
+            { border: '#14b8a6', bg: 'rgba(20, 184, 166, 0.25)', text: 'text-teal-500' }
+        ];
+
+        // --- COMPONENTES UI ---
+
+        const TermDisplay = ({ termParts, className }) => {
+            if (!termParts || termParts.length === 0) return <span className={className}>1</span>;
+            return (
+                <span className={className}>
+                    {termParts.map((p, i) => (
+                        <span key={i} className={p.isNegated ? "overline decoration-2 font-bold px-0.5" : "font-bold px-0.5"}>
+                            {p.varName}
+                        </span>
+                    ))}
+                </span>
+            );
+        };
+
+        const KMapMatrix = ({ config, activeOutput, toggleValue, solvedData, darkMode }) => {
+            const { matrix, rowLabels, colLabels, label, title } = config;
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+
+            return (
+                <div className={`flex flex-col items-center justify-center p-6 md:p-8 rounded-[2rem] transition-colors ${darkMode ? 'bg-[#0f0f0f] border border-[#222] shadow-2xl shadow-black/50' : 'bg-white/40 backdrop-blur-3xl border border-white/60 shadow-xl shadow-slate-200/50'}`}>
+                    {title && (
+                        <h4 className={`mb-8 font-mono text-xs tracking-widest uppercase font-bold py-1.5 px-4 rounded-full ${darkMode ? 'bg-[#222] text-gray-300' : 'bg-white shadow-sm text-slate-600 border border-slate-100'}`}>
+                            {title}
+                        </h4>
+                    )}
+
+                    <div className="relative w-full max-w-[340px]">
+                        <div className="flex ml-[12%] w-[88%] mb-3 text-center text-[10px] md:text-[11px] font-mono opacity-70 font-semibold tracking-wider">
+                            {colLabels.map((l, i) => <div key={i} className="flex justify-center items-center" style={{ width: `${100 / cols}%` }}><span className={darkMode ? 'bg-[#222] px-2 py-0.5 rounded text-gray-300' : 'bg-white/80 px-2 py-0.5 rounded text-slate-600 shadow-sm'}>{l}</span></div>)}
+                        </div>
+
+                        <div className="flex relative">
+                            <div className="absolute -top-7 -left-5 text-[10px] font-mono font-bold uppercase tracking-widest bg-gradient-to-br from-indigo-500 to-purple-500 text-transparent bg-clip-text drop-shadow-sm">{label}</div>
+
+                            <div className="w-[12%] flex flex-col justify-around text-[10px] md:text-[11px] font-mono opacity-70 text-right pr-2 md:pr-3 font-semibold tracking-wider">
+                                {rowLabels.map((l, i) => <div key={i} style={{ height: `${100 / rows}%` }} className="flex items-center justify-end"><span className={darkMode ? 'bg-[#222] px-1.5 py-0.5 rounded text-gray-300' : 'bg-white/80 px-1.5 py-0.5 rounded text-slate-600 shadow-sm'}>{l}</span></div>)}
+                            </div>
+
+                            <div className="w-[88%] relative" style={{ aspectRatio: `${cols}/${rows}` }}>
+                                <div
+                                    className={`grid w-full h-full gap-[1px] relative z-10 rounded-xl overflow-hidden border shadow-inner ${darkMode ? 'bg-[#333] border-[#333]' : 'bg-slate-200 border-slate-200'}`}
+                                    style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` }}
                                 >
-                                    {/* Valores Destacados vs Tenues */}
-                                    {values[logicalIndex] === 1 ? (
-                                        <span className={`text-2xl sm:text-3xl font-black text-emerald-500 ${darkMode ? 'drop-shadow-[0_0_12px_rgba(16,185,129,0.8)]' : 'drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]'} scale-110`}>1</span>
-                                    ) : values[logicalIndex] === 'X' ? (
-                                        <span className={`text-xl sm:text-2xl font-bold text-gray-400 ${darkMode ? 'drop-shadow-[0_0_8px_rgba(156,163,175,0.4)]' : ''}`}>X</span>
-                                    ) : (
-                                        <span className={`text-sm font-light transition-opacity duration-300 ${darkMode ? 'text-gray-700 group-hover:text-gray-500' : 'text-slate-200 group-hover:text-slate-300'}`}>0</span>
-                                    )}
-
-                                    {/* Índice Lógico */}
-                                    <span className={`absolute bottom-1 right-1.5 text-[8px] font-sans tracking-tighter font-semibold ${darkMode ? 'text-gray-600' : 'text-slate-300'}`}>{logicalIndex}</span>
-                                </button>
-                            ))}
-                        </div>
-
-                        {/* Overlays (Agrupaciones Perfectas) */}
-                        <div className="absolute inset-0 pointer-events-none z-30 rounded-xl overflow-hidden">
-                            {solvedData.terms.map((term, tIndex) => {
-                                const localCells = term.cells.filter(c => matrix.flat().includes(c));
-                                if (localCells.length === 0) return null;
-
-                                const color = termColors[tIndex % termColors.length];
-
-                                return localCells.map(cell => {
-                                    let r, c;
-                                    matrix.forEach((row, rowIndex) => {
-                                        row.forEach((colCell, colIndex) => {
-                                            if (colCell === cell) { r = rowIndex; c = colIndex; }
-                                        });
-                                    });
-
-                                    // Chequeo de adyacencia visual (Wraparound)
-                                    const hasUp = localCells.includes(matrix[(r + rows - 1) % rows][c]);
-                                    const hasDown = localCells.includes(matrix[(r + 1) % rows][c]);
-                                    const hasLeft = localCells.includes(matrix[r][(c + cols - 1) % cols]);
-                                    const hasRight = localCells.includes(matrix[r][(c + 1) % cols]);
-
-                                    const rRadius = '10px';
-                                    const borderThickness = '3px';
-
-                                    const borderStyle = {
-                                        borderTop: !hasUp ? `${borderThickness} solid ${color.border}` : 'none',
-                                        borderBottom: !hasDown ? `${borderThickness} solid ${color.border}` : 'none',
-                                        borderLeft: !hasLeft ? `${borderThickness} solid ${color.border}` : 'none',
-                                        borderRight: !hasRight ? `${borderThickness} solid ${color.border}` : 'none',
-                                        top: `${(r / rows) * 100}%`,
-                                        left: `${(c / cols) * 100}%`,
-                                        width: `${(1 / cols) * 100}%`,
-                                        height: `${(1 / rows) * 100}%`,
-                                        backgroundColor: color.bg,
-                                        borderTopLeftRadius: (!hasUp && !hasLeft) ? rRadius : '0px',
-                                        borderTopRightRadius: (!hasUp && !hasRight) ? rRadius : '0px',
-                                        borderBottomLeftRadius: (!hasDown && !hasLeft) ? rRadius : '0px',
-                                        borderBottomRightRadius: (!hasDown && !hasRight) ? rRadius : '0px',
-                                        zIndex: 10 + tIndex,
-                                        animation: `overlayPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) ${tIndex * 0.05}s forwards`,
-                                        opacity: 0, // Inicia invisible para la animación
-                                    };
-
-                                    return <div key={`overlay-${term.name}-${cell}`} className="absolute box-border" style={borderStyle} />;
-                                });
-                            })}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-
-export default function App() {
-    const [darkMode, setDarkMode] = useState(false);
-    const [numVars, setNumVars] = useState(4);
-    const [values, setValues] = useState(Array(16).fill(0));
-
-    const ALL_TERMS = useMemo(() => generateAllTerms(numVars), [numVars]);
-    const solvedData = useMemo(() => solveKMap(values, ALL_TERMS, numVars), [values, ALL_TERMS, numVars]);
-
-    useEffect(() => {
-        setValues(Array(1 << numVars).fill(0));
-    }, [numVars]);
-
-    const toggleValue = (index) => {
-        setValues(prev => {
-            const next = [...prev];
-            if (next[index] === 0) next[index] = 1;
-            else if (next[index] === 1) next[index] = 'X';
-            else next[index] = 0;
-            return next;
-        });
-    };
-
-    const clearAll = () => setValues(Array(1 << numVars).fill(0));
-
-    // --- ESTILOS DINÁMICOS (Pastel vs Vercel) ---
-    const appBg = darkMode
-        ? "bg-[#000] text-[#ededed] selection:bg-[#333]"
-        : "bg-slate-50 text-slate-800 selection:bg-pink-200 relative overflow-x-hidden";
-
-    const panelClass = darkMode
-        ? "bg-[#0a0a0a] border border-[#222] rounded-xl shadow-none"
-        : "bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem]";
-
-    const tableHeaderClass = darkMode ? "bg-[#111] border-b border-[#222]" : "bg-white/50 border-b border-slate-100";
-    const tableRowClass = darkMode ? "border-b border-[#1a1a1a] hover:bg-[#111]" : "border-b border-slate-50 hover:bg-slate-50/80";
-
-    const numCells = 1 << numVars;
-    const currentVars = getVars(numVars);
-    const gridsToRender = MAP_CONFIGS[numVars];
-
-    return (
-        <div className={`min-h-screen transition-colors duration-500 font-sans ${darkMode ? 'dark' : ''} ${appBg}`}>
-
-            {/* Fondo Decorativo Pastel */}
-            {!darkMode && (
-                <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-                    <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-pink-200/40 to-purple-200/40 blur-[100px]" />
-                    <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-cyan-200/40 to-blue-200/40 blur-[100px]" />
-                </div>
-            )}
-
-            <div className="relative z-10 max-w-7xl mx-auto p-4 md:p-8 flex flex-col min-h-screen">
-
-                {/* HEADER */}
-                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 shrink-0">
-                    <div>
-                        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-2">
-                            <div className={`p-2 rounded-xl ${darkMode ? 'bg-[#222] text-white' : 'bg-gradient-to-br from-pink-500 to-violet-500 text-white shadow-md'}`}>
-                                <Zap size={20} className={darkMode ? "opacity-80" : ""} />
-                            </div>
-                            <span className={darkMode ? 'text-white' : 'text-slate-800'}>
-                                Karnaugh Solver
-                            </span>
-                        </h1>
-                        <p className={`text-sm mt-1.5 ml-1 ${darkMode ? 'text-gray-500' : 'text-slate-500 font-medium'}`}>
-                            Simplificación por Quine-McCluskey
-                        </p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                        {/* Variable Selector */}
-                        <div className={`flex items-center p-1 rounded-full border ${darkMode ? 'bg-[#111] border-[#222]' : 'bg-white shadow-sm border-slate-200'}`}>
-                            <div className={`pl-3 pr-2 opacity-50 ${darkMode ? 'text-white' : 'text-slate-500'}`}>
-                                <Layers size={16} />
-                            </div>
-                            {[2, 3, 4, 5, 6].map(n => (
-                                <button
-                                    key={n}
-                                    onClick={() => setNumVars(n)}
-                                    className={`px-3 py-1.5 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 ${numVars === n
-                                            ? darkMode ? 'bg-[#333] text-white shadow-sm' : 'bg-slate-800 text-white shadow-md'
-                                            : darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-slate-500 hover:text-slate-800'
-                                        }`}
-                                >
-                                    {n}v
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="w-px h-8 bg-gray-300 dark:bg-[#333] mx-1 hidden sm:block"></div>
-
-                        <button onClick={clearAll} className={`p-2.5 rounded-full transition-all flex items-center gap-2 ${darkMode ? 'bg-[#111] hover:bg-[#222] border border-[#222] text-red-500' : 'bg-white hover:bg-red-50 shadow-sm border border-slate-200 text-red-500'}`} title="Limpiar todo">
-                            <Trash2 size={18} />
-                        </button>
-                        <button onClick={() => setDarkMode(!darkMode)} className={`p-2.5 rounded-full transition-all ${darkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-slate-800 text-white shadow-md hover:bg-slate-700'}`}>
-                            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-                        </button>
-                    </div>
-                </header>
-
-                {/* CONTENIDO PRINCIPAL */}
-                <div className="flex flex-col lg:flex-row gap-6 flex-1">
-
-                    {/* COLUMNA IZQUIERDA: Tabla de Verdad */}
-                    <div className={`lg:w-1/3 xl:w-1/4 flex flex-col shrink-0 ${panelClass} h-fit overflow-hidden`}>
-                        <div className={`p-4 font-bold text-xs tracking-widest uppercase flex justify-between items-center ${tableHeaderClass}`}>
-                            <span>Tabla de Verdad</span>
-                            <span className={`px-2 py-1 rounded-md text-[10px] ${darkMode ? 'bg-[#222] text-gray-400' : 'bg-slate-100 text-slate-500'}`}>{numCells} filas</span>
-                        </div>
-
-                        <div className="p-0">
-                            <table className="w-full text-center text-sm font-mono border-collapse">
-                                <thead className={`sticky top-0 z-10 backdrop-blur-xl ${darkMode ? 'bg-[#0a0a0a]/90' : 'bg-white/90'}`}>
-                                    <tr className={`text-xs ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-                                        {currentVars.map(v => <th key={v} className="py-3 font-semibold">{v}</th>)}
-                                        <th className="py-3 font-bold border-l border-dashed border-gray-300 dark:border-[#333] text-blue-500">F</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {values.map((val, i) => (
-                                        <tr key={i} className={`transition-colors cursor-pointer ${tableRowClass}`} onClick={() => toggleValue(i)}>
-                                            {currentVars.map((_, vIdx) => (
-                                                <td key={vIdx} className="py-2.5 opacity-40">{(i >> (numVars - 1 - vIdx)) & 1}</td>
-                                            ))}
-                                            <td className="py-2.5 border-l border-dashed border-gray-300 dark:border-[#333] bg-black/5 dark:bg-white/5 font-bold text-base">
-                                                {val === 1 ? <span className="text-emerald-500 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]">1</span> : val === 'X' ? <span className="text-gray-400">X</span> : <span className="opacity-20 font-light text-xs">0</span>}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    {/* COLUMNA DERECHA: Mapas y Resultados */}
-                    <div className="lg:w-2/3 xl:w-3/4 flex flex-col gap-6 pb-10">
-
-                        {/* Función Simplificada */}
-                        <div className={`${panelClass} p-6 md:p-8 shrink-0 relative overflow-hidden flex flex-col justify-center min-h-[160px]`}>
-                            <h3 className={`font-bold text-xs tracking-widest uppercase mb-4 ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-                                Función Simplificada
-                            </h3>
-
-                            <div className="flex flex-wrap items-center gap-3 text-2xl md:text-4xl lg:text-5xl font-mono font-medium tracking-tight">
-                                <span className={darkMode ? 'text-white/50' : 'text-slate-400'}>F = </span>
-                                {solvedData.terms.length === 0 ? (
-                                    <span className="text-gray-400 font-bold">0</span>
-                                ) : (
-                                    solvedData.terms.map((term, i) => (
-                                        <React.Fragment key={i}>
-                                            <span className={`px-2 py-1 rounded-lg ${darkMode ? 'bg-[#111] border border-[#222]' : 'bg-white shadow-sm border border-slate-100'} ${termColors[i % termColors.length].text}`}>
-                                                <TermDisplay termStr={term.name} />
-                                            </span>
-                                            {i < solvedData.terms.length - 1 && (
-                                                <span className={`text-2xl ${darkMode ? 'text-[#333]' : 'text-slate-300'}`}>+</span>
-                                            )}
-                                        </React.Fragment>
-                                    ))
-                                )}
-                            </div>
-
-                            {/* Leyenda de Agrupaciones */}
-                            {solvedData.terms.length > 0 && solvedData.expression !== "1" && solvedData.expression !== "0" && (
-                                <div className="mt-6 flex flex-wrap gap-2">
-                                    {solvedData.terms.map((term, i) => {
-                                        const color = termColors[i % termColors.length];
+                                    {matrix.flat().map((logicalIndex) => {
+                                        const val = activeOutput.values[logicalIndex];
                                         return (
-                                            <div key={i} className={`flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-semibold border ${darkMode ? 'bg-[#111] border-[#222] text-gray-400' : 'bg-white border-slate-100 text-slate-500 shadow-sm'}`}>
-                                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color.border, boxShadow: `0 0 8px ${color.border}` }}></div>
-                                                Grupo de {term.cells.length}
-                                            </div>
+                                            <button
+                                                key={`cell-${logicalIndex}`}
+                                                onClick={() => toggleValue(logicalIndex)}
+                                                className={`relative flex items-center justify-center font-mono transition-all duration-300 group ${darkMode ? 'bg-[#0a0a0a] hover:bg-[#151515]' : 'bg-white hover:bg-slate-50/80'}`}
+                                            >
+                                                {val === 1 ? (
+                                                    <span className={`text-2xl sm:text-3xl font-black text-emerald-500 ${darkMode ? 'drop-shadow-[0_0_12px_rgba(16,185,129,0.8)]' : 'drop-shadow-[0_2px_4px_rgba(16,185,129,0.3)]'} scale-110`}>1</span>
+                                                ) : val === 'X' ? (
+                                                    <span className={`text-xl sm:text-2xl font-bold text-gray-400 ${darkMode ? 'drop-shadow-[0_0_8px_rgba(156,163,175,0.4)]' : ''}`}>X</span>
+                                                ) : (
+                                                    <span className={`text-sm font-light transition-opacity duration-300 ${darkMode ? 'text-gray-700 group-hover:text-gray-500' : 'text-slate-200 group-hover:text-slate-300'}`}>0</span>
+                                                )}
+                                                <span className={`absolute bottom-1 right-1.5 text-[8px] font-sans tracking-tighter font-semibold ${darkMode ? 'text-gray-600' : 'text-slate-300'}`}>{logicalIndex}</span>
+                                            </button>
                                         );
                                     })}
                                 </div>
-                            )}
-                        </div>
 
-                        {/* Renderizado de Mapas */}
-                        <div className={`${panelClass} p-6 md:p-8 flex flex-col items-center justify-center relative`}>
-                            <h2 className={`self-start font-bold text-xs tracking-widest uppercase mb-8 ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-                                Mapa{numVars > 4 ? 's' : ''} de Karnaugh
-                            </h2>
+                                <div className="absolute inset-0 pointer-events-none z-30 rounded-xl overflow-hidden">
+                                    {solvedData.terms.map((term, tIndex) => {
+                                        const localCells = term.cells.filter(c => matrix.flat().includes(c));
+                                        if (localCells.length === 0) return null;
 
-                            <div className={`w-full grid gap-10 ${numVars <= 4 ? 'grid-cols-1 max-w-[500px]' :
-                                    numVars === 5 ? 'grid-cols-1 lg:grid-cols-2 max-w-[900px]' :
-                                        'grid-cols-1 md:grid-cols-2 max-w-[900px]'
-                                }`}>
-                                {gridsToRender.map((config, index) => (
-                                    <KMapMatrix
-                                        key={index}
-                                        config={config}
-                                        values={values}
-                                        toggleValue={toggleValue}
-                                        solvedData={solvedData}
-                                        darkMode={darkMode}
-                                    />
-                                ))}
+                                        const color = termColors[tIndex % termColors.length];
+
+                                        return localCells.map(cell => {
+                                            let r, c;
+                                            matrix.forEach((row, rowIndex) => {
+                                                row.forEach((colCell, colIndex) => {
+                                                    if (colCell === cell) { r = rowIndex; c = colIndex; }
+                                                });
+                                            });
+
+                                            const hasUp = localCells.includes(matrix[(r + rows - 1) % rows][c]);
+                                            const hasDown = localCells.includes(matrix[(r + 1) % rows][c]);
+                                            const hasLeft = localCells.includes(matrix[r][(c + cols - 1) % cols]);
+                                            const hasRight = localCells.includes(matrix[r][(c + 1) % cols]);
+
+                                            const rRadius = '10px';
+                                            const borderThickness = '3px';
+
+                                            const borderStyle = {
+                                                borderTop: !hasUp ? `${borderThickness} solid ${color.border}` : 'none',
+                                                borderBottom: !hasDown ? `${borderThickness} solid ${color.border}` : 'none',
+                                                borderLeft: !hasLeft ? `${borderThickness} solid ${color.border}` : 'none',
+                                                borderRight: !hasRight ? `${borderThickness} solid ${color.border}` : 'none',
+                                                top: `${(r / rows) * 100}%`,
+                                                left: `${(c / cols) * 100}%`,
+                                                width: `${(1 / cols) * 100}%`,
+                                                height: `${(1 / rows) * 100}%`,
+                                                backgroundColor: color.bg,
+                                                borderTopLeftRadius: (!hasUp && !hasLeft) ? rRadius : '0px',
+                                                borderTopRightRadius: (!hasUp && !hasRight) ? rRadius : '0px',
+                                                borderBottomLeftRadius: (!hasDown && !hasLeft) ? rRadius : '0px',
+                                                borderBottomRightRadius: (!hasDown && !hasRight) ? rRadius : '0px',
+                                                zIndex: 10 + tIndex,
+                                                animation: `overlayPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1) ${tIndex * 0.05}s forwards`,
+                                                opacity: 0,
+                                            };
+
+                                            return <div key={`overlay-${tIndex}-${cell}`} className="absolute box-border" style={borderStyle} />;
+                                        });
+                                    })}
+                                </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
-            </div>
+            );
+        };
 
-            {/* Estilos CSS Globales e Inyección de Animaciones */}
-            <style dangerouslySetInnerHTML={{
-                __html: `
-        @keyframes overlayPop {
-          0% { transform: scale(0.85); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
+        // --- APP PRINCIPAL ---
+
+        function App() {
+            const [darkMode, setDarkMode] = useState(false);
+            const [numVars, setNumVars] = useState(4);
+
+            const [inputNames, setInputNames] = useState(['A', 'B', 'C', 'D', 'E', 'F']);
+            const [outputs, setOutputs] = useState([{ id: 'out-1', name: 'F', values: Array(16).fill(0) }]);
+            const [activeOutputId, setActiveOutputId] = useState('out-1');
+
+            const ALL_TERMS = useMemo(() => generateAllTerms(numVars, inputNames), [numVars, inputNames]);
+            const activeOutput = outputs.find(o => o.id === activeOutputId) || outputs[0];
+            const solvedData = useMemo(() => solveKMap(activeOutput.values, ALL_TERMS, numVars), [activeOutput.values, ALL_TERMS, numVars]);
+            const gridsToRender = useMemo(() => getMapConfigs(numVars, inputNames), [numVars, inputNames]);
+
+            useEffect(() => {
+                const newSize = 1 << numVars;
+                setOutputs(prev => prev.map(o => {
+                    if (o.values.length === newSize) return o;
+                    const newVals = Array(newSize).fill(0);
+                    for (let i = 0; i < Math.min(o.values.length, newSize); i++) newVals[i] = o.values[i];
+                    return { ...o, values: newVals };
+                }));
+            }, [numVars]);
+
+            const toggleOutputValue = (outputId, index) => {
+                setOutputs(prev => prev.map(o => {
+                    if (o.id !== outputId) return o;
+                    const next = [...o.values];
+                    next[index] = next[index] === 0 ? 1 : next[index] === 1 ? 'X' : 0;
+                    return { ...o, values: next };
+                }));
+            };
+
+            const addOutput = () => {
+                const newId = `out-${Date.now()}`;
+                setOutputs([...outputs, { id: newId, name: `F${outputs.length + 1}`, values: Array(1 << numVars).fill(0) }]);
+                setActiveOutputId(newId);
+            };
+
+            const removeOutput = (id) => {
+                if (outputs.length <= 1) return;
+                const newOutputs = outputs.filter(o => o.id !== id);
+                setOutputs(newOutputs);
+                if (activeOutputId === id) setActiveOutputId(newOutputs[0].id);
+            };
+
+            const clearAllOutputs = () => setOutputs(prev => prev.map(o => ({ ...o, values: Array(1 << numVars).fill(0) })));
+
+            const appBg = darkMode
+                ? "bg-[#000] text-[#ededed] selection:bg-[#333]"
+                : "bg-slate-50 text-slate-800 selection:bg-pink-200 relative overflow-x-hidden";
+
+            const panelClass = darkMode
+                ? "bg-[#0a0a0a] border border-[#222] rounded-xl shadow-none"
+                : "bg-white/70 backdrop-blur-2xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2rem]";
+
+            const tableHeaderClass = darkMode ? "bg-[#111] border-b border-[#222]" : "bg-white/50 border-b border-slate-100";
+            const tableRowClass = darkMode ? "border-b border-[#1a1a1a] hover:bg-[#111]" : "border-b border-slate-50 hover:bg-slate-50/80";
+
+            const numCells = 1 << numVars;
+
+            return (
+                <div className={`min-h-screen transition-colors duration-500 font-sans ${darkMode ? 'dark' : ''} ${appBg}`}>
+
+                    {!darkMode && (
+                        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-pink-200/40 to-purple-200/40 blur-[100px]" />
+                            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-cyan-200/40 to-blue-200/40 blur-[100px]" />
+                        </div>
+                    )}
+
+                    <div className="relative z-10 max-w-[1400px] mx-auto p-4 md:p-8 flex flex-col min-h-screen">
+
+                        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 shrink-0">
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-2">
+                                    <div className={`p-2 rounded-xl ${darkMode ? 'bg-[#222] text-white' : 'bg-gradient-to-br from-pink-500 to-violet-500 text-white shadow-md'}`}>
+                                        <Zap size={20} className={darkMode ? "opacity-80" : ""} />
+                                    </div>
+                                    <span className={darkMode ? 'text-white' : 'text-slate-800'}>
+                                        Karnaugh Solver Pro
+                                    </span>
+                                </h1>
+                                <p className={`text-sm mt-1.5 ml-1 ${darkMode ? 'text-gray-500' : 'text-slate-500 font-medium'}`}>
+                                    Simplificación Múltiple (HTML Independiente)
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                                <div className={`flex items-center p-1 rounded-full border ${darkMode ? 'bg-[#111] border-[#222]' : 'bg-white shadow-sm border-slate-200'}`}>
+                                    <div className={`pl-3 pr-2 opacity-50 ${darkMode ? 'text-white' : 'text-slate-500'}`}>
+                                        <Layers size={16} />
+                                    </div>
+                                    {[2, 3, 4, 5, 6].map(n => (
+                                        <button
+                                            key={n}
+                                            onClick={() => setNumVars(n)}
+                                            className={`px-3 py-1.5 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 ${numVars === n
+                                                    ? darkMode ? 'bg-[#333] text-white shadow-sm' : 'bg-slate-800 text-white shadow-md'
+                                                    : darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-slate-500 hover:text-slate-800'
+                                                }`}
+                                        >
+                                            {n}v
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="w-px h-8 bg-gray-300 dark:bg-[#333] mx-1 hidden sm:block"></div>
+
+                                <button onClick={clearAllOutputs} className={`p-2.5 rounded-full transition-all flex items-center gap-2 ${darkMode ? 'bg-[#111] hover:bg-[#222] border border-[#222] text-red-500' : 'bg-white hover:bg-red-50 shadow-sm border border-slate-200 text-red-500'}`} title="Limpiar todo">
+                                    <Trash2 size={18} />
+                                </button>
+                                <button onClick={() => setDarkMode(!darkMode)} className={`p-2.5 rounded-full transition-all ${darkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-slate-800 text-white shadow-md hover:bg-slate-700'}`} title="Modo Oscuro/Claro">
+                                    {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                                </button>
+                            </div>
+                        </header>
+
+                        <div className="flex flex-col lg:flex-row gap-6 flex-1">
+
+                            <div className={`lg:w-[35%] flex flex-col shrink-0 ${panelClass} h-fit overflow-hidden`}>
+                                <div className={`p-4 font-bold text-xs tracking-widest uppercase flex justify-between items-center ${tableHeaderClass}`}>
+                                    <span>Tabla de Verdad</span>
+                                    <span className={`px-2 py-1 rounded-md text-[10px] ${darkMode ? 'bg-[#222] text-gray-400' : 'bg-slate-100 text-slate-500'}`}>{numCells} filas</span>
+                                </div>
+
+                                <div className="p-0 overflow-x-auto custom-scrollbar">
+                                    <table className="w-full text-center text-sm font-mono border-collapse min-w-max">
+                                        <thead className={`sticky top-0 z-10 backdrop-blur-xl ${darkMode ? 'bg-[#0a0a0a]/90' : 'bg-white/90'}`}>
+                                            <tr className={`text-xs ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
+                                                {Array.from({ length: numVars }).map((_, vIdx) => (
+                                                    <th key={`th-in-${vIdx}`} className="py-2.5 font-semibold px-2">
+                                                        <input
+                                                            type="text"
+                                                            value={inputNames[vIdx]}
+                                                            onChange={(e) => {
+                                                                const newNames = [...inputNames];
+                                                                newNames[vIdx] = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 4);
+                                                                setInputNames(newNames);
+                                                            }}
+                                                            className={`w-[40px] text-center bg-transparent border-b-2 border-transparent focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}
+                                                        />
+                                                    </th>
+                                                ))}
+
+                                                {outputs.map(out => (
+                                                    <th
+                                                        key={`th-out-${out.id}`}
+                                                        className={`py-2.5 font-bold border-l border-dashed px-2 cursor-pointer transition-colors ${darkMode ? 'border-[#333]' : 'border-gray-300'} ${activeOutputId === out.id ? 'text-blue-500' : ''}`}
+                                                        onClick={() => setActiveOutputId(out.id)}
+                                                    >
+                                                        <div className="flex items-center justify-center gap-1 group">
+                                                            <input
+                                                                type="text"
+                                                                value={out.name}
+                                                                onChange={(e) => {
+                                                                    setOutputs(prev => prev.map(o => o.id === out.id ? { ...o, name: e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 5) } : o));
+                                                                }}
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="w-[45px] bg-transparent text-center focus:outline-none border-b-2 border-transparent focus:border-blue-500 transition-colors"
+                                                            />
+                                                            {outputs.length > 1 && (
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); removeOutput(out.id); }}
+                                                                    className={`p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'hover:bg-red-500/20 text-red-400' : 'hover:bg-red-100 text-red-500'}`}
+                                                                >
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </th>
+                                                ))}
+
+                                                <th className={`py-2 px-3 border-l border-dashed ${darkMode ? 'border-[#333]' : 'border-gray-300'}`}>
+                                                    <button onClick={addOutput} className="p-1 rounded-md bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors" title="Añadir nueva función">
+                                                        <Plus size={16} />
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {Array.from({ length: numCells }).map((_, i) => (
+                                                <tr key={i} className={`transition-colors ${tableRowClass}`}>
+                                                    {Array.from({ length: numVars }).map((_, vIdx) => (
+                                                        <td key={`td-in-${vIdx}`} className="py-2.5 opacity-40">{(i >> (numVars - 1 - vIdx)) & 1}</td>
+                                                    ))}
+
+                                                    {outputs.map(out => (
+                                                        <td
+                                                            key={`td-out-${out.id}`}
+                                                            className={`py-2.5 border-l border-dashed transition-colors cursor-pointer ${darkMode ? 'border-[#333]' : 'border-gray-300'} ${activeOutputId === out.id ? (darkMode ? 'bg-blue-500/10' : 'bg-blue-50') : (darkMode ? 'bg-white/5' : 'bg-black/5')} font-bold text-base`}
+                                                            onClick={() => { setActiveOutputId(out.id); toggleOutputValue(out.id, i); }}
+                                                        >
+                                                            {out.values[i] === 1 ? <span className="text-emerald-500 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]">1</span> : out.values[i] === 'X' ? <span className="text-gray-400">X</span> : <span className="opacity-20 font-light text-xs">0</span>}
+                                                        </td>
+                                                    ))}
+
+                                                    <td className={`border-l border-dashed ${darkMode ? 'border-[#333]' : 'border-gray-300'}`}></td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div className="lg:w-[65%] flex flex-col gap-6 pb-10">
+
+                                <div className={`${panelClass} p-6 md:p-8 shrink-0 relative overflow-hidden flex flex-col justify-center min-h-[160px]`}>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <h3 className={`font-bold text-xs tracking-widest uppercase ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
+                                            Función Simplificada
+                                        </h3>
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-600'}`}>
+                                            Editando: {activeOutput.name}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-3 text-2xl md:text-4xl lg:text-5xl font-mono font-medium tracking-tight">
+                                        <span className={darkMode ? 'text-white/50' : 'text-slate-400'}>{activeOutput.name || '?'} = </span>
+                                        {solvedData.isZero ? (
+                                            <span className="text-gray-400 font-bold">0</span>
+                                        ) : solvedData.isOne ? (
+                                            <span className="text-emerald-500 font-bold">1</span>
+                                        ) : (
+                                            solvedData.terms.map((term, i) => (
+                                                <Fragment key={i}>
+                                                    <span className={`px-2 py-1 rounded-lg ${darkMode ? 'bg-[#111] border border-[#222]' : 'bg-white shadow-sm border border-slate-100'} ${termColors[i % termColors.length].text}`}>
+                                                        <TermDisplay termParts={term.termParts} />
+                                                    </span>
+                                                    {i < solvedData.terms.length - 1 && (
+                                                        <span className={`text-2xl ${darkMode ? 'text-[#333]' : 'text-slate-300'}`}>+</span>
+                                                    )}
+                                                </Fragment>
+                                            ))
+                                        )}
+                                    </div>
+
+                                    {solvedData.terms.length > 0 && !solvedData.isOne && !solvedData.isZero && (
+                                        <div className="mt-6 flex flex-wrap gap-2">
+                                            {solvedData.terms.map((term, i) => {
+                                                const color = termColors[i % termColors.length];
+                                                return (
+                                                    <div key={i} className={`flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-semibold border ${darkMode ? 'bg-[#111] border-[#222] text-gray-400' : 'bg-white border-slate-100 text-slate-500 shadow-sm'}`}>
+                                                        <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color.border, boxShadow: `0 0 8px ${color.border}` }}></div>
+                                                        Grupo de {term.cells.length}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className={`${panelClass} p-6 md:p-8 flex flex-col items-center justify-center relative`}>
+                                    <h2 className={`self-start font-bold text-xs tracking-widest uppercase mb-8 ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
+                                        Mapa{numVars > 4 ? 's' : ''} de Karnaugh para {activeOutput.name}
+                                    </h2>
+
+                                    <div className={`w-full grid gap-10 ${numVars <= 4 ? 'grid-cols-1 max-w-[500px]' :
+                                            numVars === 5 ? 'grid-cols-1 lg:grid-cols-2 max-w-[900px]' :
+                                                'grid-cols-1 md:grid-cols-2 max-w-[900px]'
+                                        }`}>
+                                        {gridsToRender.map((config, index) => (
+                                            <KMapMatrix
+                                                key={index}
+                                                config={config}
+                                                activeOutput={activeOutput}
+                                                toggleValue={(logicalIndex) => toggleOutputValue(activeOutput.id, logicalIndex)}
+                                                solvedData={solvedData}
+                                                darkMode={darkMode}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background-color: ${darkMode ? '#222' : '#cbd5e1'};
-          border-radius: 20px;
-          border: 2px solid ${darkMode ? '#0a0a0a' : 'transparent'};
-          background-clip: content-box;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background-color: ${darkMode ? '#444' : '#94a3b8'};
-        }
-      `}} />
-        </div>
-    );
-}
+        // Inicializar React y renderizar App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
