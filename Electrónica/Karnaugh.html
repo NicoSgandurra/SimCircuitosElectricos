@@ -104,6 +104,8 @@
         const Layers = (p) => <Icon {...p}><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" /><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" /><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" /></Icon>;
         const Zap = (p) => <Icon {...p}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></Icon>;
         const Plus = (p) => <Icon {...p}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></Icon>;
+        const Copy = (p) => <Icon {...p}><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></Icon>;
+        const Check = (p) => <Icon {...p}><path d="M20 6 9 17l-5-5" /></Icon>;
 
         // --- LÓGICA DEL SOLUCIONADOR ---
 
@@ -395,6 +397,7 @@
 
             // Estado para la confirmación de borrado
             const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+            const [copied, setCopied] = useState(false);
 
             const ALL_TERMS = useMemo(() => generateAllTerms(numVars, inputNames), [numVars, inputNames]);
             const activeOutput = outputs.find(o => o.id === activeOutputId) || outputs[0];
@@ -451,6 +454,34 @@
                         setConfirmState(prev => ({ ...prev, isOpen: false }));
                     }
                 });
+            };
+
+            const handleCopyFunction = () => {
+                let textToCopy = "";
+                if (solvedData.isZero) textToCopy = "0";
+                else if (solvedData.isOne) textToCopy = "1";
+                else {
+                    textToCopy = solvedData.terms.map(t => {
+                        if (!t.termParts || t.termParts.length === 0) return "1";
+                        return t.termParts.map(p => p.varName + (p.isNegated ? "'" : "")).join("");
+                    }).join(" + ");
+                }
+
+                const fullText = `${activeOutput.name} = ${textToCopy}`;
+
+                // Método compatible con todos los navegadores e iframes sin necesidad de permisos especiales
+                const textArea = document.createElement("textarea");
+                textArea.value = fullText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000); // Vuelve al ícono normal después de 2 segundos
+                } catch (err) {
+                    console.error('Error al copiar', err);
+                }
+                document.body.removeChild(textArea);
             };
 
             const appBg = darkMode
@@ -512,8 +543,8 @@
                                             key={n}
                                             onClick={() => setNumVars(n)}
                                             className={`px-3 py-1.5 text-xs sm:text-sm font-bold rounded-full transition-all duration-300 ${numVars === n
-                                                ? darkMode ? 'bg-[#333] text-white shadow-sm' : 'bg-slate-800 text-white shadow-md'
-                                                : darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-slate-600 hover:text-slate-900'
+                                                    ? darkMode ? 'bg-[#333] text-white shadow-sm' : 'bg-slate-800 text-white shadow-md'
+                                                    : darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-slate-600 hover:text-slate-900'
                                                 }`}
                                         >
                                             {n}v
@@ -537,99 +568,101 @@
                             <div className={`lg:w-[35%] flex flex-col shrink-0 ${panelClass} h-fit overflow-hidden`}>
                                 <div className={`p-4 font-bold text-xs tracking-widest uppercase flex justify-between items-center ${tableHeaderClass}`}>
                                     <span className={darkMode ? 'text-gray-300' : 'text-slate-700'}>Tabla de Verdad</span>
-                                    <span className={`px-2 py-1 rounded-md text-[10px] ${darkMode ? 'bg-[#222] text-gray-400' : 'bg-slate-200 text-slate-600'}`}>{numCells} filas</span>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={addOutput} className={`p-1.5 rounded-md transition-colors flex items-center gap-1 ${darkMode ? 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`} title="Añadir nueva función">
+                                            <Plus size={14} />
+                                            <span className="hidden sm:inline text-[10px] uppercase font-bold">Salida</span>
+                                        </button>
+                                        <span className={`px-2 py-1 rounded-md text-[10px] ${darkMode ? 'bg-[#222] text-gray-400' : 'bg-slate-200 text-slate-600'}`}>{numCells} filas</span>
+                                    </div>
                                 </div>
 
-                                <div className="p-0 overflow-x-auto custom-scrollbar">
-                                    <table className="w-full text-center text-sm font-mono border-collapse min-w-max">
-                                        <thead className={`sticky top-0 z-10 backdrop-blur-xl ${darkMode ? 'bg-[#0a0a0a]/95' : 'bg-white/95'}`}>
-                                            <tr className={`text-xs ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>
-                                                {/* ID HEADER (m) */}
-                                                <th className={`py-3 px-3 font-semibold text-xs border-r border-dashed ${darkMode ? 'text-gray-500 border-[#333]' : 'text-slate-400 border-slate-200'}`}>m</th>
+                                <div className="p-3 md:p-4 pt-2">
+                                    <div className={`rounded-xl overflow-hidden border ${darkMode ? 'border-[#333] bg-[#0a0a0a]' : 'border-slate-200 bg-white shadow-sm'}`}>
+                                        <div className="overflow-x-auto custom-scrollbar">
+                                            <table className="w-full text-center text-sm font-mono border-collapse min-w-max">
+                                                <thead className={`sticky top-0 z-10 backdrop-blur-xl ${darkMode ? 'bg-[#111]/95' : 'bg-slate-50/95'}`}>
+                                                    <tr className={`text-xs ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>
+                                                        {/* ID HEADER (m) */}
+                                                        <th className={`py-3 px-3 font-semibold text-xs border-r border-dashed border-b ${darkMode ? 'text-gray-500 border-[#333]' : 'text-slate-400 border-slate-200'}`}>m</th>
 
-                                                {/* INPUT HEADERS */}
-                                                {Array.from({ length: numVars }).map((_, vIdx) => (
-                                                    <th key={`th-in-${vIdx}`} className="py-3 font-bold px-2">
-                                                        <input
-                                                            type="text"
-                                                            value={inputNames[vIdx]}
-                                                            onChange={(e) => {
-                                                                const newNames = [...inputNames];
-                                                                newNames[vIdx] = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 4);
-                                                                setInputNames(newNames);
-                                                            }}
-                                                            className={`w-[40px] text-center bg-transparent border-b-2 border-transparent focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'text-gray-200' : 'text-slate-800'}`}
-                                                        />
-                                                    </th>
-                                                ))}
+                                                        {/* INPUT HEADERS */}
+                                                        {Array.from({ length: numVars }).map((_, vIdx) => (
+                                                            <th key={`th-in-${vIdx}`} className={`py-3 font-bold px-2 border-b ${darkMode ? 'border-[#333]' : 'border-slate-200'}`}>
+                                                                <input
+                                                                    type="text"
+                                                                    value={inputNames[vIdx]}
+                                                                    onChange={(e) => {
+                                                                        const newNames = [...inputNames];
+                                                                        newNames[vIdx] = e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 4);
+                                                                        setInputNames(newNames);
+                                                                    }}
+                                                                    className={`w-[40px] text-center bg-transparent border-b-2 border-transparent focus:border-blue-500 focus:outline-none transition-colors ${darkMode ? 'text-gray-200' : 'text-slate-800'}`}
+                                                                />
+                                                            </th>
+                                                        ))}
 
-                                                {/* OUTPUT HEADERS */}
-                                                {outputs.map(out => (
-                                                    <th
-                                                        key={`th-out-${out.id}`}
-                                                        className={`py-3 font-extrabold border-l border-dashed px-2 cursor-pointer transition-colors ${darkMode ? 'border-[#333]' : 'border-slate-200'} ${activeOutputId === out.id ? 'text-blue-500' : ''}`}
-                                                        onClick={() => setActiveOutputId(out.id)}
-                                                    >
-                                                        <div className="flex items-center justify-center gap-1 group">
-                                                            <input
-                                                                type="text"
-                                                                value={out.name}
-                                                                onChange={(e) => {
-                                                                    setOutputs(prev => prev.map(o => o.id === out.id ? { ...o, name: e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 5) } : o));
-                                                                }}
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                className="w-[45px] bg-transparent text-center focus:outline-none border-b-2 border-transparent focus:border-blue-500 transition-colors"
-                                                            />
-                                                            {outputs.length > 1 && (
-                                                                <button
-                                                                    onClick={(e) => { e.stopPropagation(); requestRemoveOutput(out.id, out.name); }}
-                                                                    className={`p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'hover:bg-red-500/20 text-red-400' : 'hover:bg-red-100 text-red-500'}`}
-                                                                    title="Eliminar función"
+                                                        {/* OUTPUT HEADERS */}
+                                                        {outputs.map(out => (
+                                                            <th
+                                                                key={`th-out-${out.id}`}
+                                                                className={`py-3 font-extrabold border-l border-dashed px-2 cursor-pointer transition-colors border-b ${darkMode ? 'border-[#333]' : 'border-slate-200'} ${activeOutputId === out.id ? 'text-blue-500' : ''}`}
+                                                                onClick={() => setActiveOutputId(out.id)}
+                                                            >
+                                                                <div className="flex items-center justify-center gap-1 group">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={out.name}
+                                                                        onChange={(e) => {
+                                                                            setOutputs(prev => prev.map(o => o.id === out.id ? { ...o, name: e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 5) } : o));
+                                                                        }}
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        className="w-[45px] bg-transparent text-center focus:outline-none border-b-2 border-transparent focus:border-blue-500 transition-colors"
+                                                                    />
+                                                                    {outputs.length > 1 && (
+                                                                        <button
+                                                                            onClick={(e) => { e.stopPropagation(); requestRemoveOutput(out.id, out.name); }}
+                                                                            className={`p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'hover:bg-red-500/20 text-red-400' : 'hover:bg-red-100 text-red-500'}`}
+                                                                            title="Eliminar función"
+                                                                        >
+                                                                            <Trash2 size={12} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </th>
+                                                        ))}
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    {Array.from({ length: numCells }).map((_, i) => (
+                                                        <tr key={i} className={`transition-colors ${tableRowClass}`}>
+                                                            {/* ID CELL */}
+                                                            <td className={`py-2.5 text-xs font-semibold border-r border-dashed ${darkMode ? 'text-gray-600 border-[#333]' : 'text-slate-400 border-slate-200'}`}>{i}</td>
+
+                                                            {/* INPUT CELLS */}
+                                                            {Array.from({ length: numVars }).map((_, vIdx) => (
+                                                                <td key={`td-in-${vIdx}`} className={`py-2.5 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                                                                    {(i >> (numVars - 1 - vIdx)) & 1}
+                                                                </td>
+                                                            ))}
+
+                                                            {/* OUTPUT CELLS */}
+                                                            {outputs.map(out => (
+                                                                <td
+                                                                    key={`td-out-${out.id}`}
+                                                                    className={`py-2.5 border-l border-dashed transition-colors cursor-pointer ${darkMode ? 'border-[#333]' : 'border-slate-200'} ${activeOutputId === out.id ? (darkMode ? 'bg-blue-500/10' : 'bg-blue-50') : 'bg-transparent'} font-bold text-base`}
+                                                                    onClick={() => { setActiveOutputId(out.id); toggleOutputValue(out.id, i); }}
                                                                 >
-                                                                    <Trash2 size={12} />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </th>
-                                                ))}
-
-                                                <th className={`py-2 px-3 border-l border-dashed ${darkMode ? 'border-[#333]' : 'border-slate-200'}`}>
-                                                    <button onClick={addOutput} className="p-1 rounded-md bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 transition-colors" title="Añadir nueva función">
-                                                        <Plus size={16} />
-                                                    </button>
-                                                </th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            {Array.from({ length: numCells }).map((_, i) => (
-                                                <tr key={i} className={`transition-colors ${tableRowClass}`}>
-                                                    {/* ID CELL */}
-                                                    <td className={`py-2.5 text-xs font-semibold border-r border-dashed ${darkMode ? 'text-gray-600 border-[#333]' : 'text-slate-400 border-slate-200'}`}>{i}</td>
-
-                                                    {/* INPUT CELLS */}
-                                                    {Array.from({ length: numVars }).map((_, vIdx) => (
-                                                        <td key={`td-in-${vIdx}`} className={`py-2.5 font-medium ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                                                            {(i >> (numVars - 1 - vIdx)) & 1}
-                                                        </td>
+                                                                    {out.values[i] === 1 ? <span className="text-emerald-500 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]">1</span> : out.values[i] === 'X' ? <span className={`text-xl ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>X</span> : <span className={`text-xs font-medium ${darkMode ? 'text-slate-600' : 'text-slate-400'}`}>0</span>}
+                                                                </td>
+                                                            ))}
+                                                        </tr>
                                                     ))}
-
-                                                    {/* OUTPUT CELLS */}
-                                                    {outputs.map(out => (
-                                                        <td
-                                                            key={`td-out-${out.id}`}
-                                                            className={`py-2.5 border-l border-dashed transition-colors cursor-pointer ${darkMode ? 'border-[#333]' : 'border-slate-200'} ${activeOutputId === out.id ? (darkMode ? 'bg-blue-500/10' : 'bg-blue-50') : (darkMode ? 'bg-white/5' : 'bg-black/5')} font-bold text-base`}
-                                                            onClick={() => { setActiveOutputId(out.id); toggleOutputValue(out.id, i); }}
-                                                        >
-                                                            {out.values[i] === 1 ? <span className="text-emerald-500 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]">1</span> : out.values[i] === 'X' ? <span className={`text-xl ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>X</span> : <span className={`text-xs font-medium ${darkMode ? 'text-slate-600' : 'text-slate-400'}`}>0</span>}
-                                                        </td>
-                                                    ))}
-
-                                                    <td className={`border-l border-dashed ${darkMode ? 'border-[#333]' : 'border-slate-200'}`}></td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -637,9 +670,19 @@
 
                                 <div className={`${panelClass} p-6 md:p-8 shrink-0 relative overflow-hidden flex flex-col justify-center min-h-[160px]`}>
                                     <div className="flex justify-between items-start mb-4">
-                                        <h3 className={`font-bold text-xs tracking-widest uppercase ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>
-                                            Función Simplificada
-                                        </h3>
+                                        <div className="flex items-center gap-3">
+                                            <h3 className={`font-bold text-xs tracking-widest uppercase ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>
+                                                Función Simplificada
+                                            </h3>
+                                            <button
+                                                onClick={handleCopyFunction}
+                                                className={`p-1.5 rounded-md transition-all flex items-center gap-1.5 ${copied ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : darkMode ? 'bg-[#222] text-gray-400 hover:text-white hover:bg-[#333]' : 'bg-slate-100 text-slate-500 hover:text-slate-800 hover:bg-slate-200'}`}
+                                                title="Copiar función"
+                                            >
+                                                {copied ? <Check size={14} /> : <Copy size={14} />}
+                                                <span className="text-[10px] uppercase font-bold hidden sm:inline">{copied ? 'Copiado' : 'Copiar'}</span>
+                                            </button>
+                                        </div>
                                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
                                             Editando: {activeOutput.name}
                                         </span>
@@ -686,8 +729,8 @@
                                     </h2>
 
                                     <div className={`w-full grid gap-10 ${numVars <= 4 ? 'grid-cols-1 max-w-[500px]' :
-                                        numVars === 5 ? 'grid-cols-1 lg:grid-cols-2 max-w-[900px]' :
-                                            'grid-cols-1 md:grid-cols-2 max-w-[900px]'
+                                            numVars === 5 ? 'grid-cols-1 lg:grid-cols-2 max-w-[900px]' :
+                                                'grid-cols-1 md:grid-cols-2 max-w-[900px]'
                                         }`}>
                                         {gridsToRender.map((config, index) => (
                                             <KMapMatrix
