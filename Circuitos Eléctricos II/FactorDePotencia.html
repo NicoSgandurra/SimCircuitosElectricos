@@ -1,532 +1,666 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conceptos de Electrotecnia - Factor de Potencia</title>
+    <title>Factor de Potencia - Simulador Pro</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+                        mono: ['Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
     <style>
-        :root {
-            --bg-color: #f0fdf4;
-            --card-bg: #ffffff;
-            --text-color: #2e4a4a;
-            --text-light: #6a9c9c;
-            --border-color: #d2f0e0;
-            --primary-color: #5ab17c;
-            --primary-hover: #4a9e6b;
-            --danger-color: #e76f51;
-            --danger-hover: #d05c43;
-            --code-bg: #e0f2f7;
-            --output-bg: #e0f2f7;
-            --shadow: 0 4px 12px rgba(0,0,0,0.05);
-            --shadow-hover: 0 6px 16px rgba(0,0,0,0.1);
-            --color-bg-dark: #12121e;
-            --color-bg-light: #1e1e2f;
-            --color-card: #2a2a4e;
-            --color-primary: #4a4af5;
-            --color-accent: #7aa2f7;
-            --color-text: #e0e0ff;
-            --color-text-muted: #a0a0c0;
-            --color-danger: #f77272;
-            --color-success: #73daca;
-            --color-warning: #ffc777;
+        /* Custom Scrollbar for Loads List */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
 
-        body.dark-mode {
-            --bg-color: #1a1523;
-            --card-bg: #28203d;
-            --text-color: #e6e0f0;
-            --text-light: #afa2c3;
-            --border-color: #43386b;
-            --primary-color: #a78bfa;
-            --primary-hover: #9175d6;
-            --danger-color: #ef778a;
-            --danger-hover: #d56073;
-            --code-bg: #3d305e;
-            --output-bg: #3d305e;
-            --shadow: 0 4px 12px rgba(0,0,0,0.2);
-            --shadow-hover: 0 6px 16px rgba(0,0,0,0.3);
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        * {
-            box-sizing: border-box;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #3f3f46;
+        }
+
+        /* Smooth SVG Transitions */
+        polygon,
+        line,
+        text,
+        path {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Input Number Arrows Hide */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
             margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .container {
-            max-width: 1500px;
-            margin: 20px auto;
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background-color: var(--card-bg);
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        header h1 {
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .content-section {
-            padding: 10px 30px 30px;
-        }
-
-        h2 {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 10px;
-            margin-bottom: 5px;
-        }
-
-        h3 {
-            color: var(--text-color);
-            margin-top: 25px;
-            margin-bottom: 10px;
-        }
-
-        .content-section > h3:first-child {
-            margin-top: 0;
-        }
-
-        p, li {
-            font-size: 1.05em;
-            margin-bottom: 15px;
-            color: var(--text-light);
-        }
-
-        ul {
-            padding-left: 25px;
-            list-style-type: '⚡ ';
-        }
-
-        i { font-style: italic; }
-        sub { font-size: 0.75em; vertical-align: sub; }
-        sup { font-size: 0.75em; vertical-align: super; }
-
-        .interactive-diagram {
-            background-color: var(--bg-color);
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 25px;
-            border: 1px solid var(--border-color);
-        }
-        
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 15px 0;
-        }
-        
-        .load-control {
-            background: var(--card-bg);
-            border-radius: 8px;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .load-control label {
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        input[type="number"] {
-            width: 100%;
-            max-width: 150px;
-            padding: 8px;
-            font-size: 16px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border-radius: 4px;
-            text-align: center;
-            font-weight: bold;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            box-sizing: border-box;
-        }
-        
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 10px;
-            background: var(--bg-color);
-            border-radius: 5px;
-            outline: none;
-            opacity: 0.7;
-            transition: opacity .2s;
-            margin-top: 5px;
-        }
-        input[type="range"]:hover { opacity: 1; }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: var(--primary-color);
-            cursor: pointer;
-            border-radius: 50%;
-        }
-        input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: var(--primary-color);
-            cursor: pointer;
-            border-radius: 50%;
-        }
-        
-        .info-box {
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            background: var(--card-bg);
-            border-radius: 8px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        .info-box div {
-            text-align: center;
-            margin: 5px 10px;
-        }
-        .info-box span {
-            display: block;
-            font-size: 0.9em;
-            color: var(--text-light);
-        }
-        .info-box strong {
-            font-size: 1.3em;
-            color: var(--text-color);
-            transition: color 0.3s ease;
-        }
-        
-        #power-triangle-diagram {
-            background-color: var(--code-bg);
-        }
-
-        #power-triangle-diagram polyline, #power-triangle-diagram line {
-            transition: all 0.3s ease;
-        }
-
-        #darkModeToggle {
-            background-color: transparent;
-            color: var(--text-color);
-            font-size: 24px;
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            padding: 0;
-            cursor: pointer;
-        }
-        #darkModeToggle:hover {
-            background-color: var(--code-bg);
-            transform: translateY(-2px) rotate(15deg);
         }
     </style>
 </head>
-<body>
 
-    <div class="container">
-        <header>
-            <h1>Corrección del Factor de Potencia (cos φ)</h1>
-            <button id="darkModeToggle">🌙</button>
+<body
+    class="bg-[#fdfbf7] dark:bg-black text-slate-700 dark:text-zinc-300 transition-colors duration-500 font-sans pb-12 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h1
+                    class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 text-pink-500 dark:text-zinc-100 flex items-center gap-3">
+                    <i data-feather="activity" class="text-pink-400 dark:text-purple-500 w-8 h-8"></i>
+                    Factor de Potencia
+                </h1>
+                <p class="text-slate-500 dark:text-zinc-400 font-medium">Simulador Multi-Carga & Compensación</p>
+            </div>
+            <button onclick="toggleTheme()"
+                class="p-4 rounded-full md:rounded-2xl transition-all duration-300 bg-white border-2 border-pink-100 text-pink-400 shadow-[0_4px_15px_rgba(236,72,153,0.15)] hover:bg-pink-50 dark:bg-[#111] dark:border dark:border-zinc-800 dark:text-purple-400 dark:shadow-[0_0_20px_rgba(168,85,247,0.15)] dark:hover:border-purple-500/50"
+                id="theme-btn">
+                <i data-feather="sun" id="theme-icon"></i>
+            </button>
         </header>
 
-        <section class="content-section" id="content-tema2">
-            <h3>Explicación Conceptual</h3>
-            <p>Las cargas industriales (motores, bobinas) son <strong>inductivas</strong>. Para funcionar, consumen dos tipos de potencia:</p>
-            <ul>
-                <li><strong>Potencia Activa (P):</strong> La potencia "útil" que realiza trabajo (mover un eje). Se mide en <strong>Watts (W)</strong>.</li>
-                <li><strong>Potencia Reactiva (Q):</strong> La potencia "magnética" para crear los campos magnéticos. No realiza trabajo útil, pero viaja por los cables. Se mide en <strong>Volt-Amper Reactivo (VAr)</strong>.</li>
-            </ul>
-            <p>La suma <strong>vectorial</strong> de ambas es la <strong>Potencia Aparente (S)</strong>, que es la que la red debe transportar. El <strong>Factor de Potencia (<i>cos</i> φ)</strong> es la relación <i>P</i> / <i>S</i>.</p>
-            
-            <h3>El Problema del Bajo <i>cos</i> φ</h3>
-            <p>Un <i>cos</i> φ bajo (ej. 0.7) significa que la Potencia Aparente (S) es muy grande comparada con la Potencia Activa (P) útil. Esto obliga a la compañía eléctrica a usar cables y transformadores más grandes, generando más pérdidas (<i>I</i><sup>2</sup><i>R</i>) en las líneas. Por eso, <strong>se aplican multas</strong> por bajo factor de potencia (generalmente < 0.9).</p>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-            <h3>La Solución: Banco de Capacitores</h3>
-            <p>No podemos eliminar la <i>Q</i> (Reactiva) que necesita el motor, pero podemos "inyectarla" localmente. Los <strong>capacitores</strong> hacen lo opuesto: generan potencia reactiva (<i>Q</i><sub>C</sub>).</p>
-            <p>Al instalar un banco de capacitores en paralelo, el motor toma su <i>Q</i><sub>L</sub> y el capacitor le entrega una <i>Q</i><sub>C</sub>. La red eléctrica ahora solo tiene que entregar la diferencia (<i>Q</i><sub>nueva</sub> = <i>Q</i><sub>L</sub> - <i>Q</i><sub>C</sub>), reduciendo la <i>S</i> total y mejorando el <i>cos</i> φ a un valor cercano a 1.</p>
-            
-            <div class="interactive-diagram">
-                <h3>Diagrama Interactivo: Triángulo de Potencias</h3>
-                
-                <div class="controls-grid">
-                    <div class="load-control">
-                        <label>Potencia Activa (P): <span id="power-val">250</span> kW</label>
-                        <input type="range" id="power-slider" min="50" max="1000" value="250" step="10">
-                    </div>
-                    <div class="load-control">
-                        <label><i>cos</i> φ Inicial: <span id="phi-initial-val">0.70</span></label>
-                        <input type="range" id="phi-initial-slider" min="0.5" max="1.0" value="0.7" step="0.01">
-                    </div>
-                     <div class="load-control">
-                        <label><i>cos</i> φ Final: <span id="phi-final-val">0.95</span></label>
-                        <input type="range" id="phi-final-slider" min="0.5" max="1.0" value="0.95" step="0.01">
-                    </div>
-                    <div class="load-control">
-                        <label for="voltage-input">Tensión de Línea (V)</label>
-                        <input type="number" id="voltage-input" value="380" step="1">
-                    </div>
-                    <div class="load-control">
-                        <label for="freq-input">Frecuencia (Hz)</label>
-                        <input type="number" id="freq-input" value="50" step="1">
+            <!-- Left Column: Theory & Formulas -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- Conceptos Base -->
+                <div
+                    class="p-8 transition-all duration-300 bg-white rounded-[2rem] border-2 border-pink-50/50 shadow-xl shadow-pink-100/40 dark:bg-[#0a0a0a] dark:rounded-xl dark:border dark:border-zinc-800/80 dark:shadow-none">
+                    <h2 class="flex items-center gap-2 text-xl font-bold mb-4 text-indigo-500 dark:text-purple-400">
+                        <i data-feather="info"></i> Conceptos Base
+                    </h2>
+                    <div class="space-y-4">
+                        <p class="leading-relaxed text-sm md:text-base">
+                            Al tener múltiples equipos, la red ve una <strong>carga equivalente</strong>. Se suman las
+                            potencias activas (Watts) y las reactivas (VAr) por separado para formar el triángulo total.
+                        </p>
+                        <ul class="space-y-3 text-sm md:text-base">
+                            <li class="flex items-start gap-3">
+                                <div
+                                    class="mt-1 p-1 rounded-full bg-amber-100 text-amber-500 dark:bg-amber-500/10 dark:text-amber-400">
+                                    <i data-feather="zap" class="w-4 h-4"></i></div>
+                                <span><strong>Activa (P):</strong> Trabajo útil total de la planta (Movimiento,
+                                    calor).</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div
+                                    class="mt-1 p-1 rounded-full bg-cyan-100 text-cyan-500 dark:bg-blue-500/10 dark:text-blue-400">
+                                    <i data-feather="zap" class="w-4 h-4"></i></div>
+                                <span><strong>Reactiva (Q):</strong> Magnetismo de los motores (No produce trabajo útil,
+                                    pero ocupa capacidad de la red).</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
-                <svg id="power-triangle-diagram" viewBox="-30 -20 420 340" width="350" height="300" style="margin: auto; display: block; border-radius: 8px;">
-                    <line x1="20" y1="280" x2="330" y2="280" stroke="#555" stroke-width="1" />
-                    <line x1="20" y1="280" x2="20" y2="20" stroke="#555" stroke-width="1" />
-                    <text x="330" y="295" fill="#555">P (kW)</text>
-                    <text x="10" y="20" fill="#555" text-anchor="middle">Q (kVAr)</text>
-                    
-                    <line id="p-line" x1="20" y1="280" x2="270" y2="280" stroke-width="4" stroke="var(--text-color)" />
-                    <text id="p-text" x="145" y="295" fill="#e0e0ff" text-anchor="middle">P = 250 kW</text>
-
-                    <polyline id="triangle-initial"
-                        points="20,280 270,280 270,125 20,280"
-                        fill="rgba(247, 114, 114, 0.3)" 
-                        stroke="var(--danger-color)" 
-                        stroke-width="3" />
-                    <text id="text-S-initial" x="145" y="200" fill="#f77272" text-anchor="middle" transform="rotate(-30 145 200)">S Inicial</text>
-                    <text id="text-Q-initial" x="275" y="200" fill="#f77272" text-anchor="start">Q_L</text>
-
-                    <line id="qc-line"
-                        x1="270" y1="125" x2="270" y2="125"
-                        stroke="var(--color-success)" 
-                        stroke-width="4" 
-                        stroke-dasharray="8 4" />
-                    <text id="text-Qc" x="275" y="100" fill="#73daca" text-anchor="start">Q_C</text>
-                    
-                    <polyline id="triangle-final"
-                        points="20,280 270,280 270,125 20,280"
-                        fill="rgba(122, 162, 247, 0.5)" 
-                        stroke="var(--primary-color)" 
-                        stroke-width="3" />
-                    <text id="text-S-final" x="145" y="240" fill="#7aa2f7" text-anchor="middle" transform="rotate(-15 145 240)">S Final</text>
-                    <text id="text-Q-final" x="275" y="250" fill="#7aa2f7" text-anchor="start">Q_F</text>
-                    
-                </svg>
-
-                <div class="info-box" id="info-box-2">
-                    <div>
-                        <span><i>S</i> Inicial</span>
-                        <strong id="info-s-initial">357 kVA</strong>
-                    </div>
-                    <div>
-                        <span><i>cos</i> φ Inicial</span>
-                        <strong id="info-cos-initial">0.700</strong>
-                    </div>
-                    <div>
-                        <span><i>S</i> Final</span>
-                        <strong id="info-s-final">263 kVA</strong>
-                    </div>
-                    <div>
-                        <span><i>cos</i> φ Final</span>
-                        <strong id="info-cos-final">0.950</strong>
-                    </div>
-                    <div>
-                        <span>Banco <i>Q</i><sub>C</sub></span>
-                        <strong id="info-qc-calc" style="color: var(--color-success);">172.9 kVAr</strong>
-                    </div>
-                    <div>
-                        <span>I Inicial</span>
-                        <strong id="info-i-initial">0 A</strong>
-                    </div>
-                    <div>
-                        <span>I Final</span>
-                        <strong id="info-i-final">0 A</strong>
+                <!-- NUEVA TARJETA: Sistemas y Conexionado -->
+                <div
+                    class="p-8 transition-all duration-300 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-[2rem] border-2 border-white shadow-xl shadow-emerald-100/40 dark:bg-gradient-to-br dark:from-[#111] dark:to-[#0a0a0a] dark:rounded-xl dark:border dark:border-zinc-800 dark:shadow-none">
+                    <h2 class="flex items-center gap-2 text-xl font-bold mb-4 text-emerald-600 dark:text-teal-400">
+                        <i data-feather="cpu"></i> Monofásico vs Trifásico
+                    </h2>
+                    <div class="space-y-5 text-sm md:text-base text-slate-600 dark:text-zinc-400">
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-zinc-200 mb-1">Sistema Monofásico</h3>
+                            <p>La compensación es directa. Se conecta un único capacitor en paralelo con la carga (entre
+                                Fase y Neutro). Las potencias se calculan simplemente como <span
+                                    class="font-serif italic text-emerald-600 dark:text-teal-400 font-medium">S = V
+                                    &middot; I</span>.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 dark:text-zinc-200 mb-1">Sistema Trifásico</h3>
+                            <p>Los bancos industriales se componen de 3 capacitores que pueden cablearse de dos formas:
+                            </p>
+                            <ul class="list-disc pl-5 mt-2 space-y-2">
+                                <li><strong>Estrella (Y):</strong> Cada capacitor recibe tensión de fase (<span
+                                        class="font-serif text-emerald-600 dark:text-teal-400 font-medium"><i>V</i> /
+                                        &radic;3</span>). Se requiere un valor de capacitancia (µF) tres veces mayor.
+                                </li>
+                                <li><strong>Triángulo (&Delta;):</strong> Cada capacitor recibe la tensión de línea
+                                    completa (<span
+                                        class="font-serif italic text-emerald-600 dark:text-teal-400 font-medium">V</span>).
+                                    Al recibir más voltaje, son capaces de inyectar la misma reactiva usando <strong>un
+                                        tercio (1/3) de la capacitancia</strong> en comparación con la Estrella. Es el
+                                    método más económico y usado en la industria.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
-                <div class="info-box" id="info-box-caps">
-                    <div>
-                        <span>C (Estrella)</span>
-                        <strong id="info-c-star">0 µF</strong>
+                <!-- Fórmulas -->
+                <div
+                    class="p-8 transition-all duration-300 bg-white rounded-[2rem] border-2 border-indigo-50/50 shadow-xl shadow-indigo-100/40 dark:bg-[#0a0a0a] dark:rounded-xl dark:border dark:border-zinc-800/80 dark:shadow-none">
+                    <h2 class="flex items-center gap-2 text-xl font-bold mb-6 text-indigo-600 dark:text-indigo-400">
+                        <i data-feather="trello"></i> Modelo Matemático
+                    </h2>
+
+                    <div class="space-y-6">
+                        <div
+                            class="p-4 bg-indigo-50/50 dark:bg-[#111] rounded-2xl border border-indigo-100 dark:border-zinc-800/60">
+                            <p
+                                class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3">
+                                1. Potencia Reactiva Total</p>
+                            <div
+                                class="flex items-center text-lg md:text-xl text-indigo-700 dark:text-purple-300 justify-center">
+                                <span class="font-serif italic mr-2">Q<sub>total</sub></span>
+                                <span class="mx-2">=</span>
+                                <span class="text-2xl font-light mr-1">Σ</span>
+                                <span class="font-serif italic">P<sub>i</sub></span>
+                                <span class="mx-2">·</span>
+                                <span class="font-serif">tan(φ<sub>i</sub>)</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-4 bg-pink-50/50 dark:bg-[#111] rounded-2xl border border-pink-100 dark:border-zinc-800/60">
+                            <p
+                                class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3">
+                                2. Banco de Capacitores</p>
+                            <div
+                                class="flex items-center text-lg md:text-xl text-pink-600 dark:text-pink-400 justify-center">
+                                <span class="font-serif italic mr-2">Q<sub>C</sub></span>
+                                <span class="mx-2">=</span>
+                                <span class="font-serif italic mr-2">P<sub>total</sub></span>
+                                <span class="font-serif"> [ tan(φ<sub>i</sub>) - tan(φ<sub>f</sub>) ]</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="p-4 bg-emerald-50/50 dark:bg-[#111] rounded-2xl border border-emerald-100 dark:border-zinc-800/60">
+                            <p
+                                class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3">
+                                3. Capacidad del Banco (Estrella)</p>
+                            <div
+                                class="flex items-center text-lg md:text-xl text-emerald-700 dark:text-emerald-400 justify-center font-serif">
+                                <span class="italic mr-3">C<sub>Y</sub></span>
+                                <span class="mx-2">=</span>
+                                <div class="flex flex-col items-center mx-2">
+                                    <span
+                                        class="border-b-2 border-emerald-300 dark:border-emerald-600 px-4 pb-1 italic">Q<sub>C</sub></span>
+                                    <span class="px-4 pt-1">2π · f · V²</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <span>C (Triángulo)</span>
-                        <strong id="info-c-delta">0 µF</strong>
+
+                    <!-- NUEVO: Explicación de Variables -->
+                    <div class="mt-8 pt-6 border-t border-slate-100 dark:border-zinc-800">
+                        <h3 class="font-bold text-slate-800 dark:text-zinc-200 mb-4 flex items-center gap-2">
+                            <i data-feather="book-open" class="w-5 h-5 text-indigo-500"></i> Nomenclatura e
+                            Implementación
+                        </h3>
+                        <div class="space-y-3 text-sm text-slate-600 dark:text-zinc-400">
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">P<sub>i</sub> /
+                                    P<sub>total</sub>:</strong> Potencia Activa (kW). Es la energía de las máquinas
+                                (datos de chapa).</p>
+                            <p><strong class="text-indigo-600 dark:text-indigo-400">φ (Fi):</strong> Ángulo de
+                                desfasaje. Se obtiene mediante el arco coseno del Factor de Potencia: <span
+                                    class="font-serif text-indigo-500 dark:text-indigo-300 font-medium">arccos(cos
+                                    φ)</span>.</p>
+                            <p><strong class="text-pink-600 dark:text-pink-400">Q<sub>total</sub>:</strong> Potencia
+                                Reactiva actual (kVAr). Carga magnética total de la instalación.</p>
+                            <p><strong class="text-pink-600 dark:text-pink-400">Q<sub>C</sub>:</strong> Tamaño comercial
+                                del Banco a instalar. Es la "inyección" necesaria para contrarrestar la reactiva de los
+                                motores y alcanzar tu <i
+                                    class="font-serif text-rose-500 dark:text-rose-400 font-medium">cos φ</i> objetivo
+                                (usualmente mayor a 0.95).</p>
+                            <p><strong class="text-emerald-600 dark:text-emerald-400">C<sub>Y</sub> /
+                                    C<sub>&Delta;</sub>:</strong> Capacidad requerida de los condensadores en Faradios
+                                (luego multiplicado por 1,000,000 para µF). Depende de tu frecuencia de red (<span
+                                    class="font-serif italic font-medium">f</span> = 50 o 60Hz) y el voltaje de línea
+                                (<span class="font-serif italic font-medium">V</span>).</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-        </section>
+            <!-- Right Column: Interactive Simulator -->
+            <div class="lg:col-span-7 space-y-6">
 
+                <!-- Aggregator Panel -->
+                <div
+                    class="p-6 md:p-8 transition-all duration-300 bg-white rounded-[2rem] border-2 border-pink-50/50 shadow-xl shadow-pink-100/40 dark:bg-[#0a0a0a] dark:rounded-xl dark:border dark:border-zinc-800/80 dark:shadow-none">
+
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="flex items-center gap-2 text-xl font-bold text-slate-800 dark:text-zinc-100">
+                            <i data-feather="settings" class="text-slate-400 dark:text-purple-500"></i> Agregador de
+                            Cargas
+                        </h2>
+                    </div>
+
+                    <!-- Loads List Container -->
+                    <div id="loads-container"
+                        class="space-y-3 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                        <!-- Generado por JS -->
+                    </div>
+
+                    <button onclick="addLoad()"
+                        class="w-full py-3 rounded-2xl border-2 border-dashed border-pink-200 text-pink-500 font-semibold flex items-center justify-center gap-2 hover:bg-pink-50 hover:border-pink-300 transition-all dark:border-zinc-700 dark:text-purple-400 dark:hover:bg-purple-500/10 dark:hover:border-purple-500/50">
+                        <i data-feather="plus" class="w-5 h-5"></i> Agregar Máquina / Carga
+                    </button>
+
+                    <!-- Global Settings -->
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-8 pt-8 border-t border-slate-100 dark:border-zinc-800">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="font-semibold text-sm dark:text-zinc-400">Tensión de Línea</label>
+                                <span class="font-mono text-sm text-indigo-500 dark:text-zinc-300" id="val-voltage">380
+                                    V</span>
+                            </div>
+                            <input type="range" min="220" max="1000" step="10" value="380" id="in-voltage"
+                                class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-indigo-100 accent-indigo-500 dark:bg-zinc-800 dark:accent-zinc-500"
+                                oninput="updateAll()">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="font-semibold text-sm dark:text-zinc-400">cos φ Objetivo</label>
+                                <span class="font-mono text-sm text-emerald-500 dark:text-emerald-400"
+                                    id="val-cos-target">0.95</span>
+                            </div>
+                            <input type="range" min="0.5" max="1.0" step="0.01" value="0.95" id="in-cos-target"
+                                class="w-full h-2 rounded-lg appearance-none cursor-pointer bg-emerald-100 accent-emerald-500 dark:bg-zinc-800 dark:accent-emerald-500"
+                                oninput="updateAll()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphic SVG Mejorado -->
+                <div
+                    class="relative w-full overflow-hidden rounded-[2rem] p-6 flex justify-center bg-white border-2 border-slate-100 shadow-xl shadow-slate-200/40 dark:bg-[#111] dark:border dark:border-zinc-800 dark:rounded-xl dark:shadow-none">
+
+                    <!-- Fondo de Cuadrícula "Blueprint" -->
+                    <div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+                        style="background-image: linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px); background-size: 20px 20px;">
+                    </div>
+
+                    <!-- CAJA ARREGLADA: Movida a la derecha y con fondo translúcido -->
+                    <div
+                        class="absolute top-6 right-8 z-10 bg-white/80 dark:bg-black/80 backdrop-blur-sm p-3 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-sm text-right">
+                        <div
+                            class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">
+                            Sistema Total</div>
+                        <div class="text-sm font-semibold text-slate-700 dark:text-zinc-300">cos φ Inicial: <span
+                                class="font-mono text-rose-500 dark:text-rose-400" id="out-cos-initial">0</span></div>
+                    </div>
+
+                    <svg viewBox="0 0 500 350" class="w-full max-w-[500px] h-auto font-sans overflow-visible mt-6 z-10">
+                        <defs>
+                            <linearGradient id="grad-initial" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#fb7185" stop-opacity="0.3"
+                                    class="dark:stop-color-[#f43f5e] dark:stop-opacity-[0.2]" />
+                                <stop offset="100%" stop-color="#fb7185" stop-opacity="0.05" />
+                            </linearGradient>
+                            <linearGradient id="grad-final" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.4"
+                                    class="dark:stop-color-[#a855f7] dark:stop-opacity-[0.3]" />
+                                <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.1" />
+                            </linearGradient>
+                            <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                                <polygon points="0 0, 6 3, 0 6" fill="#10b981" class="dark:fill-[#34d399]" />
+                            </marker>
+                        </defs>
+
+                        <!-- Ejes base -->
+                        <line x1="40" y1="300" x2="480" y2="300" stroke="currentColor" stroke-width="1.5"
+                            class="text-slate-300 dark:text-zinc-700" />
+                        <line x1="40" y1="300" x2="40" y2="20" stroke="currentColor" stroke-width="1.5"
+                            class="text-slate-300 dark:text-zinc-700" />
+
+                        <text x="480" y="318" fill="currentColor" class="text-slate-400 dark:text-zinc-500"
+                            font-size="12" text-anchor="middle">P (kW)</text>
+                        <text x="30" y="20" fill="currentColor" class="text-slate-400 dark:text-zinc-500" font-size="12"
+                            text-anchor="end">Q (kVAr)</text>
+
+                        <!-- Triángulos -->
+                        <polygon id="svg-tri-initial" points="40,300 40,300 40,300" fill="url(#grad-initial)"
+                            stroke="#fb7185" class="dark:stroke-[#f43f5e]" stroke-width="2" />
+                        <polygon id="svg-tri-final" points="40,300 40,300 40,300" fill="url(#grad-final)"
+                            stroke="#38bdf8" class="dark:stroke-[#a855f7]" stroke-width="3" />
+
+                        <!-- Arcos de ángulos (φ) -->
+                        <path id="svg-arc-initial" d="" fill="none" stroke="#fb7185" stroke-width="1"
+                            stroke-dasharray="2 2" />
+                        <path id="svg-arc-final" d="" fill="none" stroke="#38bdf8" stroke-width="1.5"
+                            class="dark:stroke-[#a855f7]" />
+                        <text id="svg-phi-label" x="0" y="0" font-size="12" fill="currentColor"
+                            class="text-slate-400 dark:text-zinc-500 font-serif italic">φ</text>
+
+                        <!-- Línea Qc (Capacitor) con flecha -->
+                        <line id="svg-line-qc" x1="0" y1="0" x2="0" y2="0" stroke="#10b981"
+                            class="dark:stroke-[#34d399]" stroke-width="4" stroke-dasharray="6 4"
+                            marker-end="url(#arrowhead)" />
+
+                        <!-- Línea P (Base gruesa) -->
+                        <line id="svg-line-p" x1="40" y1="300" x2="40" y2="300" stroke="currentColor"
+                            class="text-slate-600 dark:text-zinc-300" stroke-width="4" stroke-linecap="round" />
+
+                        <!-- Etiquetas de Valores en SVG -->
+                        <text id="svg-lbl-p" x="0" y="322" fill="currentColor" class="text-slate-600 dark:text-zinc-300"
+                            font-size="14" font-weight="bold" text-anchor="middle">P</text>
+                        <text id="svg-lbl-qi" x="0" y="0" fill="#e11d48" class="dark:fill-[#f43f5e]" font-size="13"
+                            font-weight="bold">Q Inicial</text>
+                        <text id="svg-lbl-qf" x="0" y="0" fill="#0284c7" class="dark:fill-[#c084fc]" font-size="13"
+                            font-weight="bold">Q Final</text>
+
+                        <!-- Caja elegante para Qc -->
+                        <rect id="svg-qc-box" x="0" y="0" width="75" height="24" rx="4" fill="white"
+                            class="dark:fill-black" stroke="#10b981" stroke-width="1" />
+                        <text id="svg-lbl-qc" x="0" y="0" fill="#059669" class="dark:fill-[#34d399]" font-size="13"
+                            font-weight="bold" text-anchor="middle">Qc</text>
+                    </svg>
+                </div>
+
+                <!-- Results Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div
+                        class="p-4 flex flex-col justify-center items-center text-center bg-white rounded-3xl shadow-lg shadow-pink-100/30 border border-pink-50 dark:bg-[#111] dark:rounded-xl dark:border dark:border-zinc-800 dark:shadow-none">
+                        <span
+                            class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">S
+                            Equivalente</span>
+                        <span class="text-xl font-bold text-rose-500 dark:text-rose-400"><span id="out-s-i">0</span>
+                            <span class="text-sm font-medium">kVA</span></span>
+                        <span class="text-xs text-slate-400 dark:text-zinc-500 mt-1"><span id="out-i-i">0</span>
+                            A</span>
+                    </div>
+
+                    <div
+                        class="p-4 flex flex-col justify-center items-center text-center relative overflow-hidden bg-white rounded-3xl shadow-lg shadow-pink-100/30 border border-pink-50 dark:bg-[#111] dark:rounded-xl dark:border dark:border-zinc-800 dark:shadow-none">
+                        <i data-feather="arrow-right"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-200 dark:text-zinc-800"></i>
+                        <span
+                            class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-1">S
+                            Final</span>
+                        <span class="text-xl font-bold text-sky-500 dark:text-purple-400"><span id="out-s-f">0</span>
+                            <span class="text-sm font-medium">kVA</span></span>
+                        <span class="text-xs text-slate-400 dark:text-zinc-500 mt-1"><span id="out-i-f">0</span>
+                            A</span>
+                    </div>
+
+                    <div
+                        class="p-4 flex flex-col justify-center items-center text-center md:col-span-2 bg-emerald-50 rounded-3xl shadow-lg shadow-emerald-100/30 border border-emerald-100 dark:bg-emerald-500/10 dark:rounded-xl dark:border dark:border-emerald-500/20 dark:shadow-none">
+                        <span
+                            class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-1">Banco
+                            Requerido (Qc)</span>
+                        <span class="text-2xl font-bold text-emerald-500 dark:text-emerald-400 mb-1"><span
+                                id="out-qc">0</span> <span class="text-base font-medium">kVAr</span></span>
+                        <div class="flex gap-3 text-xs text-emerald-600/80 dark:text-emerald-400/70">
+                            <span>Estrella: <b id="out-cy">0 µF</b></span>
+                            <span>Triángulo: <b id="out-cd">0 µF</b></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const darkModeToggle = document.getElementById('darkModeToggle');
-            const body = document.body;
+        // --- 1. THEME LOGIC ---
+        const html = document.documentElement;
+        const themeIcon = document.getElementById('theme-icon');
+        let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-            function setDarkMode(isDark) {
-                if (isDark) {
-                    body.classList.add('dark-mode');
-                    darkModeToggle.textContent = '☀️';
-                    localStorage.setItem('darkMode', 'enabled');
-                } else {
-                    body.classList.remove('dark-mode');
-                    darkModeToggle.textContent = '🌙';
-                    localStorage.setItem('darkMode', 'disabled');
-                }
-            }
-
-            const currentMode = localStorage.getItem('darkMode');
-            let prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (currentMode === 'enabled') {
-                setDarkMode(true);
-            } else if (currentMode === 'disabled') {
-                setDarkMode(false);
+        function updateThemeUI() {
+            if (isDark) {
+                html.classList.add('dark');
+                themeIcon.setAttribute('data-feather', 'moon');
             } else {
-                setDarkMode(prefersDark);
+                html.classList.remove('dark');
+                themeIcon.setAttribute('data-feather', 'sun');
             }
+            feather.replace(); // Refresh icon
+        }
 
-            darkModeToggle.addEventListener('click', () => {
-                setDarkMode(!body.classList.contains('dark-mode'));
+        function toggleTheme() {
+            isDark = !isDark;
+            updateThemeUI();
+        }
+
+        // --- 2. STATE (Agregador de Cargas) ---
+        let loads = [
+            { id: 1, name: 'Motor Principal', p: 150, cosPhi: 0.75 },
+            { id: 2, name: 'Iluminación', p: 50, cosPhi: 0.90 },
+            { id: 3, name: 'Compresor', p: 80, cosPhi: 0.65 }
+        ];
+
+        // --- 3. UI RENDERING ---
+        const loadsContainer = document.getElementById('loads-container');
+
+        function renderLoads() {
+            loadsContainer.innerHTML = '';
+            loads.forEach((load, index) => {
+                const loadDiv = document.createElement('div');
+                loadDiv.className = "group relative flex flex-col sm:flex-row gap-3 items-center p-3 sm:p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-pink-200 transition-colors dark:bg-[#111] dark:border-zinc-800/80 dark:hover:border-purple-500/50";
+
+                loadDiv.innerHTML = `
+                    <div class="w-full sm:w-1/3 flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-zinc-800 text-indigo-500 dark:text-zinc-400 flex items-center justify-center text-xs font-bold">${index + 1}</div>
+                        <input type="text" value="${load.name}" oninput="updateLoad(${load.id}, 'name', this.value)" class="w-full bg-transparent border-none outline-none focus:ring-0 text-sm font-semibold text-slate-700 dark:text-zinc-300 px-0" placeholder="Nombre">
+                    </div>
+                    <div class="w-full sm:w-2/3 flex gap-3">
+                        <div class="flex-1">
+                            <label class="text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500 block mb-1">Potencia (kW)</label>
+                            <input type="number" min="0" step="10" value="${load.p}" oninput="updateLoad(${load.id}, 'p', this.value)" class="w-full bg-white dark:bg-black border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm font-mono text-pink-600 dark:text-purple-400 focus:outline-none focus:border-pink-400 dark:focus:border-purple-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-[10px] uppercase font-bold text-slate-400 dark:text-zinc-500 block mb-1">cos φ</label>
+                            <input type="number" min="0.1" max="1" step="0.01" value="${load.cosPhi}" oninput="updateLoad(${load.id}, 'cosPhi', this.value)" class="w-full bg-white dark:bg-black border border-slate-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 text-sm font-mono text-rose-500 dark:text-rose-400 focus:outline-none focus:border-rose-400 dark:focus:border-rose-500">
+                        </div>
+                        <button onclick="removeLoad(${load.id})" ${loads.length <= 1 ? 'disabled' : ''} class="mt-5 p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:text-zinc-500 dark:hover:bg-red-500/10 dark:hover:text-red-400 disabled:opacity-30 transition-colors">
+                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                loadsContainer.appendChild(loadDiv);
             });
+            feather.replace();
+        }
 
-            const powerSlider = document.getElementById('power-slider');
-            const phiInitialSlider = document.getElementById('phi-initial-slider');
-            const phiFinalSlider = document.getElementById('phi-final-slider');
-            const voltageInput = document.getElementById('voltage-input');
-            const freqInput = document.getElementById('freq-input');
-            
-            const powerVal = document.getElementById('power-val');
-            const phiInitialVal = document.getElementById('phi-initial-val');
-            const phiFinalVal = document.getElementById('phi-final-val');
-            
-            const pLineText = document.getElementById('p-text');
-            const triangleInitial = document.getElementById('triangle-initial');
-            const triangleFinal = document.getElementById('triangle-final');
-            const qcLine = document.getElementById('qc-line');
-            const textSInitial = document.getElementById('text-S-initial');
-            const textSFinal = document.getElementById('text-S-final');
-            const textQInitial = document.getElementById('text-Q-initial');
-            const textQFinal = document.getElementById('text-Q-final');
-            const textQc = document.getElementById('text-Qc');
-            
-            const infoSInitial = document.getElementById('info-s-initial');
-            const infoCosInitial = document.getElementById('info-cos-initial');
-            const infoSFinal = document.getElementById('info-s-final');
-            const infoCosFinal = document.getElementById('info-cos-final');
-            const infoQcCalc = document.getElementById('info-qc-calc');
-            const infoIInitial = document.getElementById('info-i-initial');
-            const infoIFinal = document.getElementById('info-i-final');
-            const infoCStar = document.getElementById('info-c-star');
-            const infoCDelta = document.getElementById('info-c-delta');
+        function addLoad() {
+            const newId = loads.length > 0 ? Math.max(...loads.map(l => l.id)) + 1 : 1;
+            loads.push({ id: newId, name: `Carga ${newId}`, p: 100, cosPhi: 0.80 });
+            updateAll();
+        }
 
+        function removeLoad(id) {
+            if (loads.length <= 1) return;
+            loads = loads.filter(l => l.id !== id);
+            updateAll();
+        }
 
-            const X_ORIGIN = 20;
-            const Y_ORIGIN = 280;
-            const P_PIXELS = 250;
-            const P_X = X_ORIGIN + P_PIXELS;
-
-            function updatePowerTriangle() {
-                const P = parseFloat(powerSlider.value);
-                const cosPhi_i = parseFloat(phiInitialSlider.value);
-                const cosPhi_f = parseFloat(phiFinalSlider.value);
-                const Vl = parseFloat(voltageInput.value) || 380;
-                const freq = parseFloat(freqInput.value) || 50;
-
-                powerVal.textContent = P;
-                phiInitialVal.textContent = cosPhi_i.toFixed(2);
-                phiFinalVal.textContent = cosPhi_f.toFixed(2);
-                
-                const phi_i_rad = Math.acos(cosPhi_i);
-                const phi_f_rad = Math.acos(cosPhi_f);
-                
-                const Q_i = P * Math.tan(phi_i_rad);
-                const Q_f = P * Math.tan(phi_f_rad);
-                
-                const Q_final = (phi_f_rad > phi_i_rad) ? Q_i : Q_f;
-                const cosPhi_final = (phi_f_rad > phi_i_rad) ? cosPhi_i : cosPhi_f;
-                const phi_f_rad_corr = (phi_f_rad > phi_i_rad) ? phi_i_rad : phi_f_rad;
-                if (phi_f_rad > phi_i_rad) {
-                     phiFinalSlider.value = cosPhi_i;
-                     phiFinalVal.textContent = cosPhi_i.toFixed(2);
+        function updateLoad(id, field, value) {
+            const load = loads.find(l => l.id === id);
+            if (load) {
+                if (field === 'p' || field === 'cosPhi') {
+                    load[field] = parseFloat(value) || 0; // Guardamos número
+                } else {
+                    load[field] = value;
                 }
-
-                const Q_c = Q_i - Q_final;
-                const S_i = P / cosPhi_i;
-                const S_f = P / cosPhi_final;
-
-                const I_i = (S_i * 1000) / (Vl * Math.sqrt(3));
-                const I_f = (S_f * 1000) / (Vl * Math.sqrt(3));
-
-                const Qc_var = Q_c * 1000;
-                const C_star = Qc_var / (2 * Math.PI * freq * Vl * Vl);
-                const C_delta = C_star / 3;
-
-
-                infoSInitial.textContent = `${S_i.toFixed(1)} kVA`;
-                infoCosInitial.textContent = cosPhi_i.toFixed(3);
-                infoSFinal.textContent = `${S_f.toFixed(1)} kVA`;
-                infoCosFinal.textContent = cosPhi_final.toFixed(3);
-                infoQcCalc.textContent = `${Q_c.toFixed(1)} kVAr`;
-                infoIInitial.textContent = `${I_i.toFixed(1)} A`;
-                infoIFinal.textContent = `${I_f.toFixed(1)} A`;
-                infoCStar.textContent = `${(C_star * 1e6).toFixed(1)} µF`;
-                infoCDelta.textContent = `${(C_delta * 1e6).toFixed(1)} µF`;
-
-                
-                const max_Q_visual = 250;
-                const max_Q_calc = P * Math.tan(Math.acos(0.5));
-                
-                const y_Q_i = Y_ORIGIN - (Q_i / max_Q_calc) * max_Q_visual;
-                const y_Q_final = Y_ORIGIN - (Q_final / max_Q_calc) * max_Q_visual;
-                
-                triangleInitial.setAttribute('points', `${X_ORIGIN},${Y_ORIGIN} ${P_X},${Y_ORIGIN} ${P_X},${y_Q_i} ${X_ORIGIN},${Y_ORIGIN}`);
-                
-                qcLine.setAttribute('x1', P_X);
-                qcLine.setAttribute('y1', y_Q_i);
-                qcLine.setAttribute('x2', P_X);
-                qcLine.setAttribute('y2', y_Q_final);
-                
-                triangleFinal.setAttribute('points', `${X_ORIGIN},${Y_ORIGIN} ${P_X},${Y_ORIGIN} ${P_X},${y_Q_final} ${X_ORIGIN},${Y_ORIGIN}`);
-                
-                pLineText.textContent = `P = ${P} kW`;
-                textQInitial.setAttribute('y', y_Q_i + (Y_ORIGIN - y_Q_i) / 2);
-                textQFinal.setAttribute('y', y_Q_final + (Y_ORIGIN - y_Q_final) / 2 + 5);
-                textQc.setAttribute('y', y_Q_i + (y_Q_final - y_Q_i) / 2);
-                
-                const angle_i_deg = phi_i_rad * 180 / Math.PI;
-                const angle_f_deg = phi_f_rad_corr * 180 / Math.PI;
-                
-                textSInitial.setAttribute('transform', `rotate(${-angle_i_deg / 2} ${P_X / 2} ${Y_ORIGIN})`);
-                textSInitial.setAttribute('x', (X_ORIGIN + P_X) / 2);
-                textSInitial.setAttribute('y', (Y_ORIGIN + y_Q_i) / 2 - 5);
-                
-                textSFinal.setAttribute('transform', `rotate(${-angle_f_deg / 2} ${P_X / 2} ${Y_ORIGIN})`);
-                textSFinal.setAttribute('x', (X_ORIGIN + P_X) / 2);
-                textSFinal.setAttribute('y', (Y_ORIGIN + y_Q_final) / 2 - 5);
+                updateCalculations();
             }
+        }
 
-            [powerSlider, phiInitialSlider, phiFinalSlider, voltageInput, freqInput].forEach(el => {
-                el.addEventListener('input', updatePowerTriangle);
+        // --- 4. MATH & SVG UPDATE ---
+        function updateCalculations() {
+            // Inputs globales
+            const voltage = parseFloat(document.getElementById('in-voltage').value) || 380;
+            const targetCos = parseFloat(document.getElementById('in-cos-target').value) || 0.95;
+            const freq = 50; // Fijo para simplificar en UI
+
+            document.getElementById('val-voltage').innerText = voltage + " V";
+
+            // 1. Calcular Sumatorias
+            let P_total = 0;
+            let Q_total = 0;
+
+            loads.forEach(load => {
+                const p = load.p;
+                let cos = load.cosPhi;
+                if (cos > 1) cos = 1;
+                if (cos < 0.1) cos = 0.1;
+
+                const q = p * Math.tan(Math.acos(cos));
+                P_total += p;
+                Q_total += q;
             });
 
-            updatePowerTriangle();
-        });
-    </script>
+            if (P_total === 0) P_total = 0.01;
 
+            // 2. Sistema Equivalente Inicial
+            const S_i = Math.sqrt(P_total * P_total + Q_total * Q_total);
+            const cos_i = P_total / S_i;
+
+            // Límite: El cos final no puede ser peor que el inicial
+            let cos_f = targetCos;
+            if (cos_f < cos_i) cos_f = cos_i;
+            document.getElementById('in-cos-target').min = cos_i.toFixed(2);
+            document.getElementById('val-cos-target').innerText = cos_f.toFixed(2);
+
+            // 3. Sistema Final y Banco Qc
+            const Q_f = P_total * Math.tan(Math.acos(cos_f));
+            const Q_c = Q_total - Q_f;
+            const S_f = P_total / cos_f;
+
+            // 4. Corrientes e Ingenieria
+            const I_i = (S_i * 1000) / (voltage * Math.sqrt(3));
+            const I_f = (S_f * 1000) / (voltage * Math.sqrt(3));
+
+            // Capacitores: C = Qc / (2 * pi * f * V^2)
+            const Qc_var = Q_c * 1000;
+            const C_star_uF = (Qc_var / (2 * Math.PI * freq * Math.pow(voltage, 2))) * 1e6;
+            const C_delta_uF = C_star_uF / 3;
+
+            // 5. Update HTML Texts
+            // Actualizamos la tarjeta de la esquina superior derecha del gráfico
+            document.getElementById('out-cos-initial').innerText = cos_i.toFixed(3);
+
+            document.getElementById('out-s-i').innerText = S_i.toFixed(1);
+            document.getElementById('out-i-i').innerText = I_i.toFixed(0);
+
+            document.getElementById('out-s-f').innerText = S_f.toFixed(1);
+            document.getElementById('out-i-f').innerText = I_f.toFixed(0);
+
+            document.getElementById('out-qc').innerText = Q_c.toFixed(1);
+            document.getElementById('out-cy').innerText = C_star_uF.toFixed(0) + " µF";
+            document.getElementById('out-cd').innerText = C_delta_uF.toFixed(0) + " µF";
+
+            // 6. ACTUALIZAR SVG (ESCALADO DINÁMICO MEJORADO)
+            updateSVG(P_total, Q_total, Q_f, cos_i, cos_f);
+        }
+
+        function updateSVG(P, Qi, Qf, cos_i, cos_f) {
+            // Geometría del Canvas (ViewBox: 500x350)
+            const originX = 40;
+            const originY = 300;
+            const maxW = 400; // Ancho máx disponible para P
+            const maxH = 260; // Alto máx disponible para Q
+
+            // Escalado Inteligente
+            let scale = Math.min(maxW / P, maxH / Qi);
+            if (scale > 5) scale = 5;
+
+            const pxP = P * scale;
+            const pxQi = Qi * scale;
+            const pxQf = Qf * scale;
+
+            const endX = originX + pxP;
+            const yQi = originY - pxQi;
+            const yQf = originY - pxQf;
+
+            // Triángulos
+            document.getElementById('svg-tri-initial').setAttribute('points', `${originX},${originY} ${endX},${originY} ${endX},${yQi}`);
+            document.getElementById('svg-tri-final').setAttribute('points', `${originX},${originY} ${endX},${originY} ${endX},${yQf}`);
+
+            // Base P
+            document.getElementById('svg-line-p').setAttribute('x2', endX);
+            const lblP = document.getElementById('svg-lbl-p');
+            lblP.setAttribute('x', originX + (pxP / 2));
+            lblP.textContent = `P Total: ${P.toFixed(0)} kW`;
+
+            // Textos Q
+            const lblQi = document.getElementById('svg-lbl-qi');
+            lblQi.setAttribute('x', endX + 15);
+            lblQi.setAttribute('y', yQi + 10);
+
+            const lblQf = document.getElementById('svg-lbl-qf');
+            lblQf.setAttribute('x', endX + 15);
+            lblQf.setAttribute('y', yQf + 5);
+            lblQf.style.opacity = (Math.abs(yQi - yQf) < 15) ? "0" : "1";
+
+            // Línea Qc
+            const lineQc = document.getElementById('svg-line-qc');
+            lineQc.setAttribute('x1', endX);
+            lineQc.setAttribute('y1', yQi);
+            lineQc.setAttribute('x2', endX);
+            lineQc.setAttribute('y2', yQf - 8);
+
+            // Caja Qc
+            const midQ = yQi + (yQf - yQi) / 2;
+            const boxW = 85;
+            const boxQc = document.getElementById('svg-qc-box');
+            boxQc.setAttribute('x', endX + 10);
+            boxQc.setAttribute('y', midQ - 12);
+            boxQc.style.opacity = (Math.abs(yQi - yQf) < 15) ? "0" : "1";
+
+            const lblQc = document.getElementById('svg-lbl-qc');
+            lblQc.setAttribute('x', endX + 10 + (boxW / 2));
+            lblQc.setAttribute('y', midQ + 4);
+            lblQc.style.opacity = boxQc.style.opacity;
+
+            // Arcos de ángulo
+            function getArcPath(radius, angleRad) {
+                const x = originX + radius * Math.cos(angleRad);
+                const y = originY - radius * Math.sin(angleRad);
+                return `M ${originX + radius} ${originY} A ${radius} ${radius} 0 0 0 ${x} ${y}`;
+            }
+
+            const arcRadius = Math.min(pxP * 0.3, 60);
+            const arcRadiusF = arcRadius * 1.2;
+
+            document.getElementById('svg-arc-initial').setAttribute('d', getArcPath(arcRadius, Math.acos(cos_i)));
+            document.getElementById('svg-arc-final').setAttribute('d', getArcPath(arcRadiusF, Math.acos(cos_f)));
+
+            const phiLbl = document.getElementById('svg-phi-label');
+            phiLbl.setAttribute('x', originX + arcRadius + 10);
+            phiLbl.setAttribute('y', originY - 10);
+        }
+
+        // --- 5. INITIALIZATION ---
+        function updateAll() {
+            renderLoads();
+            updateCalculations();
+        }
+
+        window.onload = () => {
+            updateThemeUI();
+            updateAll();
+        };
+    </script>
 </body>
+
 </html>
