@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Cute</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Variables de colores para los temas */
+        :root {
+            --bg-color: #FFF0F5;
+            --card-bg: #FFFFFF;
+            --text-main: #704C5E;
+            --text-muted: #A88B98;
+            --primary: #FFB6C1;
+            --primary-hover: #FF9EAE;
+            --secondary: #FFE4E1;
+            --accent: #FF69B4;
+            --ring-track: #FFE4E1;
+            /* Color suave más visible para el track */
+            --shadow-color: rgba(255, 182, 193, 0.25);
+            --danger: #FFA0A0;
+            --timer-glow: rgba(255, 182, 193, 0.6);
+        }
+
+        .dark-theme {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --text-main: #F5F5F5;
+            --text-muted: #888888;
+            --primary: #FFB6C1;
+            --primary-hover: #FF9EAE;
+            --secondary: #2A2A2A;
+            --accent: #FFD1DC;
+            --ring-track: #333333;
+            /* Gris claro para el track en modo oscuro */
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --danger: #EF5350;
+            --timer-glow: rgba(255, 182, 193, 0.35);
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        .shadow-cute {
+            box-shadow: 0 12px 30px -10px var(--shadow-color), 0 8px 15px -10px var(--shadow-color);
+        }
+
+        /* Ocultar las flechas de los inputs numéricos */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .mode-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: var(--text-main);
+        }
+
+        .mode-btn.active {
+            background-color: var(--primary);
+            color: #121212;
+            font-weight: 700;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(255, 182, 193, 0.4);
+        }
+
+        /* --- MEJORA DE LA SOMBRA DEL TIMER --- */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+            /* Transición de 1s para que ruede como un reloj continuo */
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            /* Filtro más suave y amplio */
+            filter: drop-shadow(0 0 12px var(--timer-glow));
+        }
+
+        .cute-input {
+            background-color: var(--secondary);
+            color: var(--text-main);
+            border: 2px solid transparent;
+            border-radius: 1rem;
+            padding: 0.5rem;
+            text-align: center;
+            width: 4rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .cute-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--shadow-color);
+            transform: translateY(-2px);
+        }
+
+        #settings-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease, margin 0.3s ease;
+            opacity: 0;
+        }
+
+        #settings-panel.open {
+            max-height: 250px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
+
+        .btn-cute {
+            background-color: var(--primary);
+            color: #121212;
+            border-radius: 9999px;
+            padding: 0.75rem 2rem;
+            font-weight: 700;
+            font-size: 1.125rem;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-cute:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
+
+        .btn-icon {
+            background-color: var(--secondary);
+            color: var(--text-main);
+            padding: 0.75rem;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-icon:hover {
+            background-color: var(--primary);
+            color: #121212;
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: var(--text-muted);
+            border-radius: 10px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
+
+    <!-- Encabezado -->
+    <header class="w-full max-w-md flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold flex items-center gap-2 tracking-tight">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                class="text-[var(--accent)]">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Pomodoro
+        </h1>
+        <button id="theme-toggle" class="btn-icon focus:outline-none">
+            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <svg id="sun-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+        </button>
+    </header>
+
+    <!-- Tarjeta Principal del Temporizador -->
+    <main
+        class="bg-[var(--card-bg)] shadow-cute rounded-[2.5rem] p-8 w-full max-w-md relative transition-colors duration-500 mb-6 border border-white/10">
+
+        <!-- Selector de Modos -->
+        <div class="flex justify-between bg-[var(--secondary)] rounded-full p-1.5 mb-8 border border-white/5">
+            <button class="mode-btn active rounded-full py-2.5 px-4 text-sm font-semibold flex-1"
+                data-mode="work">Enfoque</button>
+            <button class="mode-btn rounded-full py-2.5 px-4 text-sm font-semibold flex-1"
+                data-mode="shortBreak">Descanso</button>
+            <button class="mode-btn rounded-full py-2.5 px-4 text-sm font-semibold flex-1" data-mode="longBreak">Pausa
+                Larga</button>
+        </div>
+
+        <!-- Círculo del Temporizador -->
+        <div class="relative flex justify-center items-center mb-10 mt-4">
+            <!-- overflow-visible permite que la sombra respire -->
+            <svg class="w-64 h-64 overflow-visible" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="44" fill="none" stroke="var(--ring-track)" stroke-width="5"></circle>
+                <circle id="progress-ring" class="progress-ring__circle" cx="50" cy="50" r="44" fill="none"
+                    stroke="var(--primary)" stroke-width="5" stroke-linecap="round"></circle>
+            </svg>
+
+            <div class="absolute flex flex-col items-center">
+                <span id="timer-display" class="text-6xl font-bold tracking-tighter"
+                    style="font-variant-numeric: tabular-nums;">25:00</span>
+                <span id="current-status"
+                    class="text-[var(--text-muted)] text-xs mt-2 uppercase tracking-[0.2em] font-bold">¡A
+                    Enfocarse!</span>
+            </div>
+        </div>
+
+        <!-- Controles Inferiores -->
+        <div class="flex justify-center items-center gap-3">
+            <button id="toggle-sound" class="btn-icon" aria-label="Activar/Desactivar Sonido">
+                <svg id="sound-on-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                </svg>
+                <svg id="sound-off-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <line x1="23" y1="9" x2="17" y2="15"></line>
+                    <line x1="17" y1="9" x2="23" y2="15"></line>
+                </svg>
+            </button>
+
+            <button id="toggle-settings" class="btn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                    </path>
+                </svg>
+            </button>
+
+            <button id="start-btn" class="btn-cute flex-grow h-14">
+                <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <svg id="pause-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+                    <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+                </svg>
+                <span id="start-text">Comenzar</span>
+            </button>
+
+            <button id="reset-btn" class="btn-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <polyline points="3 3 3 8 8 8"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Panel de Configuración -->
+        <div id="settings-panel" class="border-t border-gray-200 dark:border-gray-700/50 pt-5">
+            <h3 class="text-xs font-bold mb-4 text-center tracking-widest uppercase text-[var(--text-muted)]">Minutos
+            </h3>
+            <div class="flex justify-between gap-3 text-sm px-2">
+                <div class="flex flex-col items-center gap-2">
+                    <label for="work-time" class="text-[var(--text-muted)] text-xs font-semibold">Enfoque</label>
+                    <input type="number" id="work-time" class="cute-input" value="25" min="1" max="120">
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <label for="short-time" class="text-[var(--text-muted)] text-xs font-semibold">Descanso</label>
+                    <input type="number" id="short-time" class="cute-input" value="5" min="1" max="60">
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                    <label for="long-time" class="text-[var(--text-muted)] text-xs font-semibold">Larga</label>
+                    <input type="number" id="long-time" class="cute-input" value="15" min="1" max="60">
+                </div>
+            </div>
+            <button id="save-settings-btn"
+                class="w-full mt-5 bg-[var(--secondary)] hover:bg-[var(--primary)] hover:text-[#121212] transition-colors text-[var(--text-main)] font-bold py-3 rounded-2xl text-sm border border-white/5">
+                Guardar
+            </button>
+        </div>
+    </main>
+
+    <!-- Contador de Ciclos -->
+    <div
+        class="mb-6 flex items-center gap-2 text-[var(--text-muted)] font-bold bg-[var(--card-bg)] px-5 py-2.5 rounded-full shadow-cute border border-white/10">
+        <span class="text-xl">🍅</span>
+        <span>Pomodoros: <strong id="cycle-count" class="text-[var(--text-main)] text-lg ml-1">0</strong></span>
+    </div>
+
+    <!-- Gestor de Tareas -->
+    <div
+        class="bg-[var(--card-bg)] shadow-cute rounded-[2rem] p-6 w-full max-w-md transition-colors duration-500 border border-white/10">
+        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="text-[var(--accent)]">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            Mis Tareas
+        </h2>
+
+        <form id="task-form" class="flex gap-2 mb-5">
+            <input type="text" id="task-input"
+                class="flex-grow bg-[var(--secondary)] text-[var(--text-main)] rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-pink-200 transition-all border border-transparent font-medium"
+                placeholder="¿Qué vamos a lograr?" required autocomplete="off">
+            <button type="submit"
+                class="bg-[var(--primary)] text-[#121212] rounded-2xl px-4 py-3 font-bold hover:opacity-90 transition-transform active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </button>
+        </form>
+
+        <ul id="task-list" class="space-y-3 max-h-48 overflow-y-auto custom-scrollbar pr-1"></ul>
+    </div>
+
+    <script>
+        let timer;
+        let isRunning = false;
+        let timeLeft = 25 * 60;
+        let currentMode = 'work';
+        let cyclesCompleted = 0;
+        let tasks = JSON.parse(localStorage.getItem('pomodoro-tasks')) || [];
+
+        // Variables de Audio
+        let audioCtx = null;
+        let isTickingEnabled = localStorage.getItem('pomodoro-sound') === 'true';
+
+        const times = { work: 25, shortBreak: 5, longBreak: 15 };
+        const statusTexts = { work: '¡A Enfocarse!', shortBreak: 'Toma un respiro', longBreak: 'Descanso merecido' };
+        const modeColors = { work: 'var(--primary)', shortBreak: '#A0E8AF', longBreak: '#87CEFA' };
+
+        const displayTime = document.getElementById('timer-display');
+        const displayStatus = document.getElementById('current-status');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const progressRing = document.getElementById('progress-ring');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const startText = document.getElementById('start-text');
+
+        const toggleSettingsBtn = document.getElementById('toggle-settings');
+        const settingsPanel = document.getElementById('settings-panel');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const workInput = document.getElementById('work-time');
+        const shortInput = document.getElementById('short-time');
+        const longInput = document.getElementById('long-time');
+        const cycleCountDisplay = document.getElementById('cycle-count');
+
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const moonIcon = document.getElementById('moon-icon');
+        const sunIcon = document.getElementById('sun-icon');
+
+        const toggleSoundBtn = document.getElementById('toggle-sound');
+        const soundOnIcon = document.getElementById('sound-on-icon');
+        const soundOffIcon = document.getElementById('sound-off-icon');
+
+        const taskForm = document.getElementById('task-form');
+        const taskInput = document.getElementById('task-input');
+        const taskList = document.getElementById('task-list');
+
+        const radius = progressRing.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
+
+        function setProgress(percent) {
+            const offset = circumference - (percent / 100) * circumference;
+            progressRing.style.strokeDashoffset = offset;
+        }
+
+        function requestNotificationPermission() {
+            if ("Notification" in window && Notification.permission !== "granted") Notification.requestPermission();
+        }
+
+        function sendNotification(title, body) {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(title, { body, icon: "https://fav.farm/🍅" });
+            }
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playCuteBeep() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 1);
+            } catch (e) { }
+        }
+
+        function playTicTac() {
+            if (!audioCtx || !isTickingEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.01); // Volumen muy suave
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) { }
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = tasks.length === 0 ? '<li class="text-center text-[var(--text-muted)] text-sm py-6 font-medium">No hay tareas pendientes.</li>' : '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `flex items-center justify-between p-3.5 rounded-2xl bg-[var(--secondary)] transition-all border border-white/5 ${task.completed ? 'opacity-50 grayscale-[50%]' : ''}`;
+                li.innerHTML = `
+                    <label class="flex items-center gap-3.5 cursor-pointer flex-grow group">
+                        <div class="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 transition-all duration-300 ${task.completed ? 'border-pink-300 bg-[var(--primary)]' : 'border-[var(--text-muted)] group-hover:border-pink-300'}">
+                            ${task.completed ? '<svg class="w-4 h-4 text-[#121212]" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>' : ''}
+                        </div>
+                        <span class="text-[0.95rem] font-semibold ${task.completed ? 'line-through text-[var(--text-muted)]' : ''}">${task.text}</span>
+                    </label>
+                    <button class="delete-task-btn p-2 text-[var(--text-muted)] hover:text-red-400" data-index="${index}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                `;
+                li.querySelector('label').onclick = () => { tasks[index].completed = !tasks[index].completed; saveAndRenderTasks(); };
+                li.querySelector('.delete-task-btn').onclick = (e) => { e.stopPropagation(); tasks.splice(index, 1); saveAndRenderTasks(); };
+                taskList.appendChild(li);
+            });
+        }
+
+        function saveAndRenderTasks() { localStorage.setItem('pomodoro-tasks', JSON.stringify(tasks)); renderTasks(); }
+
+        taskForm.onsubmit = (e) => {
+            e.preventDefault();
+            if (taskInput.value.trim()) { tasks.push({ text: taskInput.value.trim(), completed: false }); taskInput.value = ''; saveAndRenderTasks(); }
+        };
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            displayTime.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            setProgress((timeLeft / (times[currentMode] * 60)) * 100);
+            document.title = `${displayTime.textContent} - Pomodoro`;
+        }
+
+        function switchMode(mode, autoStart = false) {
+            currentMode = mode;
+            timeLeft = times[currentMode] * 60;
+            modeBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+            displayStatus.textContent = statusTexts[mode];
+            progressRing.style.stroke = modeColors[mode] || 'var(--primary)';
+            resetTimer();
+            if (autoStart) toggleTimer();
+        }
+
+        function timerComplete() {
+            playCuteBeep();
+            if (currentMode === 'work') {
+                cyclesCompleted++;
+                cycleCountDisplay.textContent = cyclesCompleted;
+                localStorage.setItem('pomodoro-cycles', cyclesCompleted);
+                sendNotification("¡Pomodoro Completado! 🍅", "Es hora de descansar.");
+                switchMode(cyclesCompleted % 4 === 0 ? 'longBreak' : 'shortBreak', true);
+            } else {
+                sendNotification("¡Descanso Terminado! ✨", "Hora de volver al trabajo.");
+                switchMode('work', true);
+            }
+        }
+
+        function toggleTimer() {
+            requestNotificationPermission();
+            initAudio();
+
+            if (isRunning) {
+                clearInterval(timer);
+                playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden');
+                startText.textContent = "Reanudar";
+            } else {
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    if (isRunning) playTicTac();
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        timerComplete();
+                    }
+                }, 1000);
+                playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden');
+                startText.textContent = "Pausar";
+            }
+            isRunning = !isRunning;
+        }
+
+        function resetTimer() { clearInterval(timer); isRunning = false; timeLeft = times[currentMode] * 60; playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); startText.textContent = "Comenzar"; updateDisplay(); }
+
+        // EVENTOS FALTANTES QUE ARREGLAN EL BOTÓN
+        startBtn.onclick = toggleTimer;
+        resetBtn.onclick = resetTimer;
+
+        // Evento de Sonido
+        toggleSoundBtn.onclick = () => {
+            initAudio();
+            isTickingEnabled = !isTickingEnabled;
+            localStorage.setItem('pomodoro-sound', isTickingEnabled);
+            soundOnIcon.classList.toggle('hidden', !isTickingEnabled);
+            soundOffIcon.classList.toggle('hidden', isTickingEnabled);
+        };
+
+        modeBtns.forEach(btn => btn.onclick = () => { if (!isRunning || confirm("¿Cambiar modo?")) switchMode(btn.dataset.mode); });
+        toggleSettingsBtn.onclick = () => settingsPanel.classList.toggle('open');
+        saveSettingsBtn.onclick = () => {
+            times.work = parseInt(workInput.value) || 25;
+            times.shortBreak = parseInt(shortInput.value) || 5;
+            times.longBreak = parseInt(longInput.value) || 15;
+            localStorage.setItem('pomodoro-work', times.work);
+            localStorage.setItem('pomodoro-short', times.shortBreak);
+            localStorage.setItem('pomodoro-long', times.longBreak);
+            settingsPanel.classList.remove('open');
+            resetTimer();
+        };
+
+        themeToggleBtn.onclick = () => {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('pomodoro-theme', isDark ? 'dark' : 'light');
+            moonIcon.classList.toggle('hidden', isDark); sunIcon.classList.toggle('hidden', !isDark);
+        };
+
+        (function init() {
+            const savedWork = localStorage.getItem('pomodoro-work');
+            if (savedWork) { times.work = parseInt(savedWork); times.shortBreak = parseInt(localStorage.getItem('pomodoro-short')); times.longBreak = parseInt(localStorage.getItem('pomodoro-long')); }
+            workInput.value = times.work; shortInput.value = times.shortBreak; longInput.value = times.longBreak;
+            cyclesCompleted = parseInt(localStorage.getItem('pomodoro-cycles')) || 0;
+            cycleCountDisplay.textContent = cyclesCompleted;
+            if (localStorage.getItem('pomodoro-theme') === 'dark') { document.body.classList.add('dark-theme'); moonIcon.classList.add('hidden'); sunIcon.classList.remove('hidden'); }
+
+            if (isTickingEnabled) {
+                soundOnIcon.classList.remove('hidden');
+                soundOffIcon.classList.add('hidden');
+            }
+
+            switchMode('work');
+            renderTasks();
+        })();
+    </script>
+</body>
+
+</html>
