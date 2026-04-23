@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTN FRSR - Simulador de Gradiente Eléctrico</title>
+    <style>
+        :root {
+            --bg-main: #050914;
+            --panel-bg: #0a1128;
+            --cyan-glow: #00f0ff;
+            --text-muted: #849bb3;
+            --border-color: #1a2b4c;
+            --trafo-color: #ffaa00;
+            --danger: #ff2a2a;
+            --success: #00ff66;
+        }
+
+        body {
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: var(--bg-main);
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #sidebar {
+            width: 480px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.9);
+            z-index: 10;
+        }
+
+        h3 {
+            color: var(--cyan-glow);
+            font-size: 1.05rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 0 0 10px 0;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        h3::before { content: "►"; margin-right: 8px; font-size: 0.8em; }
+
+        .control-group { margin-bottom: 10px; }
+        label {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        select {
+            width: 100%;
+            background: #020613;
+            color: white;
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .slider-row { display: flex; align-items: center; gap: 10px; }
+        input[type=range] {
+            flex-grow: 1;
+            -webkit-appearance: none;
+            background: #152238;
+            height: 6px;
+            border-radius: 3px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--cyan-glow);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--cyan-glow);
+        }
+        .val-display { color: var(--cyan-glow); font-weight: bold; font-size: 0.9rem; min-width: 80px; text-align: right; }
+
+        .btn-action {
+            background: rgba(0, 240, 255, 0.05);
+            color: var(--cyan-glow);
+            border: 1px solid var(--cyan-glow);
+            padding: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 5px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+        .btn-action:hover { background: var(--cyan-glow); color: #000; box-shadow: 0 0 15px var(--cyan-glow); }
+
+        #results-panel {
+            background: #020613;
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--cyan-glow);
+            padding: 15px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border-radius: 4px;
+        }
+        .res-highlight { color: #fff; font-weight: bold; }
+
+        .math-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--text-muted);
+            padding: 10px;
+            font-size: 0.75rem;
+            color: #a0b2c6;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        #canvas-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #02040a;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+            padding: 20px;
+            overflow: auto;
+            position: relative;
+        }
+        
+        canvas {
+            border: 1px solid #1a2b4c;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.1);
+            background-color: #000000;
+            cursor: crosshair;
+        }
+
+        #probe-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--cyan-glow);
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 0.8rem;
+            pointer-events: none;
+            display: none;
+            border-radius: 4px;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div>
+            <h3>1. Parámetros de Red</h3>
+            <div class="control-group">
+                <label>CONDUCTOR (Preensamblado Al)</label>
+                <select id="cond" onchange="calcularDatos()">
+                    <option value="0.000641">95 mm² (R: 0.641 Ω/km)</option>
+                    <option value="0.000868" selected>70 mm² (R: 0.868 Ω/km)</option>
+                    <option value="0.001280">50 mm² (R: 1.280 Ω/km)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>CAÍDA DE TENSIÓN LÍMITE (%)</label>
+                <div class="slider-row">
+                    <input type="range" id="vDrop" min="1" max="10" value="5" step="0.5" oninput="updateVal('vDrop', this.value, '%'); calcularDatos();">
+                    <span class="val-display" id="val-vDrop">-5.0 %</span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>2. Estudio de Demanda</h3>
+            <div class="control-group">
+                <label>POTENCIA POR LOTE (kW)</label>
+                <div class="slider-row">
+                    <input type="range" id="pLot" min="1" max="15" value="5" step="0.5" oninput="updateVal('pLot', this.value, ' kW'); calcularDatos();">
+                    <span class="val-display" id="val-pLot">5.0 kW</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>COEFICIENTE DE SIMULTANEIDAD</label>
+                <div class="slider-row">
+                    <input type="range" id="fs" min="0.2" max="1.0" value="0.6" step="0.05" oninput="updateVal('fs', this.value, ''); calcularDatos();">
+                    <span class="val-display" id="val-fs">0.60</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>ALUMBRADO PÚBLICO (kW)</label>
+                <div class="slider-row">
+                    <input type="range" id="pAlum" min="0" max="30" value="8" step="1" oninput="updateVal('pAlum', this.value, ' kW'); calcularDatos();">
+                    <span class="val-display" id="val-pAlum">8.0 kW</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>POTENCIA PLAZA CENTRAL (kW)</label>
+                <div class="slider-row">
+                    <input type="range" id="pPlaza" min="0" max="30" value="10" step="1" oninput="updateVal('pPlaza', this.value, ' kW'); calcularDatos();">
+                    <span class="val-display" id="val-pPlaza">10.0 kW</span>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>FACTOR DE POTENCIA (cos φ)</label>
+                <div class="slider-row">
+                    <input type="range" id="fp" min="0.70" max="1.00" value="0.90" step="0.01" oninput="updateVal('fp', this.value, ''); calcularDatos();">
+                    <span class="val-display" id="val-fp">0.90</span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>3. Ubicación Manual</h3>
+            <label style="color:var(--text-muted); font-size:0.75rem; margin-bottom:10px;">Elegí el trafo y hacé click en el plano para instalarlo.</label>
+            <select id="trafoKVA" style="background: rgba(255, 170, 0, 0.1); border-color: var(--trafo-color); color: var(--trafo-color); font-weight:bold; margin-bottom:10px;">
+                <option value="160">Módulo a ubicar: 160 kVA</option>
+                <option value="250">Módulo a ubicar: 250 kVA</option>
+                <option value="315" selected>Módulo a ubicar: 315 kVA</option>
+                <option value="400">Módulo a ubicar: 400 kVA</option>
+                <option value="500">Módulo a ubicar: 500 kVA</option>
+            </select>
+            <button class="btn-action" onclick="limpiarTrafos()" style="border-color: var(--danger); color: var(--danger); width:100%;">
+                Limpiar Escenario
+            </button>
+        </div>
+
+        <div id="results-panel">
+            Demanda Estimada (S): <span id="resS" class="res-highlight" style="color:var(--cyan-glow)">-- kVA</span><br>
+            Trafos Instalados: <span id="resOptimos" class="res-highlight" style="color:var(--trafo-color)">--</span><br>
+            
+            <div class="math-box">
+                <strong>MEMORIA DE CÁLCULO:</strong><br>
+                S_total = [(P_lotes × Fs) + P_alum + P_plaza] / cos(φ)<br>
+                ΔV(%) ≈ [ (√3 × I_ramal × L(km) × R) / 380V ] × 100<br>
+                * I_ramal se estima dinámicamente como el 35% de la carga de la subestación más cercana.
+            </div>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="planoCanvas"></canvas>
+        <div id="probe-tooltip"></div>
+    </div>
+
+    <script>
+        function updateVal(id, val, suffix, prefix = '') {
+            let formatVal = parseFloat(val).toFixed(2).replace('.00', '');
+            if(id === 'vDrop') formatVal = "-" + parseFloat(val).toFixed(1);
+            else if(id !== 'fs' && id !== 'fp') formatVal = parseFloat(val).toFixed(1);
+            document.getElementById('val-' + id).innerText = prefix + formatVal + suffix;
+        }
+
+        const canvas = document.getElementById('planoCanvas');
+        const ctx = canvas.getContext('2d');
+        const tooltip = document.getElementById('probe-tooltip');
+        
+        // Loteo: 332m Ancho x 432m Alto
+        const SCALE = 2.0; 
+        const STREET = 16;
+        const PADDING = 40;
+        
+        canvas.width = (332 + STREET*2) * SCALE + PADDING*2; 
+        canvas.height = (432 + STREET*2) * SCALE + PADDING*2; 
+
+        // Ejes
+        const sX = [PADDING + STREET*SCALE, PADDING + (100+STREET*2)*SCALE, PADDING + (200+STREET*3)*SCALE];
+        const sY = [PADDING + STREET*SCALE, PADDING + (100+STREET*2)*SCALE, PADDING + (300+STREET*3)*SCALE];
+
+        let rCond = 0, vDropMax = 5;
+        let sTotalReq = 0, iTotalReq = 0;
+        let trafosManuales = [];
+
+        // --- SONDA VIRTUAL ---
+        canvas.addEventListener('mousemove', function(e) {
+            if(trafosManuales.length === 0) {
+                tooltip.style.display = 'none';
+                dibujarPlano(); 
+                return;
+            }
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            const mouseY = (e.clientY - rect.top) * scaleY;
+
+            let minDist = Infinity;
+            let closestT = null;
+            trafosManuales.forEach(t => {
+                let d = Math.hypot(mouseX - t.x, mouseY - t.y);
+                if(d < minDist) { minDist = d; closestT = t; }
+            });
+
+            let dist_m = minDist / SCALE;
+            let sTotalInstalada = trafosManuales.reduce((acc, t) => acc + t.kva, 0);
+            let proporcionCarga = closestT.kva / (sTotalInstalada || 1);
+            let iTrafo = iTotalReq * proporcionCarga; 
+            let iRamal = iTrafo * 0.35; 
+            let dvPercent = (1.732 * iRamal * dist_m * rCond) / 380 * 100;
+
+            tooltip.style.display = 'block';
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+            
+            let color = dvPercent <= vDropMax ? "var(--success)" : "var(--danger)";
+            tooltip.innerHTML = `
+                Distancia (L): <b>${dist_m.toFixed(1)} m</b><br>
+                Caída (ΔV): <b style="color:${color}">-${dvPercent.toFixed(2)} %</b>
+            `;
+
+            dibujarPlano();
+            
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(closestT.x, closestT.y);
+            ctx.lineTo(mouseX, mouseY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(mouseX, mouseY, 8, 0, Math.PI*2);
+            ctx.moveTo(mouseX - 12, mouseY); ctx.lineTo(mouseX + 12, mouseY);
+            ctx.moveTo(mouseX, mouseY - 12); ctx.lineTo(mouseX, mouseY + 12);
+            ctx.stroke();
+        });
+
+        canvas.addEventListener('mouseout', function() {
+            tooltip.style.display = 'none';
+            dibujarPlano();
+        });
+
+        // --- COLOCACIÓN MANUAL ---
+        canvas.addEventListener('mousedown', function(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clickX = (e.clientX - rect.left) * scaleX;
+            const clickY = (e.clientY - rect.top) * scaleY;
+
+            for(let i=0; i<trafosManuales.length; i++) {
+                if(Math.hypot(trafosManuales[i].x - clickX, trafosManuales[i].y - clickY) < 20) {
+                    trafosManuales.splice(i, 1);
+                    calcularDatos();
+                    return;
+                }
+            }
+            
+            let selectedKVA = parseInt(document.getElementById('trafoKVA').value);
+            trafosManuales.push({x: clickX, y: clickY, kva: selectedKVA});
+            calcularDatos();
+        });
+
+        function limpiarTrafos() {
+            trafosManuales = [];
+            tooltip.style.display = 'none';
+            calcularDatos();
+        }
+
+        function calcularDatos() {
+            const pLot = parseFloat(document.getElementById('pLot').value);
+            const fs = parseFloat(document.getElementById('fs').value);
+            const pPlaza = parseFloat(document.getElementById('pPlaza').value);
+            const pAlum = parseFloat(document.getElementById('pAlum').value);
+            const fp = parseFloat(document.getElementById('fp').value);
+            
+            rCond = parseFloat(document.getElementById('cond').value);
+            vDropMax = parseFloat(document.getElementById('vDrop').value);
+
+            // Fórmula Completa
+            let pActiva = (100 * pLot * fs) + pPlaza + pAlum; 
+            sTotalReq = pActiva / fp; 
+            iTotalReq = (sTotalReq * 1000) / (1.732 * 380);
+            
+            document.getElementById('resS').innerText = sTotalReq.toFixed(1) + " kVA";
+            document.getElementById('resOptimos').innerText = trafosManuales.length;
+
+            dibujarPlano();
+        }
+
+        function dibujarGradiente() {
+            if(trafosManuales.length === 0) return;
+
+            const gridSize = 6; 
+            ctx.globalAlpha = 0.55; 
+
+            let sTotalInstalada = trafosManuales.reduce((acc, t) => acc + t.kva, 0);
+
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                for (let y = 0; y < canvas.height; y += gridSize) {
+                    
+                    let minDist = Infinity;
+                    let closestT = null;
+
+                    trafosManuales.forEach(t => {
+                        let d = Math.hypot(x - t.x, y - t.y);
+                        if(d < minDist) { minDist = d; closestT = t; }
+                    });
+
+                    let dist_m = minDist / SCALE;
+                    let proporcionCarga = closestT.kva / (sTotalInstalada || 1);
+                    let iTrafo = iTotalReq * proporcionCarga; 
+                    let iRamal = iTrafo * 0.35; 
+                    let dvPercent = (1.732 * iRamal * dist_m * rCond) / 380 * 100;
+
+                    let ratio = Math.min(dvPercent / vDropMax, 1); 
+                    
+                    let r, g, b;
+                    if(ratio < 0.5) {
+                        let localRatio = ratio * 2;
+                        r = Math.round(0 + localRatio * 255);
+                        g = Math.round(255 - localRatio * 40);
+                        b = Math.round(150 - localRatio * 150);
+                    } else {
+                        let localRatio = (ratio - 0.5) * 2;
+                        r = 255;
+                        g = Math.round(215 - localRatio * 215);
+                        b = 0;
+                    }
+
+                    if (ratio >= 1) { r = 255; g = 0; b = 42; }
+
+                    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    ctx.fillRect(x, y, gridSize, gridSize);
+                }
+            }
+            ctx.globalAlpha = 1.0; 
+        }
+
+        function dibujarPlano() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            dibujarGradiente();
+
+            ctx.font = "10px Consolas";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            ctx.fillStyle = '#00e5ff';
+            ctx.font = "12px Consolas";
+            ctx.fillText("CALLE MEMBRIVES", canvas.width/2, PADDING + (STREET/2)*SCALE);
+            ctx.fillText("CALLE NICOLAS", canvas.width/2, canvas.height - PADDING - (STREET/2)*SCALE);
+
+            ctx.save();
+            ctx.translate(PADDING + (STREET/2)*SCALE, canvas.height/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText("CALLE LOPEZ", 0, 0);
+            ctx.restore();
+
+            ctx.save();
+            ctx.translate(canvas.width - PADDING - (STREET/2)*SCALE, canvas.height/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText("CALLE JOVERI", 0, 0);
+            ctx.restore();
+
+            let numLote = 1;
+            function dibujarBloque(startX, startY, cols, rows) {
+                for(let r=0; r<rows; r++) {
+                    for(let c=0; c<cols; c++) {
+                        let x = startX + (c * 50 * SCALE);
+                        let y = startY + (r * 20 * SCALE);
+                        
+                        ctx.strokeStyle = '#005522';
+                        ctx.fillStyle = 'rgba(0, 255, 68, 0.05)';
+                        ctx.lineWidth = 1;
+                        ctx.fillRect(x, y, 50*SCALE, 20*SCALE);
+                        ctx.strokeRect(x, y, 50*SCALE, 20*SCALE);
+
+                        ctx.fillStyle = '#00ff44';
+                        ctx.font = "bold 13px Consolas";
+                        ctx.fillText(numLote, x + 25*SCALE, y + 8*SCALE);
+                        
+                        ctx.fillStyle = '#447755';
+                        ctx.font = "9px Consolas";
+                        ctx.fillText("50x20m", x + 25*SCALE, y + 15*SCALE);
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        if(c === 0) ctx.arc(x + 3*SCALE, y + 10*SCALE, 1.5, 0, Math.PI*2);
+                        else ctx.arc(x + 47*SCALE, y + 10*SCALE, 1.5, 0, Math.PI*2);
+                        ctx.fill();
+
+                        numLote++;
+                    }
+                }
+            }
+
+            dibujarBloque(sX[0], sY[0], 2, 5); 
+            dibujarBloque(sX[1], sY[0], 2, 5); 
+            dibujarBloque(sX[2], sY[0], 2, 5); 
+            
+            dibujarBloque(sX[0], sY[1], 2, 10); 
+            
+            let px = sX[1], py = sY[1], pw = 100*SCALE, ph = 200*SCALE;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.fillRect(px, py, pw, ph);
+            ctx.strokeRect(px, py, pw, ph);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "bold 16px Consolas";
+            ctx.save();
+            ctx.translate(px + pw/2, py + ph/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText("PLAZA CENTRAL", 0, -10);
+            ctx.font = "11px Consolas";
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillText("100 x 200 m", 0, 10);
+            ctx.restore();
+
+            dibujarBloque(sX[2], sY[1], 2, 10); 
+
+            dibujarBloque(sX[0], sY[2], 2, 5); 
+            dibujarBloque(sX[1], sY[2], 2, 5); 
+            dibujarBloque(sX[2], sY[2], 2, 5); 
+
+            trafosManuales.forEach(p => {
+                ctx.fillStyle = 'rgba(0,0,0,0.8)';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 14, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#ffb700';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                ctx.shadowColor = '#000';
+                ctx.shadowBlur = 4;
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "bold 11px Consolas";
+                ctx.fillText(p.kva + "kVA", p.x, p.y + 24);
+                ctx.shadowBlur = 0;
+            });
+        }
+
+        calcularDatos();
+
+    </script>
+</body>
+</html>
