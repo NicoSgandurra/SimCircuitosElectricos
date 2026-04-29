@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leyes de Kirchhoff - Teoría</title>
+    <meta name="description" content="Explicación detallada de las Leyes de Kirchhoff (Nodos y Mallas).">
+    <style>
+        /* Shared Styles */
+        :root {
+            /* Modo Claro */
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --dot-color: #2a2a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .example-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            gap: 2rem;
+        }
+
+        .formula-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .formula-item span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .math-formula {
+            font-family: inherit;
+            font-size: 1.6rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .math-var {
+            font-style: italic;
+        }
+
+        .math-op {
+            margin: 0 0.4rem;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-num {
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-sub {
+            font-size: 0.6em;
+            vertical-align: sub;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 1rem;
+            }
+            .content-card {
+                padding: 1.5rem;
+            }
+            .formula {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al Hub">⬅️</a>
+            📖 Teoría: Leyes de Kirchhoff
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <main>
+        <div class="content-card">
+            <h2>Introducción</h2>
+            <p>Las <strong>Leyes de Kirchhoff</strong>, formuladas por Gustav Kirchhoff en 1845, son dos igualdades fundamentales en el análisis de circuitos eléctricos que se basan en los principios de conservación de la energía y de la carga eléctrica. Estas leyes nos permiten resolver circuitos complejos (con múltiples mallas y nodos) que no pueden simplificarse únicamente con la Ley de Ohm.</p>
+
+            <h2>Primera Ley de Kirchhoff (Ley de Corrientes o LCK)</h2>
+            <p>También conocida como la regla de los nodos. Un nodo es cualquier punto de un circuito donde se conectan tres o más conductores.</p>
+            
+            <div class="statement">
+                "La suma algebraica de las corrientes que entran a un nodo es igual a la suma de las corrientes que salen de él. Alternativamente: la suma de todas las corrientes en un nodo es igual a cero."
+            </div>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-op">Σ</span> <span class="math-var">I</span><span class="math-sub">entran</span> <span class="math-op">=</span> <span class="math-op">Σ</span> <span class="math-var">I</span><span class="math-sub">salen</span>
+                    </div>
+                    <span>Conservación de la Carga</span>
+                </div>
+            </div>
+
+            <div class="svg-container">
+                <!-- SVG de un Nodo -->
+                <svg width="250" height="200" viewBox="0 0 250 200" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="125" cy="100" r="10" fill="var(--primary-color)"/>
+                    
+                    <!-- Corrientes entrantes -->
+                    <!-- I1 -->
+                    <line x1="25" y1="20" x2="115" y2="92" stroke="var(--text-color)" stroke-width="4"/>
+                    <polygon points="120,96 102,88 112,80" fill="var(--text-color)"/>
+                    <text x="50" y="30" font-family="sans-serif" font-weight="bold" font-size="18" fill="var(--primary-color)">I₁ (entra)</text>
+                    
+                    <!-- I2 -->
+                    <line x1="25" y1="180" x2="115" y2="108" stroke="var(--text-color)" stroke-width="4"/>
+                    <polygon points="120,104 112,120 102,112" fill="var(--text-color)"/>
+                    <text x="45" y="180" font-family="sans-serif" font-weight="bold" font-size="18" fill="var(--primary-color)">I₂ (entra)</text>
+
+                    <!-- Corriente saliente I3 -->
+                    <line x1="135" y1="100" x2="225" y2="100" stroke="var(--text-color)" stroke-width="4"/>
+                    <polygon points="230,100 215,92 215,108" fill="var(--text-color)"/>
+                    <text x="160" y="90" font-family="sans-serif" font-weight="bold" font-size="18" fill="var(--primary-color)">I₃ (sale)</text>
+                    
+                    <text x="125" y="160" font-family="sans-serif" font-weight="bold" font-size="16" fill="var(--text-light)" text-anchor="middle">I₁ + I₂ = I₃</text>
+                </svg>
+            </div>
+
+            <h2>Segunda Ley de Kirchhoff (Ley de Voltajes o LVK)</h2>
+            <p>También conocida como la regla de las mallas. Una malla es cualquier trayectoria cerrada en un circuito.</p>
+
+            <div class="statement">
+                "En cualquier trayectoria cerrada (malla) de un circuito, la suma algebraica de las diferencias de potencial (voltajes) es igual a cero. En otras palabras, el voltaje suministrado por las fuentes es igual a las caídas de voltaje en las resistencias."
+            </div>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-op">Σ</span> <span class="math-var">V</span> <span class="math-op">=</span> <span class="math-num">0</span>
+                    </div>
+                    <span>Conservación de la Energía</span>
+                </div>
+            </div>
+
+            <p>Para aplicar esta ley, se debe establecer un sentido de recorrido arbitrario (generalmente horario) y sumar los voltajes respetando los signos (si pasamos de - a + en una fuente, es positivo; si pasamos por una resistencia en el sentido de la corriente, es una caída de tensión, por lo que es negativa).</p>
+
+            <div class="svg-container">
+                <!-- SVG de una Malla -->
+                <svg width="250" height="180" viewBox="0 0 250 180" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="50" y="30" width="150" height="100" fill="none" stroke="var(--text-color)" stroke-width="4"/>
+                    
+                    <!-- Fuente -->
+                    <circle cx="50" cy="80" r="15" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="4"/>
+                    <text x="50" y="85" font-family="sans-serif" font-weight="bold" font-size="14" fill="var(--primary-color)" text-anchor="middle">Vf</text>
+                    <text x="30" y="60" font-family="sans-serif" font-weight="bold" font-size="16" fill="var(--text-color)" text-anchor="middle">+</text>
+                    <text x="30" y="110" font-family="sans-serif" font-weight="bold" font-size="20" fill="var(--text-color)" text-anchor="middle">-</text>
+
+                    <!-- Resistencia 1 -->
+                    <rect x="100" y="20" width="50" height="20" fill="var(--card-bg)" stroke="var(--primary-hover)" stroke-width="4"/>
+                    <text x="125" y="15" font-family="sans-serif" font-weight="bold" font-size="14" fill="var(--primary-hover)" text-anchor="middle">V₁</text>
+
+                    <!-- Resistencia 2 -->
+                    <rect x="190" y="60" width="20" height="40" fill="var(--card-bg)" stroke="var(--primary-hover)" stroke-width="4"/>
+                    <text x="230" y="85" font-family="sans-serif" font-weight="bold" font-size="14" fill="var(--primary-hover)" text-anchor="middle">V₂</text>
+
+                    <!-- Flecha de corriente -->
+                    <path d="M 100 80 A 25 25 0 1 1 150 80" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-dasharray="5,5"/>
+                    <polygon points="152,80 148,72 143,78" fill="var(--text-light)"/>
+                    <text x="125" y="105" font-family="sans-serif" font-size="16" fill="var(--text-light)" text-anchor="middle">I</text>
+
+                    <text x="125" y="160" font-family="sans-serif" font-weight="bold" font-size="16" fill="var(--text-light)" text-anchor="middle">Vf - V₁ - V₂ = 0</text>
+                </svg>
+            </div>
+
+            <h2>Ejemplos de Cálculo</h2>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 1: LCK Básica (Cálculo de una rama)</span>
+                <p><em>Enunciado:</em> En un nodo de un circuito entran dos corrientes: I₁ = 3 A e I₂ = 5 A. Sale una tercera corriente I₃. ¿Cuál es el valor de I₃?</p>
+                <p><em>Solución:</em> Aplicamos la Primera Ley de Kirchhoff (ΣI_entran = ΣI_salen).<br>
+                I₁ + I₂ = I₃<br>
+                3 A + 5 A = <strong>8 A</strong></p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2: LVK Básica (Malla Simple)</span>
+                <p><em>Enunciado:</em> Una malla tiene una fuente de 12 V y dos resistencias en serie. La caída de tensión en la primera resistencia (V₁) es de 4 V. ¿Cuál es la caída de tensión en la segunda resistencia (V₂)?</p>
+                <p><em>Solución:</em> Aplicamos la Segunda Ley de Kirchhoff (ΣV = 0).<br>
+                V_fuente - V₁ - V₂ = 0<br>
+                12 V - 4 V - V₂ = 0<br>
+                V₂ = 12 V - 4 V = <strong>8 V</strong></p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 3: LCK Intermedia (Varias Ramas)</span>
+                <p><em>Enunciado:</em> En un nodo concurren cuatro ramas. Entran I₁ = 10 A e I₂ = 2 A. Sale I₃ = 7 A. ¿Cuál es la magnitud y sentido de la corriente I₄?</p>
+                <p><em>Solución:</em> Asumimos que I₄ sale (ΣI_entran = ΣI_salen).<br>
+                I₁ + I₂ = I₃ + I₄<br>
+                10 A + 2 A = 7 A + I₄<br>
+                12 A = 7 A + I₄<br>
+                I₄ = 12 A - 7 A = <strong>5 A (Sale del nodo)</strong></p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 4: LVK Intermedia (Dos fuentes en la misma malla)</span>
+                <p><em>Enunciado:</em> En una malla cerrada tenemos una fuente de 24 V, seguida de una resistencia R que disipa 10 V, y luego una fuente de 6 V conectada en <em>oposición</em> (polaridad invertida frente al recorrido). ¿Cuánto vale la caída de tensión en la última resistencia Rx que cierra el circuito?</p>
+                <p><em>Solución:</em> Recorremos la malla y aplicamos ΣV = 0.<br>
+                +24 V (fuente a favor) - 10 V (caída en R) - 6 V (fuente en contra) - Vx (caída en Rx) = 0<br>
+                14 V - 6 V - Vx = 0<br>
+                8 V - Vx = 0<br>
+                Vx = <strong>8 V</strong></p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 5: LCK y LVK Combinadas (Nivel Complejo)</span>
+                <p><em>Enunciado:</em> Un circuito de dos mallas tiene una fuente de 10 V (Malla 1), una fuente de 5 V (Malla 2), y una resistencia central compartida Rc = 2 Ω. Las corrientes de malla son I₁ e I₂ (ambas en sentido horario). La ecuación de LVK para la malla 1 es: 10 - 4(I₁) - 2(I₁ - I₂) = 0. Sabiendo que I₁ = 2 A, encuentre el valor de I₂.</p>
+                <p><em>Solución Paso a Paso:</em><br>
+                1. La corriente que pasa por Rc es (I₁ - I₂) hacia abajo, aplicando LCK en el nodo superior.<br>
+                2. Reemplazamos I₁ = 2 A en la ecuación de LVK de la Malla 1:<br>
+                10 - 4(2) - 2(2 - I₂) = 0<br>
+                10 - 8 - 4 + 2(I₂) = 0<br>
+                2 - 4 + 2(I₂) = 0<br>
+                -2 + 2(I₂) = 0<br>
+                2(I₂) = 2<br>
+                I₂ = 2 / 2 = <strong>1 A</strong></p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+    </footer>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true); // Default to dark mode as per hub
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ley de Ohm - Teoría</title>
+    <meta name="description" content="Explicación detallada de la Ley de Ohm.">
+    <style>
+        /* Shared Styles */
+        :root {
+            /* Modo Claro */
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --dot-color: #2a2a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .example-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            gap: 2rem;
+        }
+
+        .formula-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .formula-item span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .math-formula {
+            font-family: inherit;
+            font-size: 1.6rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .math-var {
+            font-style: italic;
+        }
+
+        .math-op {
+            margin: 0 0.4rem;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-num {
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-sub {
+            font-size: 0.6em;
+            vertical-align: sub;
+        }
+
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            font-size: 0.9em;
+            margin: 0 0.3rem;
+            line-height: 1.2;
+        }
+
+        .fraction > span:first-child {
+            border-bottom: 2px solid var(--text-color);
+            padding: 0 0.2rem;
+        }
+        
+        .fraction > span:last-child {
+            padding: 0 0.2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 1rem;
+            }
+            .content-card {
+                padding: 1.5rem;
+            }
+            .formula {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al Hub">⬅️</a>
+            📖 Teoría: Ley de Ohm
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <main>
+        <div class="content-card">
+            <h2>Introducción</h2>
+            <p>La <strong>Ley de Ohm</strong> es uno de los principios fundamentales de la electricidad y la electrónica. Fue postulada por el físico y matemático alemán Georg Simon Ohm en 1827. Esta ley describe la relación matemática que existe entre tres magnitudes eléctricas fundamentales en un circuito de corriente continua: la Tensión (o voltaje), la Corriente (o intensidad) y la Resistencia.</p>
+
+            <h2>Enunciado de la Ley</h2>
+            <div class="statement">
+                "La intensidad de la corriente eléctrica que circula por un conductor es directamente proporcional a la diferencia de potencial (voltaje) aplicada en sus extremos, e inversamente proporcional a la resistencia del conductor."
+            </div>
+
+            <h2>Fórmulas y Magnitudes</h2>
+            <p>Matemáticamente, la Ley de Ohm se expresa mediante la siguiente ecuación principal, de la cual se pueden despejar las otras dos variables:</p>
+            
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">V</span> <span class="math-op">=</span> <span class="math-var">I</span> <span class="math-op">×</span> <span class="math-var">R</span>
+                    </div>
+                    <span>Tensión</span>
+                </div>
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">I</span> <span class="math-op">=</span> 
+                        <div class="fraction">
+                            <span class="math-var">V</span>
+                            <span class="math-var">R</span>
+                        </div>
+                    </div>
+                    <span>Corriente</span>
+                </div>
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">R</span> <span class="math-op">=</span> 
+                        <div class="fraction">
+                            <span class="math-var">V</span>
+                            <span class="math-var">I</span>
+                        </div>
+                    </div>
+                    <span>Resistencia</span>
+                </div>
+            </div>
+
+            <p>Las magnitudes involucradas son:</p>
+            <ul>
+                <li><strong>V (Tensión o Voltaje):</strong> Es la fuerza electromotriz o diferencia de potencial que impulsa a los electrones a moverse a través del circuito. Se mide en <strong>Voltios (V)</strong>.</li>
+                <li><strong>I (Intensidad de Corriente):</strong> Es el flujo de carga eléctrica (electrones) que recorre el material en un tiempo determinado. Se mide en <strong>Amperios (A)</strong>.</li>
+                <li><strong>R (Resistencia):</strong> Es la oposición que presenta el material al paso de la corriente eléctrica. Se mide en <strong>Ohmios (Ω)</strong>.</li>
+            </ul>
+
+            <h2>Triángulo de Ohm</h2>
+            <p>Una regla mnemotécnica muy útil para recordar las fórmulas de la Ley de Ohm es el "Triángulo de Ohm". En este triángulo, la tensión (V) se sitúa en la parte superior, mientras que la corriente (I) y la resistencia (R) se ubican en la parte inferior.</p>
+            
+            <div class="svg-container">
+                <!-- Triángulo de Ohm SVG -->
+                <svg width="220" height="200" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Triángulo -->
+                    <polygon points="110,20 200,170 20,170" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Línea horizontal central -->
+                    <line x1="65" y1="95" x2="155" y2="95" stroke="var(--primary-color)" stroke-width="4"/>
+                    <!-- Línea vertical divisoria inferior -->
+                    <line x1="110" y1="95" x2="110" y2="170" stroke="var(--primary-color)" stroke-width="4"/>
+                    <!-- Texto -->
+                    <text x="110" y="75" font-size="36" font-family="sans-serif" font-weight="bold" fill="var(--text-color)" text-anchor="middle">V</text>
+                    <text x="75" y="150" font-size="36" font-family="sans-serif" font-weight="bold" fill="var(--text-color)" text-anchor="middle">I</text>
+                    <text x="145" y="150" font-size="36" font-family="sans-serif" font-weight="bold" fill="var(--text-color)" text-anchor="middle">R</text>
+
+                </svg>
+            </div>
+            <ul>
+                <li>Si quieres calcular <strong>V</strong>, tapas la V y te queda I y R multiplicándose (I × R).</li>
+                <li>Si quieres calcular <strong>I</strong>, tapas la I y te queda V sobre R (V / R).</li>
+                <li>Si quieres calcular <strong>R</strong>, tapas la R y te queda V sobre I (V / I).</li>
+            </ul>
+
+            <h2>Aplicaciones Prácticas</h2>
+            <p>La Ley de Ohm es fundamental para el diseño y análisis de cualquier circuito eléctrico o electrónico. Algunas de sus aplicaciones más comunes incluyen:</p>
+            <ul>
+                <li><strong>Cálculo del valor de componentes:</strong> Determinar qué valor de resistencia se necesita para limitar la corriente que pasa por un componente sensible, como un LED.</li>
+                <li><strong>Análisis de consumo:</strong> Calcular cuánta corriente consumirá un dispositivo si se conoce su resistencia interna y el voltaje de alimentación, permitiendo dimensionar correctamente fuentes de alimentación y cables.</li>
+                <li><strong>Resolución de fallas (Troubleshooting):</strong> Identificar si un componente está dañado midiendo su resistencia y comprobando si concuerda con los valores teóricos esperados al aplicarle un voltaje.</li>
+            </ul>
+
+            <h2>Ley de Watt y Triángulo de Potencias</h2>
+            <p>Junto con la Ley de Ohm, es fundamental conocer la <strong>Ley de Watt</strong>, la cual relaciona la potencia eléctrica con el voltaje y la corriente. La potencia (P) se mide en Vatios o Watts (W).</p>
+            
+            <div class="svg-container">
+                <!-- Triángulo de Potencia SVG -->
+                <svg width="220" height="200" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Triángulo -->
+                    <polygon points="110,20 200,170 20,170" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="4" stroke-linejoin="round"/>
+                    <!-- Línea horizontal central -->
+                    <line x1="65" y1="95" x2="155" y2="95" stroke="var(--primary-color)" stroke-width="4"/>
+                    <!-- Línea vertical divisoria inferior -->
+                    <line x1="110" y1="95" x2="110" y2="170" stroke="var(--primary-color)" stroke-width="4"/>
+                    <!-- Texto -->
+                    <text x="110" y="75" font-size="36" font-family="sans-serif" font-weight="bold" fill="var(--text-color)" text-anchor="middle">P</text>
+                    <text x="75" y="150" font-size="36" font-family="sans-serif" font-weight="bold" fill="var(--text-color)" text-anchor="middle">V</text>
+                    <text x="145" y="150" font-size="36" font-family="sans-serif" font-weight="bold" fill="var(--text-color)" text-anchor="middle">I</text>
+
+                </svg>
+            </div>
+
+            <p>El triángulo de potencias funciona igual que el de Ohm:</p>
+            <ul>
+                <li><strong>P = V × I</strong> (Potencia es Voltaje por Corriente)</li>
+                <li><strong>V = P / I</strong> (Voltaje es Potencia sobre Corriente)</li>
+                <li><strong>I = P / V</strong> (Corriente es Potencia sobre Voltaje)</li>
+            </ul>
+
+            <p>Si combinamos la Ley de Watt (P = V × I) con la Ley de Ohm (V = I × R), podemos obtener fórmulas derivadas muy útiles para calcular la potencia directamente si nos falta un dato:</p>
+            <div class="formula">
+                <div class="formula-item">
+                    P = I² × R
+                    <span>Si no conocemos V</span>
+                </div>
+                <div class="formula-item">
+                    P = V² / R
+                    <span>Si no conocemos I</span>
+                </div>
+            </div>
+
+            <h2>Ejemplos de Cálculo</h2>
+            
+            <div class="example-box">
+                <span class="example-title">Ejemplo 1: Cálculo de Voltaje (Nivel Básico)</span>
+                <p><em>Enunciado:</em> Tenemos una resistencia de 15 Ω por la cual circula una corriente de 3 A. ¿Cuál es el voltaje aplicado?</p>
+                <p><em>Solución:</em> Aplicamos la fórmula directa V = I × R.<br>
+                V = 3 A × 15 Ω = <strong>45 V</strong></p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2: Cálculo de Corriente (Nivel Básico)</span>
+                <p><em>Enunciado:</em> Un foco está conectado a una batería de 12 V y tiene una resistencia interna de 4 Ω. ¿Cuánta corriente fluye por el foco?</p>
+                <p><em>Solución:</em> Despejamos la corriente I = V / R.<br>
+                I = 12 V / 4 Ω = <strong>3 A</strong></p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 3: Cálculo de Potencia (Nivel Intermedio)</span>
+                <p><em>Enunciado:</em> Un motor de corriente continua se alimenta con 24 V y su resistencia interna es de 8 Ω. ¿Cuál es la potencia consumida por el motor?</p>
+                <p><em>Solución:</em> Como no tenemos la corriente, podemos calcularla primero o usar la fórmula derivada directa P = V² / R.<br>
+                P = (24 V)² / 8 Ω = 576 / 8 = <strong>72 W</strong></p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 4: Cálculo de Resistencia desde Potencia (Nivel Intermedio)</span>
+                <p><em>Enunciado:</em> Un soldador eléctrico consume 100 W al conectarse a un tomacorriente de 220 V. ¿Cuál es el valor de la resistencia de su elemento calefactor?</p>
+                <p><em>Solución:</em> De la fórmula P = V² / R, despejamos R. Pasamos R multiplicando y P dividiendo, quedando R = V² / P.<br>
+                R = (220 V)² / 100 W = 48400 / 100 = <strong>484 Ω</strong></p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 5: Circuito con varias resistencias (Nivel Complejo)</span>
+                <p><em>Enunciado:</em> En un circuito hay dos resistencias en serie, R1 de 2 Ω y R2 de 4 Ω, conectadas a una fuente de 12 V. ¿Cuánta potencia disipa únicamente la resistencia R1?</p>
+                <p><em>Solución Paso a Paso:</em><br>
+                1. Al estar en serie, calculamos la resistencia total: Rt = R1 + R2 = 2 Ω + 4 Ω = 6 Ω.<br>
+                2. Con la Ley de Ohm calculamos la corriente total del circuito: I = V / Rt = 12 V / 6 Ω = 2 A.<br>
+                3. Como están en serie, la misma corriente (2 A) pasa por R1.<br>
+                4. Usamos la fórmula derivada de potencia para R1: P1 = I² × R1.<br>
+                P1 = (2 A)² × 2 Ω = 4 × 2 = <strong>8 W</strong>.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+    </footer>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true); // Default to dark mode as per hub
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+
+</html>

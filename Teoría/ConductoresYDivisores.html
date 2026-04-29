@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conductores y Divisores de Tensión - Teoría</title>
+    <meta name="description" content="Propiedades de los conductores, temperatura y divisores de tensión.">
+    <style>
+        /* Shared Styles */
+        :root {
+            /* Modo Claro */
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --dot-color: #2a2a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+
+        .warning {
+            background-color: rgba(229, 107, 115, 0.1);
+            border-left: 4px solid #e56b73;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            color: var(--text-color);
+        }
+
+        ul,
+        ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .example-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            gap: 2rem;
+        }
+
+        .formula-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .formula-item span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .math-formula {
+            font-family: inherit;
+            font-size: 1.6rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .math-var {
+            font-style: italic;
+        }
+
+        .math-op {
+            margin: 0 0.4rem;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-num {
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-sub {
+            font-size: 0.6em;
+            vertical-align: sub;
+        }
+
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            font-size: 0.9em;
+            margin: 0 0.3rem;
+            line-height: 1.2;
+        }
+
+        .fraction>span:first-child {
+            border-bottom: 2px solid var(--text-color);
+            padding: 0 0.2rem;
+        }
+
+        .fraction>span:last-child {
+            padding: 0 0.2rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 0.8rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 1rem;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+            }
+
+            .formula {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al Hub">⬅️</a>
+            📖 Teoría: Conductores y Divisores
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <main>
+        <div class="content-card">
+            <h2>Introducción</h2>
+            <p>Un técnico electricista no solo trabaja con circuitos ideales, sino con componentes del mundo real. En
+                esta sección abordaremos cómo el material y las dimensiones de un cable definen su
+                <strong>resistividad</strong>, cómo la <strong>temperatura</strong> afecta su rendimiento térmico y
+                resistivo, y cómo se utiliza un <strong>divisor de tensión</strong> para adaptar señales de voltaje en
+                aplicaciones prácticas.
+            </p>
+
+            <!-- SECCIÓN 1 -->
+            <h2>1. Resistividad y Conductividad</h2>
+            <p>La resistencia (R) de un conductor no depende solo del material, sino también de su geometría. La
+                <strong>resistividad (ρ)</strong> es una propiedad específica de cada material que indica qué tanto se
+                opone al paso de la corriente. Por el contrario, la <strong>conductividad (σ)</strong> es la inversa de
+                la resistividad (σ = 1 / ρ), indicando la facilidad con la que el material conduce la corriente.
+            </p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">R</span> <span class="math-op">=</span> <span class="math-var">ρ</span>
+                        <span class="math-op">×</span>
+                        <div class="fraction">
+                            <span class="math-var">L</span>
+                            <span class="math-var">S</span>
+                        </div>
+                    </div>
+                    <span>Resistencia por Geometría</span>
+                </div>
+            </div>
+            <ul>
+                <li><strong>ρ (Rho):</strong> Resistividad del material (Ej. Cobre ≈ 0.0172 Ω·mm²/m).</li>
+                <li><strong>L:</strong> Longitud del conductor en metros (m).</li>
+                <li><strong>S:</strong> Sección transversal (área) en milímetros cuadrados (mm²).</li>
+            </ul>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 1.1: Caída de tensión en acometida larga</span>
+                <p><em>Enunciado:</em> Se debe alimentar un tablero a 50 metros del pilar usando cable de cobre de 4
+                    mm². La corriente estimada es de 20 A. Calcule la resistencia de la línea (ida y vuelta, L=100m) y
+                    la caída de tensión en el cable.</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li><strong>Cálculo de Resistencia:</strong> R = 0.0172 Ω·mm²/m × (100 m / 4 mm²) = 0.0172 × 25
+                            = <strong style="color: var(--primary-color);">0.43 Ω</strong>.</li>
+                        <li><strong>Cálculo de Caída (Ley de Ohm):</strong> ΔV = I × R = 20 A × 0.43 Ω = <strong
+                                style="color: var(--primary-color);">8.6 V</strong>.</li>
+                        <li><em>Implicancia:</em> Es una caída del 3.9% (en 220V). Si la normativa local exige un máximo
+                            del 3%, el electricista deberá saltar a la sección de 6 mm² comercial.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 1.2: Cobre vs Aluminio</span>
+                <p><em>Enunciado:</em> Un distribuidor ofrece reemplazar un cable troncal de Cobre de 10 mm² (ρ =
+                    0.0172) por uno de Aluminio (ρ = 0.028) más económico. Para mantener exactamente la misma
+                    resistencia por metro, ¿qué sección de Aluminio se necesita?</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>Igualamos las fórmulas: ρ_Cu / S_Cu = ρ_Al / S_Al.</li>
+                        <li><strong>Despejando S_Al:</strong> S_Al = (ρ_Al × S_Cu) / ρ_Cu.</li>
+                        <li>S_Al = (0.028 × 10) / 0.0172 = 0.28 / 0.0172 ≈ <strong
+                                style="color: var(--primary-color);">16.27 mm²</strong>.</li>
+                        <li><em>Implicancia:</em> Comercialmente, el técnico deberá optar por la sección normalizada
+                            superior, que típicamente será utilizar un cable de <strong>25 mm²</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 1.3: Verificación de Conductividad</span>
+                <p><em>Enunciado:</em> Se comprueba una bobina de cable "de cobre" sospechoso. En 100 m de cable de 2.5
+                    mm², se miden 1.2 Ω. ¿Cuál es la conductividad (σ) del material y es cobre puro?</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li><strong>Despejar ρ:</strong> ρ = (R × S) / L = (1.2 Ω × 2.5 mm²) / 100 m = <strong
+                                style="color: var(--primary-color);">0.030 Ω·mm²/m</strong>.</li>
+                        <li><strong>Conductividad (σ):</strong> σ = 1 / ρ = 1 / 0.030 = <strong
+                                style="color: var(--primary-color);">33.33 S/m (Siemens por metro)</strong>.</li>
+                        <li><em>Implicancia:</em> El cobre puro tiene σ ≈ 58 S/m. Este cable tiene excesiva resistencia,
+                            indicando que probablemente es una aleación barata (como el CCA: aluminio bañado en cobre) y
+                            causará recalentamiento.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2 -->
+            <h2>2. Efecto de la Temperatura en los Conductores</h2>
+            <p>La resistividad que figura en las tablas es generalmente a 20°C. Al aumentar la temperatura (ya sea por
+                el calor ambiental, o por el propio efecto Joule de la corriente), la agitación atómica dificulta el
+                paso de electrones. Esto causa dos problemas vitales para el técnico:</p>
+            <ol>
+                <li><strong>Aumento de Resistencia:</strong> A mayor calor, mayor resistencia eléctrica, lo que empeora
+                    las caídas de tensión.</li>
+                <li><strong>Reducción de Ampacidad:</strong> Todo aislante de cable (PVC, XLPE) tiene un límite de
+                    temperatura térmica (ej. 70°C). Si el ambiente es caluroso, el cable no disipará bien su propio
+                    calor, por lo que su capacidad máxima de mover corriente (ampacidad) debe ser reducida aplicando un
+                    "factor de corrección".</li>
+            </ol>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Temperatura Ambiente (°C)</th>
+                        <th>Factor de Corrección (Aislamiento PVC 70°C)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>20°C</td>
+                        <td>1.12</td>
+                    </tr>
+                    <tr style="background-color: rgba(229, 107, 115, 0.1);">
+                        <td>30°C</td>
+                        <td><strong>1.00 (Referencia Nominal)</strong></td>
+                    </tr>
+                    <tr>
+                        <td>40°C</td>
+                        <td>0.87</td>
+                    </tr>
+                    <tr>
+                        <td>50°C</td>
+                        <td>0.71</td>
+                    </tr>
+                    <tr>
+                        <td>60°C</td>
+                        <td>0.50</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">R</span><span class="math-sub">f</span> <span class="math-op">=</span>
+                        <span class="math-var">R</span><span class="math-sub">20°C</span> <span class="math-op">·</span>
+                        <span class="math-op">[</span> <span class="math-num">1</span> <span class="math-op">+</span>
+                        <span class="math-var">α</span><span class="math-op">(</span><span
+                            class="math-var">T</span><span class="math-sub">f</span> <span class="math-op">-</span>
+                        <span class="math-num">20°C</span><span class="math-op">)</span> <span class="math-op">]</span>
+                    </div>
+                    <span>Efecto Térmico en Resistencia</span>
+                </div>
+            </div>
+            <p style="text-align:center;"><em>Donde α es el coeficiente térmico del material (Cobre ≈ 0.00393 /°C).</em>
+            </p>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2.1: Diagnóstico de bobinado caliente</span>
+                <p><em>Enunciado:</em> En frío (20°C), un motor industrial mide 10 Ω en sus bobinas de cobre. Tras 3
+                    horas operando a plena carga, se detiene y se vuelve a medir, registrando 12.5 Ω. Estime la
+                    temperatura interna de los conductores del motor.</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>Fórmula: R_f / R_0 = 1 + α(ΔT).</li>
+                        <li>12.5 / 10 = 1.25. Entonces, 1 + 0.00393(ΔT) = 1.25.</li>
+                        <li>0.00393(ΔT) = 0.25 ➔ ΔT = 0.25 / 0.00393 ≈ <strong
+                                style="color: var(--primary-color);">63.6°C</strong>.</li>
+                        <li><strong>T_final:</strong> 20°C + 63.6°C = <strong
+                                style="color: var(--primary-color);">83.6°C</strong>.</li>
+                        <li><em>Implicancia:</em> Si la clase de aislación del motor soporta hasta 130°C (Clase B), el
+                            motor está trabajando dentro de márgenes muy seguros y saludables.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2.2: Factor de corrección de Ampacidad por ambiente</span>
+                <p><em>Enunciado:</em> Un cable unipolar de 6 mm² soporta 36 A a temperatura ambiente estándar de 40°C
+                    en bandeja. Si el manual del fabricante indica que el factor de corrección (fc) a 55°C de ambiente
+                    es de 0.71, ¿cuál es la corriente máxima segura si se instala en un entretecho expuesto al sol de
+                    verano (55°C)?</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li><strong>I_corregida</strong> = I_nominal × fc</li>
+                        <li>I_corregida = 36 A × 0.71 = <strong style="color: var(--primary-color);">25.56 A</strong>.
+                        </li>
+                        <li><em>Implicancia:</em> El técnico no puede colocarle una protección termomagnética de 32 A
+                            como lo haría normalmente; deberá bajar a una de 25 A para evitar que el aislamiento (PVC)
+                            se ablande y derrita en verano.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2.3: Aumento de la Caída de Tensión por calor</span>
+                <p><em>Enunciado:</em> Una línea de alimentación tiene una resistencia de 0.8 Ω a 20°C. En pleno
+                    funcionamiento de potencia expuesta al sol, el conductor metálico alcanza los 60°C. ¿Cuál será la
+                    resistencia real operando?</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>ΔT = 60°C - 20°C = 40°C.</li>
+                        <li>R_f = 0.8 × [1 + 0.00393 × 40] = 0.8 × [1 + 0.1572] = 0.8 × 1.1572 ≈ <strong
+                                style="color: var(--primary-color);">0.925 Ω</strong>.</li>
+                        <li><em>Implicancia:</em> La resistencia subió casi un 16%. Esto incrementará directamente la
+                            caída de tensión en la línea cuando el circuito esté con su carga de plena potencia.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3 -->
+            <h2>3. Divisor de Tensión y Potenciómetros</h2>
+            <p>Un divisor de tensión es un circuito lineal pasivo que produce una tensión de salida (V<sub>out</sub>)
+                que es una fracción de la tensión de entrada (V<sub>in</sub>). Este circuito, formado usualmente por dos
+                resistencias en serie, es la base de la adaptación de sensores, divisores de referencia y
+                <strong>potenciómetros</strong> (resistencias variables que operan deslizando un contacto físico por una
+                pista de carbón).
+            </p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">V</span><span class="math-sub">out</span> <span class="math-op">=</span>
+                        <span class="math-var">V</span><span class="math-sub">in</span> <span class="math-op">×</span>
+                        <span class="math-var">R</span><span class="math-sub">2</span>/(
+                        <span class="math-var">R</span><span class="math-sub">1</span>+<span
+                            class="math-var">R</span><span class="math-sub">2</span>)
+                    </div>
+                    <span>Fórmula del Divisor</span>
+                </div>
+            </div>
+
+            <div class="svg-container">
+                <!-- SVG Divisor de tension -->
+                <svg width="300" height="240" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Vin Top Line -->
+                    <line x1="60" y1="40" x2="140" y2="40" stroke="var(--text-color)" stroke-width="3"
+                        stroke-linecap="round" />
+                    <circle cx="60" cy="40" r="5" fill="var(--text-color)" />
+                    <text x="45" y="45" font-family="sans-serif" font-weight="bold" font-size="16"
+                        fill="var(--primary-color)" text-anchor="end">+ Vin</text>
+
+                    <!-- Down to R1 -->
+                    <line x1="140" y1="40" x2="140" y2="70" stroke="var(--text-color)" stroke-width="3"
+                        stroke-linecap="round" />
+
+                    <!-- R1 -->
+                    <rect x="120" y="70" width="40" height="50" fill="var(--card-bg)" stroke="var(--primary-color)"
+                        stroke-width="3" stroke-linejoin="round" />
+                    <text x="175" y="100" font-family="sans-serif" font-weight="bold" font-size="16"
+                        fill="var(--text-color)">R₁</text>
+
+                    <!-- Down to R2 -->
+                    <line x1="140" y1="120" x2="140" y2="150" stroke="var(--text-color)" stroke-width="3"
+                        stroke-linecap="round" />
+
+                    <!-- Vout Middle Line -->
+                    <line x1="140" y1="135" x2="220" y2="135" stroke="var(--text-color)" stroke-width="3"
+                        stroke-dasharray="4,4" />
+                    <circle cx="140" cy="135" r="5" fill="var(--text-color)" />
+                    <circle cx="220" cy="135" r="5" fill="var(--text-color)" />
+                    <text x="235" y="140" font-family="sans-serif" font-weight="bold" font-size="16"
+                        fill="var(--primary-color)" text-anchor="start">+ Vout</text>
+
+                    <!-- R2 -->
+                    <rect x="120" y="150" width="40" height="50" fill="var(--card-bg)" stroke="var(--primary-color)"
+                        stroke-width="3" stroke-linejoin="round" />
+                    <text x="175" y="180" font-family="sans-serif" font-weight="bold" font-size="16"
+                        fill="var(--text-color)">R₂</text>
+
+                    <!-- Down to Ground/Bottom Line -->
+                    <line x1="140" y1="200" x2="140" y2="220" stroke="var(--text-color)" stroke-width="3"
+                        stroke-linecap="round" />
+
+                    <!-- Bottom Line -->
+                    <line x1="60" y1="220" x2="220" y2="220" stroke="var(--text-color)" stroke-width="3"
+                        stroke-linecap="round" />
+                    <circle cx="60" cy="220" r="5" fill="var(--text-color)" />
+                    <circle cx="220" cy="220" r="5" fill="var(--text-color)" />
+
+                    <text x="45" y="226" font-family="sans-serif" font-weight="bold" font-size="20"
+                        fill="var(--text-color)" text-anchor="end">-</text>
+                    <text x="235" y="226" font-family="sans-serif" font-weight="bold" font-size="20"
+                        fill="var(--text-color)" text-anchor="start">-</text>
+                </svg>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 3.1: Adaptación de Sensor (Industrial a Arduino)</span>
+                <p><em>Enunciado:</em> Un sensor industrial entrega una señal lógica máxima de 24 V. Un autómata (o un
+                    Arduino) solo tolera hasta 5 V en su entrada digital. ¿Qué resistencias usarías para crear un
+                    divisor seguro que baje la señal?</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>Queremos que con V_in = 24 V, V_out sea máximo 5 V.</li>
+                        <li>Elegimos de nuestro cajón R₂ = 5 kΩ (un valor comercial seguro para la entrada).</li>
+                        <li>Fórmula: 5 V = 24 V × [ 5k / (R₁ + 5k) ].</li>
+                        <li>5 × (R₁ + 5k) = 120k ➔ 5·R₁ + 25k = 120k ➔ 5·R₁ = 95k ➔ R₁ = <strong
+                                style="color: var(--primary-color);">19 kΩ</strong>.</li>
+                        <li><em>Implicancia:</em> Uniendo una R₁ de 19 kΩ y una R₂ de 5 kΩ, el técnico adapta la señal
+                            de maquinaria pesada al microcontrolador previniendo que la placa de 5V se queme
+                            instantáneamente.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 3.2: Ajuste de velocidad de Motor con Potenciómetro</span>
+                <p><em>Enunciado:</em> El Inversor (VDF) de un motor industrial recibe una consigna analógica de 0 a 10
+                    V. Se usa un potenciómetro lineal de 10 kΩ con una fuente fija de 10 V. ¿En qué valor resistivo se
+                    encuentra el centro si el motor debe girar a media velocidad (5 V)?</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>El potenciómetro actúa como un divisor donde R₁ + R₂ es siempre la suma total de 10 kΩ.</li>
+                        <li>Para V_out = 5 V: 5 V = 10 V × [ R₂ / 10 kΩ ].</li>
+                        <li>R₂ / 10k = 0.5 ➔ R₂ = <strong style="color: var(--primary-color);">5 kΩ</strong>.</li>
+                        <li><em>Implicancia:</em> Como el potenciómetro es lineal, los 5 kΩ representan exactamente el
+                            <strong style="color: var(--primary-color);">50%</strong> del recorrido mecánico,
+                            permitiendo un control predecible del operario sobre la máquina.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 3.3: Prevención de daño en un Potenciómetro (Ajuste de
+                    Potencia)</span>
+                <p><em>Enunciado:</em> Un aprendiz usa un pequeño potenciómetro comercial de 1 kΩ (fabricado para
+                    soportar 0.5 Watts máximo) conectándolo directo a una batería de 12 V para usarlo de atenuador. ¿Se
+                    quemará el componente si no se conecta carga en la salida?</p>
+                <div
+                    style="background-color: var(--card-bg); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid var(--border-color);">
+                    <strong>Solución:</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>Aunque V_out no tenga carga, por la pista completa fluye una corriente constante: I = 12 V /
+                            1000 Ω = 0.012 A.</li>
+                        <li><strong>Potencia disipada constante:</strong> P = V × I = 12 V × 0.012 A = <strong
+                                style="color: var(--primary-color);">0.144 W</strong>.</li>
+                        <li><em>Implicancia:</em> Como 0.144 W es menor a 0.5 W, <strong>no se quemará en
+                                vacío</strong>. Sin embargo, los técnicos saben que los potenciómetros regulan
+                            <em>señales de voltaje</em>, no <em>cargas de potencia</em>. Si el aprendiz conecta un motor
+                            a la salida V_out, la corriente se disparará y fundirá la pista de carbón del componente.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+    </footer>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true); // Default to dark mode as per hub
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+
+</html>
