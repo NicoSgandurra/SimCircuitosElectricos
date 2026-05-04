@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistemas Trifásicos - Teoría</title>
+    <meta name="description" content="Explicación detallada de Sistemas Trifásicos, Conexiones y Potencia.">
+    <style>
+        /* Shared Styles */
+        :root {
+            /* Modo Claro */
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --dot-color: #2a2a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--text-color);
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .example-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            gap: 2rem;
+        }
+
+        .formula-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .formula-item span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .math-formula {
+            font-family: inherit;
+            font-size: 1.6rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+
+        .math-var {
+            font-style: italic;
+        }
+
+        .math-op {
+            margin: 0 0.4rem;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-num {
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-sub {
+            font-size: 0.6em;
+            vertical-align: sub;
+        }
+
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            font-size: 0.9em;
+            margin: 0 0.3rem;
+            line-height: 1.2;
+        }
+
+        .fraction>span:first-child {
+            border-bottom: 2px solid var(--text-color);
+            padding: 0 0.2rem;
+        }
+
+        .fraction>span:last-child {
+            padding: 0 0.2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 1rem;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+            }
+
+            .formula {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al Hub">⬅️</a>
+            📖 Teoría: Sistemas Trifásicos
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <main>
+        <div class="content-card">
+            <h2>Tensión de Línea (VL) y Tensión de Fase (VF)</h2>
+            <p>En un <strong>sistema trifásico</strong>, existen dos tipos principales de tensiones que se pueden medir
+                en la red:</p>
+            <ul>
+                <li><strong>Tensión de Fase (V<sub>F</sub>):</strong> Es la tensión medida entre cualquiera de las fases
+                    (R, T o S) y el punto neutro (N). También se la denomina tensión simple.</li>
+                <li><strong>Tensión de Línea (V<sub>L</sub>):</strong> Es la tensión medida entre dos fases cualesquiera
+                    (por ejemplo, entre R y S, S y T, o T y R). También se conoce como tensión compuesta.</li>
+            </ul>
+            <p>La relación matemática entre la tensión de línea y la tensión de fase depende fundamentalmente de cómo
+                esté conectado el sistema (en estrella o en triángulo).</p>
+
+            <h3>Obtención Matemática y Gráfica</h3>
+            <p>Para entender por qué la tensión de línea es <strong>&radic;3</strong> veces mayor que la tensión de fase en un sistema equilibrado, debemos recurrir a la suma vectorial (o fasorial).</p>
+            
+            <p><strong>1. Desarrollo Matemático:</strong></p>
+            <p>La Tensión de Línea (por ejemplo, V<sub>RS</sub>, la tensión entre las fases R y S) no es una simple suma aritmética, sino la <strong>diferencia fasorial</strong> entre dos Tensiones de Fase (V<sub>R</sub> y V<sub>S</sub>):</p>
+            
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">V<sub>RS</sub></span> <span class="math-op">=</span> <span class="math-var">V<sub>R</sub></span> <span class="math-op">-</span> <span class="math-var">V<sub>S</sub></span>
+                    </div>
+                </div>
+            </div>
+            
+            <p><strong>2. Demostración Gráfica (Fasores):</strong></p>
+            <p>En un diagrama fasorial, las tres tensiones de fase (V<sub>R</sub>, V<sub>S</sub>, V<sub>T</sub>) se representan como tres vectores separados por 120 grados exactos entre sí.</p>
+            <p>Para calcular gráficamente V<sub>R</sub> - V<sub>S</sub>, se invierte el vector V<sub>S</sub> (creando -V<sub>S</sub>) y se le suma al vector V<sub>R</sub> mediante la regla del paralelogramo.</p>
+            
+            <div class="svg-container">
+                <!-- Diagrama Fasorial SVG -->
+                <svg width="300" height="250" viewBox="0 -30 300 280" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-color)" />
+                        </marker>
+                        <marker id="arrow-primary" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--primary-color)" />
+                        </marker>
+                        <marker id="arrow-light" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-light)" />
+                        </marker>
+                    </defs>
+                    <!-- VR Vector (150,150 -> 150,50) -->
+                    <line x1="150" y1="150" x2="150" y2="50" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrow)"/>
+                    <!-- VS Vector -->
+                    <line x1="150" y1="150" x2="236.6" y2="200" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrow)"/>
+                    <!-- VT Vector -->
+                    <line x1="150" y1="150" x2="63.4" y2="200" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrow)"/>
+
+                    <text x="140" y="35" font-family="sans-serif" font-size="16" font-weight="bold" fill="var(--text-color)">VR</text>
+                    <text x="245" y="215" font-family="sans-serif" font-size="16" font-weight="bold" fill="var(--text-color)">VS</text>
+                    <text x="40" y="215" font-family="sans-serif" font-size="16" font-weight="bold" fill="var(--text-color)">VT</text>
+
+                    <!-- -VS Vector -->
+                    <line x1="150" y1="150" x2="63.4" y2="100" stroke="var(--text-light)" stroke-width="2" stroke-dasharray="4" marker-end="url(#arrow-light)"/>
+                    <text x="25" y="95" font-family="sans-serif" font-size="14" fill="var(--text-light)">-VS</text>
+
+                    <!-- Parallelogram lines -->
+                    <line x1="150" y1="50" x2="63.4" y2="0" stroke="var(--text-light)" stroke-width="1" stroke-dasharray="4"/>
+                    <line x1="63.4" y1="100" x2="63.4" y2="0" stroke="var(--text-light)" stroke-width="1" stroke-dasharray="4"/>
+
+                    <!-- VRS Resultant Vector -->
+                    <line x1="150" y1="150" x2="63.4" y2="0" stroke="var(--primary-color)" stroke-width="3" marker-end="url(#arrow-primary)"/>
+                    <text x="75" y="20" font-family="sans-serif" font-size="16" font-weight="bold" fill="var(--primary-color)">VRS (VL)</text>
+
+                    <!-- Angle Arc 30 deg -->
+                    <path d="M 150 90 A 60 60 0 0 0 120 98" fill="none" stroke="var(--primary-color)" stroke-width="1.5" />
+                    <text x="125" y="85" font-family="sans-serif" font-size="12" fill="var(--primary-color)">30°</text>
+                </svg>
+            </div>
+
+            <p>La diagonal mayor de este paralelogramo representa <strong>V<sub>RS</sub></strong> (la Tensión de Línea). Como se observa, el vector resultante forma un ángulo de 30° con el vector original V<sub>R</sub>.</p>
+            <p>Si dividimos el triángulo isósceles resultante a la mitad, obtenemos un triángulo rectángulo donde la hipotenusa es la Tensión de Fase (V<sub>F</sub>) y el ángulo adyacente es 30°. Usando trigonometría básica:</p>
+            <ul>
+                <li>La mitad de la Tensión de Línea es: <code>V<sub>F</sub> × cos(30°)</code></li>
+                <li>Sabiendo que el <code>cos(30°) = &radic;3 / 2</code>, esa mitad es: <code>V<sub>F</sub> × (&radic;3 / 2)</code></li>
+                <li>Al multiplicar por dos para obtener la Tensión de Línea completa, llegamos a la famosa relación:</li>
+            </ul>
+            
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">V<sub>L</sub></span> <span class="math-op">=</span> &radic;3 <span class="math-op">×</span> <span class="math-var">V<sub>F</sub></span>
+                    </div>
+                </div>
+            </div>
+            <div class="example-box">
+                <span class="example-title">Ejemplo 1: Cálculo de Tensión Compuesta (Línea)</span>
+                <p><em>Situación:</em> En una fábrica, la red eléctrica entrega una Tensión de Fase (V<sub>F</sub>) de <strong>220V</strong> (medida entre cualquier cable de fase y el neutro). Un técnico necesita conectar un motor industrial que funciona con la Tensión de Línea. ¿Qué tensión recibe el motor si se conecta entre dos fases (por ejemplo, R y S)?</p>
+                <p><em>Solución Matemática:</em> Usamos nuestra fórmula descubierta anteriormente, donde multiplicamos por la raíz cuadrada de 3 (&approx;1.732):<br>
+                <code>V<sub>L</sub> = 1.732 × 220 V = <strong>381 V</strong></code> (En la práctica industrial, este sistema se denomina de 380V).</p>
+                <p><em>Explicación Gráfica Simple:</em> Imagina que las tres fases son las agujas de un reloj de pared marcando las 12, las 4 y las 8. La longitud desde el centro del reloj hasta la punta de la aguja de las 12 es de 220 cm. Si mides la distancia en línea recta desde la punta de las 12 hasta la punta de las 4, no es sumar 220+220=440. Debido a la geometría del triángulo que forman al estar separadas, esa distancia recta (que representa la tensión de línea) resulta ser de exactamente 381 cm.</p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2: Cálculo Fasorial Exacto (Forma Rectangular)</span>
+                <p><em>Situación:</em> Para aquellos estudiantes que ya dominan los números complejos, podemos demostrar matemáticamente cómo calcular las tres tensiones de línea individuales (V<sub>RS</sub>, V<sub>ST</sub> y V<sub>TR</sub>) usando coordenadas rectangulares (ejes X e Y), asumiendo una Tensión de Fase de 220V.</p>
+                <p><em>1. Descomposición de las Fases:</em> Ubicamos la Fase R a 90° (arriba), la Fase S a -30° y la Fase T a -150° (para que estén separadas por exactamente 120° en nuestro plano cartesiano):</p>
+                <ul>
+                    <li><strong>V<sub>R</sub> (90°):</strong> <code>X = 220 × cos(90°) = 0</code> | <code>Y = 220 × sin(90°) = 220</code> &rarr; <strong>V<sub>R</sub> = 0 + j220 V</strong></li>
+                    <li><strong>V<sub>S</sub> (-30°):</strong> <code>X = 220 × cos(-30°) = 190.5</code> | <code>Y = 220 × sin(-30°) = -110</code> &rarr; <strong>V<sub>S</sub> = 190.5 - j110 V</strong></li>
+                    <li><strong>V<sub>T</sub> (-150°):</strong> <code>X = 220 × cos(-150°) = -190.5</code> | <code>Y = 220 × sin(-150°) = -110</code> &rarr; <strong>V<sub>T</sub> = -190.5 - j110 V</strong></li>
+                </ul>
+                <p><em>2. Suma fasorial (resta de coordenadas):</em> Las tensiones de línea son la diferencia vectorial entre las fases. Restamos el eje X con el X, y el Y con el Y:</p>
+                <ul>
+                    <li><strong>V<sub>RS</sub> = V<sub>R</sub> - V<sub>S</sub>:</strong> <code>(0 - 190.5) + j(220 - (-110))</code> &rarr; <strong>-190.5 + j330 V</strong>. Si calculamos la hipotenusa (por Teorema de Pitágoras): <code>&radic;((-190.5)² + 330²) = <strong>381 V</strong></code>.</li>
+                    <li><strong>V<sub>ST</sub> = V<sub>S</sub> - V<sub>T</sub>:</strong> <code>(190.5 - (-190.5)) + j(-110 - (-110))</code> &rarr; <strong>381 + j0 V</strong>. Su hipotenusa es obviamente <code><strong>381 V</strong></code>.</li>
+                    <li><strong>V<sub>TR</sub> = V<sub>T</sub> - V<sub>R</sub>:</strong> <code>(-190.5 - 0) + j(-110 - 220)</code> &rarr; <strong>-190.5 - j330 V</strong>. Su hipotenusa también resulta en <code>&radic;((-190.5)² + (-330)²) = <strong>381 V</strong></code>.</li>
+                </ul>
+                <p><em>Conclusión:</em> Como por arte de magia matemática, sin importar qué par de fases combinemos, la distancia fasorial resultante (la Tensión de Línea) siempre tiene la misma longitud exacta: los famosos 380V que medimos con el voltímetro en el taller.</p>
+            </div>
+
+            <h2>Conexiones Estrella (Y) y Triángulo (Δ)</h2>
+            <p>En los sistemas trifásicos, los componentes (generadores, transformadores o motores) pueden conectarse
+                principalmente de dos configuraciones distintas:</p>
+
+            <h3>Conexión Estrella (Y)</h3>
+            <p>En la conexión en estrella, un extremo de cada una de las tres bobinas o fases se conecta a un punto
+                común, formando el <strong>neutro</strong> del sistema.</p>
+            <ul>
+                <li><strong>Tensiones:</strong> La Tensión de Línea es &radic;3 veces mayor que la Tensión de Fase. <br>
+                    <div class="math-formula" style="justify-content: flex-start; font-size: 1.2rem; margin: 0.5rem 0;">
+                        V<sub>L</sub> = &radic;3 × V<sub>F</sub></div>
+                </li>
+                <li><strong>Corrientes:</strong> La Corriente que circula por la Línea (I<sub>L</sub>) es exactamente
+                    igual a la Corriente que circula por la Fase (I<sub>F</sub>). <br>
+                    <div class="math-formula" style="justify-content: flex-start; font-size: 1.2rem; margin: 0.5rem 0;">
+                        I<sub>L</sub> = I<sub>F</sub></div>
+                </li>
+            </ul>
+            <p><em>Aplicaciones:</em> Es la configuración más utilizada en distribución de baja tensión (como las redes
+                domiciliarias) ya que al tener un punto neutro disponible, permite obtener dos niveles de tensión
+                diferentes de la misma red (por ejemplo, 380V de línea para fuerza motriz y 220V de fase para
+                iluminación y enchufes). También es clave para el primer paso del arranque suave de motores grandes.</p>
+
+            <h3>Conexión Triángulo (Δ)</h3>
+            <p>En la conexión en triángulo (o delta), las tres fases se conectan formando un circuito cerrado, uniendo
+                el final de una fase con el principio de la siguiente. En esta configuración no existe un punto neutro.
+            </p>
+            <ul>
+                <li><strong>Tensiones:</strong> La Tensión de Línea es idéntica a la Tensión de Fase. <br>
+                    <div class="math-formula" style="justify-content: flex-start; font-size: 1.2rem; margin: 0.5rem 0;">
+                        V<sub>L</sub> = V<sub>F</sub></div>
+                </li>
+                <li><strong>Corrientes:</strong> La Corriente de Línea es &radic;3 veces mayor que la Corriente de Fase.
+                    <br>
+                    <div class="math-formula" style="justify-content: flex-start; font-size: 1.2rem; margin: 0.5rem 0;">
+                        I<sub>L</sub> = &radic;3 × I<sub>F</sub></div>
+                </li>
+            </ul>
+            <p><em>Aplicaciones:</em> Se emplea frecuentemente en sistemas de transmisión de potencia donde no se
+                requiere de un conductor neutro (ahorrando costos de cableado) y en el funcionamiento normal de motores
+                trifásicos de potencia para obtener su par motor máximo nominal.</p>
+
+            <h3>Conexión de Motores: Estrella vs. Triángulo</h3>
+            <div class="statement">
+                El método de arranque "Estrella-Triángulo" es una de las técnicas más clásicas para reducir la elevada
+                corriente de irrupción al encender un motor trifásico.
+            </div>
+            <ul>
+                <li><strong>Arranque en Estrella:</strong> Inicialmente, el motor se conecta en estrella. Cada bobinado
+                    recibe solamente la tensión de fase (V<sub>L</sub> / &radic;3). Al recibir menos tensión, se reduce
+                    drásticamente (a un tercio) tanto la corriente absorbida de la red como el par de arranque. Esto
+                    protege la instalación eléctrica de picos dañinos y evita caídas de tensión severas en la red.</li>
+                <li><strong>Funcionamiento en Triángulo:</strong> Una vez que el motor ha acelerado y se acerca a su
+                    velocidad de régimen (aprox. 75-80% de las RPM nominales), el contactor cambia la conexión de los
+                    bobinados a triángulo. En este momento, cada bobina recibe el 100% de la tensión de línea
+                    (V<sub>L</sub> = V<sub>F</sub>), permitiendo al motor entregar toda su potencia mecánica y par
+                    nominal.</li>
+            </ul>
+
+            <h3>Desconexión del Neutro (El Neutro Flotante)</h3>
+            <p>Desde un punto de vista conceptual, si un sistema trifásico conectado en estrella está <strong>desequilibrado</strong> (es decir, las cargas conectadas a cada fase no son idénticas) y el conductor neutro se abre o se desconecta accidentalmente, se produce un fenómeno severo conocido como <em>Neutro Flotante</em>.</p>
+            <ul>
+                <li><strong>Impacto en las tensiones de fase:</strong> El neutro sirve como un camino de retorno para estabilizar el sistema. Sin él, el "punto neutro" físico de la carga se desplaza dependiendo de las impedancias. Esto provoca que las fases con <em>menor carga</em> (mayor impedancia) sufran una violenta <strong>sobretensión</strong>, acercándose al valor de la tensión de línea (por ejemplo, disparándose de 220V a cerca de 380V). Paralelamente, las fases con <em>mayor carga</em> experimentan una caída de tensión pronunciada.</li>
+                <li><strong>Consecuencias para los equipos:</strong> Esta sobretensión es letal. Destruirá casi instantáneamente equipos electrónicos, electrodomésticos e iluminación conectados a las fases afectadas. Por otro lado, la caída de tensión en las otras fases hará que motores y compresores no logren arrancar, recalentándose y quemándose a largo plazo.</li>
+            </ul>
+
+            <h2>Secuencia de Fases</h2>
+            <p>La <strong>secuencia de fases</strong> se define como el orden temporal en el cual las tres tensiones (R, S, T) alcanzan su valor máximo positivo. Existen dos secuencias posibles:</p>
+            <ul>
+                <li><strong>Secuencia Directa (Positiva):</strong> El orden es R &rarr; S &rarr; T.</li>
+                <li><strong>Secuencia Inversa (Negativa):</strong> El orden es R &rarr; T &rarr; S. Se logra intercambiando físicamente dos cables de fase cualesquiera.</li>
+            </ul>
+            <p><strong>¿Por qué es un factor crítico?</strong><br>
+            La secuencia de las fases es la responsable directa de crear el campo magnético rotante dentro de las máquinas eléctricas. Por lo tanto, determina exclusivamente el <strong>sentido de giro de los motores trifásicos</strong>. Si se alimenta una máquina industrial (como una bomba, un compresor, un torno o una cinta transportadora) con la secuencia invertida, el motor girará en reversa. Esto no solo impide su funcionamiento normal, sino que puede destruir componentes mecánicos (por ejemplo, desenroscar piezas internas o romper bombas de agua por cavitación) y causar accidentes graves.</p>
+
+            <h2>Cálculo de Potencias en Sistemas Trifásicos</h2>
+            <p>En un sistema trifásico equilibrado, el flujo de energía se divide en tres tipos de potencia.</p>
+            
+            <h3>Potencia con Valores de Fase vs. Valores de Línea</h3>
+            <p>La forma más intuitiva de calcular la potencia total es sumar la potencia de las tres fases por separado, usando las <strong>Tensiones de Fase (V<sub>F</sub>)</strong> y las <strong>Corrientes de Fase (I<sub>F</sub>)</strong>:</p>
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">P</span> <span class="math-op">=</span> 3 <span class="math-op">×</span> <span class="math-var">V<sub>F</sub></span> <span class="math-op">×</span> <span class="math-var">I<sub>F</sub></span> <span class="math-op">×</span> cos(&phi;)
+                    </div>
+                    <span>Cálculo empleando valores de FASE</span>
+                </div>
+            </div>
+            <p>Sin embargo, en el día a día industrial es peligroso o imposible medir los valores de fase porque el cable neutro a menudo no está disponible en las borneras de los motores. Lo que los técnicos miden de forma segura y directa con su pinza amperométrica y multímetro son los <strong>valores de línea (V<sub>L</sub> e I<sub>L</sub>)</strong>.</p>
+            <p>Si usamos las ecuaciones matemáticas aprendidas arriba para reemplazar la Fase por la Línea, el número "3" se transforma en una "Raíz de 3". Por este motivo, el estándar mundial y la forma más práctica para calcular las potencias es usar siempre la raíz de 3 y los valores de línea, mediante las siguientes fórmulas:</p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">P</span> <span class="math-op">=</span> &radic;3 <span
+                            class="math-op">×</span> <span class="math-var">V<sub>L</sub></span> <span
+                            class="math-op">×</span> <span class="math-var">I<sub>L</sub></span> <span
+                            class="math-op">×</span> cos(&phi;)
+                    </div>
+                    <span>Potencia Activa (P) - Unidad: Vatios (W)</span>
+                </div>
+            </div>
+
+            <p><strong>Potencia Activa (P):</strong> Es la "potencia real". Es la porción de energía eléctrica que
+                efectivamente se transforma en trabajo útil (por ejemplo, movimiento rotativo en el eje de un motor o
+                calor en una resistencia).</p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">Q</span> <span class="math-op">=</span> &radic;3 <span
+                            class="math-op">×</span> <span class="math-var">V<sub>L</sub></span> <span
+                            class="math-op">×</span> <span class="math-var">I<sub>L</sub></span> <span
+                            class="math-op">×</span> sen(&phi;)
+                    </div>
+                    <span>Potencia Reactiva (Q) - Unidad: Voltamperios Reactivos (VAr)</span>
+                </div>
+            </div>
+
+            <p><strong>Potencia Reactiva (Q):</strong> Es la "potencia de magnetización". Es esencial para crear los
+                campos magnéticos en los equipos de corriente alterna, pero no genera trabajo útil directo.</p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">S</span> <span class="math-op">=</span> &radic;3 <span
+                            class="math-op">×</span> <span class="math-var">V<sub>L</sub></span> <span
+                            class="math-op">×</span> <span class="math-var">I<sub>L</sub></span>
+                    </div>
+                    <span>Potencia Aparente (S) - Unidad: Voltamperios (VA)</span>
+                </div>
+            </div>
+
+            <p><strong>Potencia Aparente (S):</strong> Es la potencia total (la suma vectorial de P y Q) que debe
+                suministrar el transformador de la red eléctrica. Las instalaciones, cables y protecciones deben
+                dimensionarse siempre en base a la potencia aparente y la corriente total.</p>
+
+            <p>La relación geométrica entre estas tres potencias se visualiza mediante el <strong>Triángulo de
+                    Potencias</strong>, donde por el Teorema de Pitágoras: <code>S² = P² + Q²</code>.</p>
+
+            <h2>Corrección del Factor de Potencia (FP)</h2>
+            <p>El <strong>Factor de Potencia (FP)</strong>, también conocido como <em>cos(&phi;)</em>, es un indicador
+                fundamental sobre cuán eficientemente se está aprovechando la energía eléctrica en una instalación.
+                Matemáticamente, es la relación que existe entre la Potencia Activa (P) (la energía útil) y la Potencia
+                Aparente (S) (la energía total demandada).</p>
+            <p><strong>La importancia de corregirlo:</strong><br>
+                La mayoría de las cargas industriales (motores eléctricos, transformadores, balastos magnéticos) son
+                fuertemente inductivas. Estos equipos requieren <em>Potencia Reactiva (Q)</em> para generar sus campos
+                magnéticos internos. Esta potencia reactiva "fluye" constantemente entre la red y la carga sin producir
+                trabajo mecánico ni calor útil, pero sí ocupa capacidad de corriente en los conductores y
+                transformadores, aumentando considerablemente las pérdidas por calentamiento (Efecto Joule). Un Factor
+                de Potencia bajo indica una instalación ineficiente y es fuertemente penalizado económicamente en la
+                factura eléctrica por las compañías distribuidoras.</p>
+            <p><strong>¿Cómo se corrige y funciona?</strong><br>
+                Para mitigar este problema, se instalan <strong>Bancos de Capacitores</strong> (condensadores). Estos
+                equipos proporcionan <em>potencia reactiva capacitiva</em>, la cual tiene un efecto opuesto a la
+                reactiva inductiva de los motores y se anulan mutuamente en la red local. Al compensar esta demanda de
+                manera local (cerca del motor o en el tablero principal), la red eléctrica general ya no necesita
+                suministrar esa corriente reactiva, disminuyendo la corriente total de línea, reduciendo las pérdidas,
+                liberando capacidad en los transformadores y mejorando el voltaje general del sistema sin afectar en
+                absoluto la potencia mecánica útil.</p>
+
+            <h2>Ejercicios de Aplicación (Potencia y FP)</h2>
+            
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2: Calculando Potencias de un Motor</span>
+                <p><em>Situación:</em> Un motor trifásico está conectado a una red de <strong>380V</strong> (Tensión de Línea) y la pinza amperométrica indica que absorbe una corriente de <strong>10 A</strong> (Corriente de Línea). En su chapa de características de fábrica dice que tiene un Factor de Potencia <code>cos(&phi;) = 0.85</code>.</p>
+                <p><em>Desarrollo:</em> Vamos a calcular los tres tipos de potencia paso a paso para entender su consumo.</p>
+                <ul>
+                    <li><strong>1. Potencia Aparente (S):</strong> Es la energía total bruta que el motor "arranca" de los cables.<br>
+                    <code>S = &radic;3 × 380 V × 10 A = 1.732 × 3800 = <strong>6581 VA</strong></code> (o 6.58 kVA)</li>
+                    <li><strong>2. Potencia Activa (P):</strong> Es la fuerza útil real que el motor convierte en movimiento.<br>
+                    <code>P = S × cos(&phi;) = 6581 VA × 0.85 = <strong>5594 W</strong></code> (o 5.59 kW)</li>
+                    <li><strong>3. Potencia Reactiva (Q):</strong> Es la energía "prestada" usada internamente solo para crear los imanes electromagnéticos. Sabiendo por calculadora que si el coseno es 0.85, el seno es &approx;0.526.<br>
+                    <code>Q = &radic;3 × 380 V × 10 A × 0.526 = <strong>3462 VAr</strong></code> (o 3.46 kVAr)</li>
+                </ul>
+                <p><em>Conclusión:</em> El motor le exige a la red eléctrica 6.58 kVA en total, pero debido a su eficiencia eléctrica de 0.85, solo logra aprovechar 5.59 kW para hacer el trabajo físico pesado.</p>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 3: La Magia de Corregir el Factor de Potencia</span>
+                <p><em>Situación:</em> Tienes el mismo motor del Ejemplo 2 consumiendo <strong>5594 W</strong> (P) a <strong>380V</strong>. El gerente de la planta decide instalar un <em>Banco de Capacitores</em> que mejora enormemente la eficiencia eléctrica del circuito, subiendo el Factor de Potencia de <strong>0.85</strong> a un excelente <strong>0.95</strong>.</p>
+                <p><em>Desarrollo:</em> La Potencia Activa (P) que el motor necesita para realizar el trabajo físico <em>no cambia</em> (sigue siendo 5594 W). Vamos a ver qué ocurre con la corriente que viaja por los cables principales:</p>
+                <ul>
+                    <li><strong>Nueva Potencia Aparente (S):</strong> Despejamos de la fórmula <code>P = S × cos(&phi;)</code> &rarr; <code>S = P / cos(&phi;)</code><br>
+                    <code>Nueva S = 5594 W / 0.95 = <strong>5888 VA</strong></code> (¡Bajó muchísimo desde los 6581 VA originales!).</li>
+                    <li><strong>Nueva Corriente de Línea (I<sub>L</sub>):</strong> Despejamos de la fórmula <code>S = &radic;3 × V<sub>L</sub> × I<sub>L</sub></code> &rarr; <code>I<sub>L</sub> = S / (&radic;3 × V<sub>L</sub>)</code><br>
+                    <code>Nueva I<sub>L</sub> = 5888 / (1.732 × 380) = 5888 / 658.1 = <strong>8.94 A</strong></code> (Bajó desde los 10 A originales).</li>
+                </ul>
+                <p><em>Conclusión:</em> ¡Esta es la importancia de la corrección! Al compensar el circuito usando los capacitores, <strong>la corriente que viaja desde la calle hasta la fábrica bajó de 10 A a casi 9 A</strong>. El motor gira a la misma velocidad y mueve la misma carga pesada, pero como fluye menos corriente por los cables principales, estos se calentarán mucho menos, se previenen caídas de tensión, y la empresa evitará costosas multas en la factura eléctrica.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+    </footer>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true); // Default to dark mode as per hub
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+
+</html>
