@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resonancia Eléctrica - Teoría</title>
+    <meta name="description" content="Análisis de resonancia en circuitos eléctricos monofásicos: resonancia serie, paralelo, frecuencia de resonancia y factor de calidad.">
+    <style>
+        /* Shared Styles */
+        :root {
+            /* Modo Claro */
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --dot-color: #2a2a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--text-color);
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .example-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .formula-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .formula-item span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .math-formula {
+            font-family: inherit;
+            font-size: 1.6rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            flex-wrap: wrap;
+        }
+
+        .math-var {
+            font-style: italic;
+        }
+
+        .math-op {
+            margin: 0 0.4rem;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-sub {
+            font-size: 0.6em;
+            vertical-align: sub;
+        }
+        
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            font-size: 0.9em;
+            margin: 0 0.3rem;
+            line-height: 1.2;
+        }
+
+        .fraction>span:first-child {
+            border-bottom: 2px solid var(--text-color);
+            padding: 0 0.2rem;
+        }
+
+        .fraction>span:last-child {
+            padding: 0 0.2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 1rem;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+            }
+
+            .formula {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al Hub">⬅️</a>
+            📖 Teoría: Resonancia Eléctrica
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <main>
+        <div class="content-card">
+            <div class="statement">
+                La resonancia es un fenómeno crítico que ocurre en circuitos de corriente alterna que contienen inductancias (L) y capacitancias (C). Bajo una frecuencia específica, las características reactivas de estos componentes se anulan mutuamente, generando comportamientos extremos en la impedancia, corriente y tensiones del sistema.
+            </div>
+
+            <h2>1. El Principio de Resonancia</h2>
+            <p>Como se ha estudiado en el análisis de CA, la reactancia inductiva (X<sub>L</sub>) y la reactancia capacitiva (X<sub>C</sub>) tienen efectos direccionalmente opuestos en el plano complejo fasorial. En la expresión matemática de la impedancia (<code>Z = R + j(X<sub>L</sub> - X<sub>C</sub>)</code>), sus magnitudes se contrarrestan.</p>
+            <p>El estado de <strong>resonancia</strong> se alcanza en el instante exacto donde la reactancia inductiva se iguala en magnitud con la reactancia capacitiva:</p>
+            
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">X<sub>L</sub></span> <span class="math-op">=</span> <span class="math-var">X<sub>C</sub></span>
+                    </div>
+                    <span>Condición Fundamental de Resonancia</span>
+                </div>
+            </div>
+
+            <p>Al igualarse, el término reactivo neto <code>(X<sub>L</sub> - X<sub>C</sub>)</code> se reduce a cero. En consecuencia, la impedancia total del circuito pierde su parte imaginaria y se vuelve puramente resistiva (<code>Z = R + j0</code>). En esta condición, el <strong>Factor de Potencia (FP) es unitario (1.0)</strong>, y la tensión de alimentación se encuentra perfectamente en fase con la corriente total.</p>
+
+            <h3>Frecuencia de Resonancia (f<sub>r</sub>)</h3>
+            <p>Dado que X<sub>L</sub> aumenta de manera proporcional con la frecuencia (<code>X<sub>L</sub> = 2&pi;fL</code>) y X<sub>C</sub> disminuye inversamente con ella (<code>X<sub>C</sub> = 1 / (2&pi;fC)</code>), existe una única frecuencia en la cual sus curvas se intersectan. Esta es la <em>Frecuencia de Resonancia</em> y se deriva despejando de la igualdad fundamental, dando lugar a la fórmula de Thomson:</p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">f<sub>r</sub></span> <span class="math-op">=</span> <span class="fraction"><span>1</span><span>2&pi;&radic;(L&middot;C)</span></span>
+                    </div>
+                    <span>Frecuencia de Resonancia (f en Hertz)</span>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 1: Cálculo de la Frecuencia de Resonancia</span>
+                <p><em>Datos:</em> Un circuito de instrumentación posee una bobina de L = 10 mH (0.01 H) y un capacitor de C = 100 &mu;F (0.0001 F).</p>
+                <p><em>Cálculo:</em> Aplicando la fórmula de Thomson:<br>
+                <code>f<sub>r</sub> = 1 / (2 &times; &pi; &times; &radic;(0.01 &times; 0.0001))</code> <br>
+                <code>f<sub>r</sub> = 1 / (2 &times; 3.1416 &times; &radic;(0.000001))</code> <br>
+                <code>f<sub>r</sub> = 1 / (6.2832 &times; 0.001) = 1 / 0.0062832 = <strong>159.15 Hz</strong></code>.</p>
+                <p><em>Conclusión:</em> Si a este circuito se le aplica una señal alterna de exactamente 159.15 Hz, entrará en resonancia térmica, cancelando su reactancia neta y operando como un circuito puramente resistivo.</p>
+            </div>
+
+            <h2>2. Resonancia en Serie</h2>
+            <p>Cuando un resistor, un inductor y un capacitor se conectan en serie (Circuito RLC serie), y la frecuencia de excitación se ajusta a f<sub>r</sub>, ocurren los siguientes fenómenos:</p>
+            <ul>
+                <li><strong>Impedancia Mínima:</strong> Puesto que la reactancia neta es cero, la impedancia decae a su valor mínimo posible, dictado únicamente por la resistencia (<code>Z = R</code>).</li>
+                <li><strong>Corriente Máxima:</strong> Por la Ley de Ohm (<code>I = V/Z</code>), la corriente suministrada por la fuente alcanza su pico máximo absoluto ante el nulo freno reactivo.</li>
+                <li><strong>Sobretensiones Destructivas:</strong> Aunque la tensión vectorial neta de los elementos reactivos es cero, las caídas de tensión individuales sobre la bobina (<code>V<sub>L</sub> = I &times; X<sub>L</sub></code>) y el capacitor (<code>V<sub>C</sub> = I &times; X<sub>C</sub></code>) pueden ser múltiplos altísimos de la tensión de la fuente. Internamente, estas tensiones desfasadas en 180&deg; pueden perforar el aislamiento dieléctrico y destruir los componentes.</li>
+            </ul>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2: Evaluación de Sobretensiones en Resonancia Serie</span>
+                <p><em>Datos:</em> Un circuito RLC serie en resonancia tiene parámetros R = 5 &Omega;, X<sub>L</sub> = 100 &Omega;, y X<sub>C</sub> = 100 &Omega;. Está alimentado por una fuente de V = 50 V.</p>
+                <p><em>1. Impedancia y Corriente de Línea:</em> Al cumplirse X<sub>L</sub> = X<sub>C</sub>, <code>Z = R = 5 &Omega;</code>. <br>
+                La corriente máxima será: <code>I = V / Z = 50 V / 5 &Omega; = <strong>10 A</strong></code>.</p>
+                <p><em>2. Tensiones Individuales Internas:</em> <br>
+                Tensión en el Resistor: <code>V<sub>R</sub> = I &times; R = 10 A &times; 5 &Omega; = <strong>50 V</strong></code> (La totalidad de la fuente cae sobre la resistencia activa).<br>
+                Tensión en el Capacitor: <code>V<sub>C</sub> = I &times; X<sub>C</sub> = 10 A &times; 100 &Omega; = <strong>1000 V</strong></code>.<br>
+                Tensión en el Inductor: <code>V<sub>L</sub> = I &times; X<sub>L</sub> = 10 A &times; 100 &Omega; = <strong>1000 V</strong></code>.</p>
+                <p><em>Conclusión:</em> El fenómeno resonante multiplicó la tensión de la fuente 20 veces sobre los componentes reactivos. Una fuente inofensiva de 50V generó 1000V internos. Este es el principio técnico detrás del funcionamiento de los elevadores de tensión resonantes (como la Bobina de Tesla), pero es un riesgo latente en instalaciones industriales si no se diseña correctamente.</p>
+            </div>
+
+            <h2>3. Resonancia en Paralelo (Circuito Tanque)</h2>
+            <p>La asociación de un inductor y un capacitor en paralelo presenta un comportamiento inverso al circuito serie. Esta configuración es frecuentemente denominada "Circuito Tanque" debido a su capacidad para almacenar y oscilar energía.</p>
+            <ul>
+                <li><strong>Impedancia Máxima:</strong> A la frecuencia de resonancia, la rama inductiva y la rama capacitiva se compensan mutuamente. Desde el exterior, el circuito paralelo presenta una impedancia altísima (tendiente a infinito en componentes ideales).</li>
+                <li><strong>Corriente Mínima de Fuente:</strong> Como resultado de la elevada impedancia, la corriente que la red principal debe inyectar al circuito decae a un mínimo casi nulo.</li>
+                <li><strong>Corrientes Circulantes Extremas:</strong> En el interior del lazo LC cerrado (el tanque), la energía almacenada rebota entre el campo magnético del inductor y el campo eléctrico del capacitor. Esto genera una corriente oscilante altísima confinada exclusivamente a ese bucle local.</li>
+            </ul>
+            <p><em>Aplicaciones Tecnológicas:</em> La alta impedancia selectiva de la resonancia paralelo es la base de la radiofrecuencia y telecomunicaciones. Un circuito tanque conectado a una antena actúa como un filtro sintonizador: ofrece máxima resistencia (selecciona) a la frecuencia de resonancia (la emisora deseada) y deriva a tierra fácilmente todas las demás frecuencias.</p>
+
+            <h2>4. Factor de Calidad (Q)</h2>
+            <p>El <strong>Factor de Calidad (Q)</strong> es un parámetro adimensional que define la agudeza, selectividad y eficiencia de un circuito resonante. En términos energéticos, representa la relación entre la energía almacenada reactivamente y la energía disipada activamente por ciclo.</p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">Q</span> <span class="math-op">=</span> <span class="fraction"><span>X<sub>L</sub></span><span>R</span></span>
+                    </div>
+                    <span>Factor de Calidad en Circuito Serie</span>
+                </div>
+            </div>
+
+            <p><strong>Impacto de la Magnitud de Q:</strong></p>
+            <ul>
+                <li><strong>Circuitos de Alto Q (Baja Resistencia):</strong> Poseen una altísima selectividad frecuencial, resonando con fuerza en una franja de frecuencias sumamente estrecha. Las multiplicaciones de tensión (en serie) o corriente (en paralelo) son muy pronunciadas. Son indispensables en el diseño de transmisores de radio y filtros estrechos.</li>
+                <li><strong>Circuitos de Bajo Q (Alta Resistencia):</strong> Exhiben una respuesta amortiguada. La resonancia se distribuye sobre un rango frecuencial más generoso (mayor Ancho de Banda) y los picos de tensión son más tenues y seguros.</li>
+            </ul>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+    </footer>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true); // Default to dark mode as per hub
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+
+</html>

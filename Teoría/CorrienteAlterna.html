@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corriente Alterna - Teoría</title>
+    <meta name="description" content="Análisis progresivo de circuitos en CA: impedancias, corriente, potencias y factor de potencia.">
+    <style>
+        /* Shared Styles */
+        :root {
+            /* Modo Claro */
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --dot-color: #2a2a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--text-color);
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .example-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .formula-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .formula-item span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .math-formula {
+            font-family: inherit;
+            font-size: 1.6rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            flex-wrap: wrap;
+        }
+
+        .math-var {
+            font-style: italic;
+        }
+
+        .math-op {
+            margin: 0 0.4rem;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+
+        .math-sub {
+            font-size: 0.6em;
+            vertical-align: sub;
+        }
+
+        .tag-rect {
+            background-color: #4CAF50;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .tag-polar {
+            background-color: #2196F3;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 1rem;
+            }
+
+            .content-card {
+                padding: 1.5rem;
+            }
+
+            .formula {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al Hub">⬅️</a>
+            📖 Teoría: Análisis de Circuitos en CA
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <main>
+        <div class="content-card">
+            <div class="statement">
+                El análisis de circuitos en Corriente Alterna (CA) introduce una variable fundamental que no existe en Corriente Continua (CC): el <strong>desfase temporal</strong> entre las magnitudes eléctricas. Esto requiere el uso de números complejos para modelar con precisión el comportamiento de los componentes.
+            </div>
+
+            <h2>1. Reactancia e Impedancia (X<sub>L</sub>, X<sub>C</sub> y Z)</h2>
+            <p>En CA, los componentes no solo presentan una resistencia óhmica pura (R), sino que los inductores (bobinas) y capacitores introducen una oposición dependiente de la frecuencia llamada <strong>Reactancia</strong>:</p>
+            <ul>
+                <li><strong>Reactancia Inductiva (X<sub>L</sub>):</strong> Oposición al paso de la corriente alterna por parte de una bobina. Provoca que la corriente se atrase respecto a la tensión.</li>
+                <li><strong>Reactancia Capacitiva (X<sub>C</sub>):</strong> Oposición por parte de un capacitor. Provoca que la corriente se adelante respecto a la tensión.</li>
+            </ul>
+
+            <p>La combinación vectorial de la Resistencia (R) y las Reactancias (X) se denomina <strong>Impedancia (Z)</strong>, y representa la oposición total al paso de la corriente en CA.</p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">Z</span> <span class="math-op">=</span> <span class="math-var">R</span> <span class="math-op">+</span> j(<span class="math-var">X<sub>L</sub></span> <span class="math-op">-</span> <span class="math-var">X<sub>C</sub></span>)
+                    </div>
+                    <span>Forma Rectangular <span class="tag-rect">Rectangular</span></span>
+                </div>
+            </div>
+
+            <p>Para aplicaciones de multiplicación o división (como en la Ley de Ohm), es conveniente expresar la impedancia en su <strong>Forma Polar</strong>:</p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">Z</span> <span class="math-op">=</span> |<span class="math-var">Z</span>| &ang; <span class="math-var">&theta;</span>
+                    </div>
+                    <span>Forma Polar <span class="tag-polar">Polar</span></span>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 1: Cálculo de la Impedancia Total</span>
+                <p><em>Datos:</em> Un circuito posee una resistencia de 4&Omega; y una reactancia inductiva X<sub>L</sub> de 3&Omega;.</p>
+                <p><em>Enfoque <span class="tag-rect">Rectangular</span>:</em> Expresamos la impedancia analíticamente: <strong>Z = 4 + j3 &Omega;</strong></p>
+                <p><em>Conversión <span class="tag-polar">Polar</span>:</em> Calculamos el módulo mediante Pitágoras y el ángulo mediante la tangente inversa:<br>
+                <code>|Z| = &radic;(4² + 3²) = &radic;25 = 5 &Omega;</code> <br>
+                <code>&theta; = arctan(3/4) = 36.87&deg;</code>.</p>
+                <p><em>Resultado:</em> La impedancia total expresada en forma polar es <strong>Z = 5 &ang; 36.87&deg; &Omega;</strong>.</p>
+            </div>
+
+            <h2>2. Asociación de Impedancias (Serie y Paralelo)</h2>
+            <p>Al igual que las resistencias en CC, las impedancias en CA pueden agruparse. Sin embargo, las operaciones algebraicas requieren manejar adecuadamente los números complejos.</p>
+            
+            <h3>Impedancias en Serie</h3>
+            <p>En serie, las impedancias se suman linealmente. La forma más directa de realizar esta operación matemática es operando en <strong>Forma Rectangular</strong>, sumando partes reales con reales y partes imaginarias con imaginarias.</p>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 2: Suma de Impedancias en Serie</span>
+                <p><em>Datos:</em> Dos impedancias en serie: Z<sub>1</sub> = (3 + j4) &Omega; y Z<sub>2</sub> = (5 - j2) &Omega;.</p>
+                <p><em>Suma <span class="tag-rect">Rectangular</span>:</em> <code>Z<sub>eq</sub> = Z<sub>1</sub> + Z<sub>2</sub></code> <br>
+                <code>Z<sub>eq</sub> = (3 + 5) + j(4 - 2) = <strong>8 + j2 &Omega;</strong></code></p>
+                <p><em>Conversión <span class="tag-polar">Polar</span>:</em> <code>|Z| = &radic;(8² + 2²) = 8.24 &Omega;</code> | <code>&theta; = arctan(2/8) = 14.03&deg;</code> <br>
+                <strong>Z<sub>eq</sub> = 8.24 &ang; 14.03&deg; &Omega;</strong></p>
+            </div>
+
+            <h3>Impedancias en Paralelo</h3>
+            <p>Para impedancias en paralelo, se utiliza la fórmula equivalente general: <code>Z<sub>eq</sub> = (Z<sub>1</sub> × Z<sub>2</sub>) / (Z<sub>1</sub> + Z<sub>2</sub>)</code>. <br>
+            Para evitar errores y agilizar el cálculo, se recomienda realizar las multiplicaciones y divisiones en <strong>Forma Polar</strong> y las sumas en <strong>Forma Rectangular</strong>.</p>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 3: Resolución de Impedancias en Paralelo</span>
+                <p><em>Datos:</em> Z<sub>1</sub> = 4 &ang; 90&deg; &Omega; (Inductor) y Z<sub>2</sub> = 3 &ang; 0&deg; &Omega; (Resistor).</p>
+                <p><em>1. Numerador (Producto) <span class="tag-polar">Polar</span>:</em> Se multiplican módulos y suman ángulos. <br>
+                <code>Z<sub>1</sub> × Z<sub>2</sub> = (4 × 3) &ang; (90&deg; + 0&deg;) = <strong>12 &ang; 90&deg;</strong></code></p>
+                
+                <p><em>2. Denominador (Suma) <span class="tag-rect">Rectangular</span>:</em> Convertimos a rectangular para sumar: Z<sub>1</sub> = j4, Z<sub>2</sub> = 3. <br>
+                <code>Z<sub>1</sub> + Z<sub>2</sub> = <strong>3 + j4</strong></code></p>
+                
+                <p><em>3. Conversión de Denominador <span class="tag-polar">Polar</span>:</em> Para poder dividir, pasamos la suma a polar: <br>
+                <code>3 + j4 = <strong>5 &ang; 53.13&deg;</strong></code></p>
+
+                <p><em>4. Resultado Final (División) <span class="tag-polar">Polar</span>:</em> Dividimos los resultados (módulos se dividen, ángulos se restan): <br>
+                <code>Z<sub>eq</sub> = (12 &ang; 90&deg;) / (5 &ang; 53.13&deg;) = (12/5) &ang; (90&deg; - 53.13&deg;) = <strong>2.4 &ang; 36.87&deg; &Omega;</strong></code></p>
+            </div>
+
+            <h2>3. Ley de Ohm en Corriente Alterna</h2>
+            <p>Una vez obtenida la impedancia equivalente del sistema, se puede determinar la corriente total circulante aplicando la Ley de Ohm para circuitos de CA, siempre operando con magnitudes fasoriales.</p>
+
+            <div class="formula">
+                <div class="formula-item">
+                    <div class="math-formula">
+                        <span class="math-var">I</span> <span class="math-op">=</span> <span class="math-var">V</span> <span class="math-op">/</span> <span class="math-var">Z</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p>La operación se simplifica notablemente trabajando con las variables en su <strong>Forma Polar</strong>.</p>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 4: Cálculo de Corriente</span>
+                <p><em>Datos:</em> Tensión de fuente V = 220 &ang; 0&deg; V e impedancia de carga Z = 5 &ang; 36.87&deg; &Omega;.</p>
+                <p><em>Cálculo <span class="tag-polar">Polar</span>:</em> Aplicamos la fórmula <code>I = V / Z</code>.<br>
+                <code>I = (220 &ang; 0&deg;) / (5 &ang; 36.87&deg;)</code></p>
+                <p>Módulos: <code>220 / 5 = 44 A</code>. <br>
+                Ángulos: <code>0&deg; - 36.87&deg; = -36.87&deg;</code>.</p>
+                <p><em>Resultado:</em> <strong>I = 44 &ang; -36.87&deg; A</strong>. La corriente posee un módulo de 44 A y presenta un retraso de 36.87&deg; respecto a la tensión de la fuente, confirmando el carácter inductivo de la carga.</p>
+            </div>
+
+            <h2>4. Potencias y Factor de Potencia (FP)</h2>
+            <p>En corriente alterna, el cálculo de potencia se descompone en tres componentes vectoriales fundamentales que forman el "Triángulo de Potencias". Matemáticamente, parten de la Potencia Aparente compleja, la cual se obtiene del producto de la tensión fasorial por la corriente conjugada (I*).</p>
+
+            <div class="formula" style="gap: 1rem;">
+                <div class="formula-item">
+                    <div class="math-formula" style="font-size: 1.3rem;">
+                        <span class="math-var">S</span> <span class="math-op">=</span> <span class="math-var">V</span> <span class="math-op">×</span> <span class="math-var">I*</span>
+                    </div>
+                </div>
+            </div>
+
+            <ul>
+                <li><strong>Potencia Aparente (S):</strong> Medida en Voltamperios (VA). Es la suma vectorial de P y Q, representando la demanda total de potencia sobre la fuente y las líneas de transmisión.</li>
+                <li><strong>Potencia Activa (P):</strong> Medida en Vatios (W). Es la porción de potencia que la carga transforma en trabajo útil (como movimiento en un motor) o disipa como calor. Se calcula como la componente real de S: <code>P = |S| × cos(&theta;)</code>.</li>
+                <li><strong>Potencia Reactiva (Q):</strong> Medida en Voltamperios Reactivos (VAr). Es la potencia oscilante necesaria para mantener los campos magnéticos en inductores y eléctricos en capacitores. No produce trabajo real. Se calcula como la componente imaginaria de S: <code>Q = |S| × sen(&theta;)</code>.</li>
+            </ul>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 5: Cálculo de Potencias (S, P, Q)</span>
+                <p><em>Datos:</em> Un motor es alimentado con V = 220 &ang; 0&deg; V y consume una corriente de I = 44 &ang; -36.87&deg; A.</p>
+                <p><em>1. Corriente Conjugada (I*):</em> Invertimos el signo del ángulo de la corriente para el cálculo de potencia: <strong>I* = 44 &ang; 36.87&deg; A</strong>.</p>
+                <p><em>2. Potencia Aparente (S) <span class="tag-polar">Polar</span>:</em> <br>
+                <code>S = V × I* = (220 &ang; 0&deg;) × (44 &ang; 36.87&deg;) = <strong>9680 &ang; 36.87&deg; VA</strong></code></p>
+                <p><em>3. Potencias Activa y Reactiva <span class="tag-rect">Rectangular</span>:</em> Convertimos S a rectangular para separar sus componentes: <br>
+                <code>P = 9680 × cos(36.87&deg;) = <strong>7744 W</strong> (Activa)</code> <br>
+                <code>Q = 9680 × sen(36.87&deg;) = <strong>5808 VAr</strong> (Reactiva inductiva)</code></p>
+                <p><em>Resultado:</em> El motor demanda 9680 VA totales de la red, pero solo 7744 W se convierten en trabajo útil. El resto (5808 VAr) se utiliza intermitentemente para la magnetización interna del motor.</p>
+            </div>
+
+            <h3>El Factor de Potencia y su Importancia</h3>
+            <p>El <strong>Factor de Potencia (FP)</strong> evalúa la eficiencia con la que se utiliza la energía eléctrica. Se define como la relación entre la Potencia Activa (P) y la Potencia Aparente (S), siendo equivalente al coseno del ángulo de desfase (<code>FP = cos(&theta;)</code>).</p>
+            
+            <p><strong>¿Por qué exigen las distribuidoras eléctricas corregir el FP?</strong><br>
+            La energía reactiva (Q) ocupa "capacidad de transporte" en las líneas y transformadores de la distribuidora. Si una industria tiene un FP bajo (por ejemplo 0.60), está exigiendo una enorme corriente total de la red pública solo para magnetizar sus equipos internamente. Esto provoca:
+            </p>
+            <ul>
+                <li><strong>Calentamiento excesivo (Efecto Joule)</strong> y pérdidas sustanciales de energía en los conductores públicos.</li>
+                <li><strong>Caídas de tensión</strong> severas a lo largo de la red de distribución.</li>
+                <li><strong>Saturación de transformadores y generadores</strong>, bloqueando la capacidad de la distribuidora para conectar nuevos clientes a la red existente.</li>
+            </ul>
+            <p>Debido a esto, las compañías eléctricas establecen penalidades y fuertes multas en la facturación para aquellos usuarios que posean un FP deficiente. Las normativas típicamente exigen mantener un FP superior a <strong>0.92 o 0.95</strong> (dependiendo de la legislación local). En la práctica industrial, se busca corregir el factor a valores entre <strong>0.95 y 0.98</strong> para garantizar un margen de seguridad seguro ante multas.</p>
+
+            <h3>Corrección del Factor de Potencia</h3>
+            <p>Para elevar un FP bajo sin alterar la potencia útil del equipo (P), se instalan <strong>Bancos de Capacitores</strong> en paralelo a la instalación. Los capacitores generan <em>potencia reactiva capacitiva (-Q)</em>, la cual se contrarresta directamente con la <em>potencia reactiva inductiva (+Q)</em> de los motores y transformadores. Al compensarse localmente dentro de la planta, la red distribuidora deja de suministrar esa potencia reactiva, lo que reduce la corriente total extraída y mejora el FP.</p>
+
+            <div class="example-box">
+                <span class="example-title">Ejemplo 6: Dimensionamiento para Corregir el Factor de Potencia</span>
+                <p><em>Situación:</em> Retomando el motor del Ejemplo 5: consume una Potencia Activa constante P = 7744 W y una Potencia Reactiva original Q<sub>L</sub> = 5808 VAr. Su FP original era <code>cos(36.87&deg;) = 0.80</code>. La compañía distribuidora exige elevar el FP a <strong>0.95</strong> para evadir penalizaciones.</p>
+                <p><em>Paso 1: Nuevo ángulo objetivo.</em> Para alcanzar un FP de 0.95, determinamos el nuevo ángulo de desfase tolerado:<br>
+                <code>&theta;<sub>nuevo</sub> = arccos(0.95) = 18.19&deg;</code>.</p>
+                <p><em>Paso 2: Nueva Potencia Reactiva permitida (Q<sub>nueva</sub>).</em> Considerando que la Potencia Activa (P) se mantiene invariable en 7744 W:<br>
+                <code>Q<sub>nueva</sub> = P × tan(&theta;<sub>nuevo</sub>) = 7744 × tan(18.19&deg;) = <strong>2544 VAr</strong></code>.</p>
+                <p><em>Paso 3: Calcular la Potencia del Banco de Capacitores (Q<sub>C</sub>).</em> Se debe inyectar potencia reactiva capacitiva para reducir los 5808 VAr originales hasta los 2544 VAr de tope exigidos:<br>
+                <code>Q<sub>C</sub> = Q<sub>original</sub> - Q<sub>nueva</sub> = 5808 - 2544 = <strong>3264 VAr</strong></code>.</p>
+                <p><em>Conclusión:</em> Al instalar un banco de capacitores de <strong>3.26 kVAr</strong>, el factor de potencia de la instalación se eleva a 0.95. Como beneficio directo, la Potencia Aparente demandada a la red desciende de 9680 VA a tan solo 8151 VA (<code>7744 / 0.95</code>). Esto reduce considerablemente la corriente que atraviesa el medidor y evita las multas de facturación, manteniendo intacto el torque y la velocidad de trabajo del motor.</p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+    </footer>
+
+    <script>
+        // --- Dark Mode Logic ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true); // Default to dark mode as per hub
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+
+</html>
