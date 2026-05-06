@@ -518,9 +518,8 @@
         function energizarFaseMicro(polaridad, bobinaPrincipal, bobinaOpuesta) {
             const absPolaridad = Math.abs(polaridad);
             
-            // --- ¡ESTA ES LA CORRECCIÓN! ---
-            // Se quita el `return` para permitir que la opacidad llegue a 0.
-            // if (absPolaridad < 0.05) return; // <-- ESTA LÍNEA SE FUE
+            bobinaPrincipal.classList.remove('energizada-norte', 'energizada-sur', 'popped');
+            bobinaOpuesta.classList.remove('energizada-norte', 'energizada-sur', 'popped');
 
             if (polaridad > 0) { // NORTE en principal
                 bobinaPrincipal.classList.add('energizada-norte');
@@ -547,16 +546,15 @@
             
             let fasesTexto = [];
             
-            apagarTodasLasBobinas();
-
-            if (modoPaso === 'micro') {
-                energizarFaseMicro(paso.fA, bobinas.a1, bobinas.a2);
-                energizarFaseMicro(paso.fB, bobinas.b1, bobinas.b2);
-                energizarFaseMicro(paso.fC, bobinas.c1, bobinas.c2);
-            } else { 
+            if (modoPaso !== 'micro') {
+                apagarTodasLasBobinas();
                 energizarFase(paso.fA, bobinas.a1, bobinas.a2, fasesTexto, 'A');
                 energizarFase(paso.fB, bobinas.b1, bobinas.b2, fasesTexto, 'B');
                 energizarFase(paso.fC, bobinas.c1, bobinas.c2, fasesTexto, 'C');
+            } else {
+                energizarFaseMicro(paso.fA, bobinas.a1, bobinas.a2);
+                energizarFaseMicro(paso.fB, bobinas.b1, bobinas.b2);
+                energizarFaseMicro(paso.fC, bobinas.c1, bobinas.c2);
             }
             
             // Actualizar texto de estado
@@ -641,6 +639,9 @@
                 anguloPorPaso = 360 / TOTAL_PASOS_MICRO;
                 velocidadGiroActual = VELOCIDAD_GIRO_MICRO;
                 rotor.style.transition = `transform ${VELOCIDAD_GIRO_MICRO}ms linear`; 
+                listaBobinas.forEach(b => {
+                    b.style.transition = `opacity ${VELOCIDAD_GIRO_MICRO}ms linear, background-color ${VELOCIDAD_GIRO_MICRO}ms linear, border-color ${VELOCIDAD_GIRO_MICRO}ms linear`;
+                });
                 
                 switchModo.disabled = true;
                 labelModoHalf.style.color = 'var(--motor-bobina-off)';
@@ -652,6 +653,9 @@
                 labelModoFull.style.color = 'var(--text-light)';
                 velocidadGiroActual = VELOCIDAD_GIRO_STEP;
                 rotor.style.transition = 'transform 0.15s ease-in-out'; 
+                listaBobinas.forEach(b => {
+                    b.style.transition = ''; // Restaura las transiciones CSS por defecto
+                });
 
                 if (esFull) {
                     modoPaso = 'full';
