@@ -362,6 +362,42 @@
                 Tensión en el Capacitor: <code>V<sub>C</sub> = I &times; X<sub>C</sub> = 10 A &times; 100 &Omega; = <strong>1000 V</strong></code>.<br>
                 Tensión en el Inductor: <code>V<sub>L</sub> = I &times; X<sub>L</sub> = 10 A &times; 100 &Omega; = <strong>1000 V</strong></code>.</p>
                 <p><em>Conclusión:</em> El fenómeno resonante multiplicó la tensión de la fuente 20 veces sobre los componentes reactivos. Una fuente inofensiva de 50V generó 1000V internos. Este es el principio técnico detrás del funcionamiento de los elevadores de tensión resonantes (como la Bobina de Tesla), pero es un riesgo latente en instalaciones industriales si no se diseña correctamente.</p>
+
+                <div style="display: flex; justify-content: center; margin: 1.5rem 0;">
+                    <svg width="250" height="300" viewBox="0 -150 250 300" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <marker id="arrow-vl2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#F44336" />
+                            </marker>
+                            <marker id="arrow-vc2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#2196F3" />
+                            </marker>
+                            <marker id="arrow-vr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#4CAF50" />
+                            </marker>
+                        </defs>
+                        <!-- VL (1000V) -->
+                        <line x1="125" y1="0" x2="125" y2="-130" stroke="#F44336" stroke-width="3" marker-end="url(#arrow-vl2)"/>
+                        <text x="135" y="-110" font-family="sans-serif" font-size="14" font-weight="bold" fill="#F44336">VL (1000V)</text>
+                        
+                        <!-- VC (1000V) -->
+                        <line x1="125" y1="0" x2="125" y2="130" stroke="#2196F3" stroke-width="3" marker-end="url(#arrow-vc2)"/>
+                        <text x="135" y="125" font-family="sans-serif" font-size="14" font-weight="bold" fill="#2196F3">VC (1000V)</text>
+                        
+                        <!-- VR = V (50V) -->
+                        <line x1="125" y1="0" x2="190" y2="0" stroke="#FF9800" stroke-width="4" marker-end="url(#arrow-vr2)"/>
+                        <text x="140" y="-10" font-family="sans-serif" font-size="14" font-weight="bold" fill="#FF9800">VR = V (50V)</text>
+                        
+                        <!-- Break lines to indicate huge scale for VL and VC -->
+                        <path d="M 120 -80 L 130 -75 M 120 -75 L 130 -70" stroke="var(--bg-color)" stroke-width="3" fill="none"/>
+                        <path d="M 120 -80 L 130 -75 M 120 -75 L 130 -70" stroke="#F44336" stroke-width="1.5" fill="none"/>
+                        <path d="M 120 70 L 130 75 M 120 75 L 130 80" stroke="var(--bg-color)" stroke-width="3" fill="none"/>
+                        <path d="M 120 70 L 130 75 M 120 75 L 130 80" stroke="#2196F3" stroke-width="1.5" fill="none"/>
+                        
+                        <!-- Origin Point -->
+                        <circle cx="125" cy="0" r="4" fill="var(--text-color)" />
+                    </svg>
+                </div>
             </div>
 
             <h2>3. Resonancia en Paralelo (Circuito Tanque)</h2>
@@ -390,6 +426,95 @@
                 <li><strong>Circuitos de Alto Q (Baja Resistencia):</strong> Poseen una altísima selectividad frecuencial, resonando con fuerza en una franja de frecuencias sumamente estrecha. Las multiplicaciones de tensión (en serie) o corriente (en paralelo) son muy pronunciadas. Son indispensables en el diseño de transmisores de radio y filtros estrechos.</li>
                 <li><strong>Circuitos de Bajo Q (Alta Resistencia):</strong> Exhiben una respuesta amortiguada. La resonancia se distribuye sobre un rango frecuencial más generoso (mayor Ancho de Banda) y los picos de tensión son más tenues y seguros.</li>
             </ul>
+
+            <div style="display: flex; justify-content: center; margin: 2rem 0;">
+                <svg width="450" height="400" viewBox="0 0 450 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrow-ax-res" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-color)" />
+                        </marker>
+                        <marker id="arrow-label" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-color)" />
+                        </marker>
+                        <marker id="arrow-delta1" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                            <path d="M 10 0 L 0 5 L 10 10 z" fill="var(--text-color)" />
+                        </marker>
+                        <marker id="arrow-delta2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-color)" />
+                        </marker>
+                    </defs>
+                    
+                    <!-- Axes -->
+                    <line x1="60" y1="350" x2="420" y2="350" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrow-ax-res)"/>
+                    <line x1="60" y1="350" x2="60" y2="30" stroke="var(--text-color)" stroke-width="2" marker-end="url(#arrow-ax-res)"/>
+                    
+                    <!-- X-Axis Labels -->
+                    <text x="320" y="380" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)">ω (x10⁶ rad/s)</text>
+                    <line x1="135" y1="350" x2="135" y2="355" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="130" y="370" font-family="sans-serif" font-size="14" fill="var(--text-color)">9</text>
+                    
+                    <line x1="210" y1="350" x2="210" y2="355" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="202" y="370" font-family="sans-serif" font-size="14" fill="var(--text-color)">10</text>
+                    
+                    <line x1="285" y1="350" x2="285" y2="355" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="277" y="370" font-family="sans-serif" font-size="14" fill="var(--text-color)">11</text>
+
+                    <line x1="360" y1="350" x2="360" y2="355" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="352" y="370" font-family="sans-serif" font-size="14" fill="var(--text-color)">12</text>
+                    
+                    <!-- Y-Axis Labels -->
+                    <text x="25" y="300" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)" transform="rotate(-90 25,300)">Potencia promedio (microvatios)</text>
+                    
+                    <line x1="60" y1="307" x2="55" y2="307" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="40" y="312" font-family="sans-serif" font-size="14" fill="var(--text-color)">1</text>
+                    
+                    <line x1="60" y1="264" x2="55" y2="264" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="40" y="269" font-family="sans-serif" font-size="14" fill="var(--text-color)">2</text>
+                    
+                    <line x1="60" y1="221" x2="55" y2="221" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="40" y="226" font-family="sans-serif" font-size="14" fill="var(--text-color)">3</text>
+                    
+                    <line x1="60" y1="178" x2="55" y2="178" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="40" y="183" font-family="sans-serif" font-size="14" fill="var(--text-color)">4</text>
+                    
+                    <line x1="60" y1="135" x2="55" y2="135" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="40" y="140" font-family="sans-serif" font-size="14" fill="var(--text-color)">5</text>
+                    
+                    <line x1="60" y1="93" x2="55" y2="93" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="40" y="98" font-family="sans-serif" font-size="14" fill="var(--text-color)">6</text>
+                    
+                    <line x1="60" y1="50" x2="55" y2="50" stroke="var(--text-color)" stroke-width="2"/>
+                    <text x="40" y="55" font-family="sans-serif" font-size="14" fill="var(--text-color)">7</text>
+                    
+                    <!-- Center dotted line for ω0 -->
+                    <line x1="210" y1="350" x2="210" y2="50" stroke="var(--text-color)" stroke-width="1.5" stroke-dasharray="4"/>
+                    
+                    <!-- Curve 1 (High Q) -->
+                    <path d="M 60 328 C 170 328, 185 54, 210 54 C 235 54, 250 328, 380 340" fill="none" stroke="#F44336" stroke-width="2.5" />
+                    
+                    <!-- Curve 2 (Low Q) -->
+                    <path d="M 60 340 C 130 330, 160 247, 210 247 C 260 247, 290 330, 380 345" fill="none" stroke="#F44336" stroke-width="2.5" />
+                    
+                    <!-- Labels High Q -->
+                    <text x="140" y="40" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)">ω₀ = 10⁷ rad/s</text>
+                    <line x1="190" y1="45" x2="205" y2="50" stroke="var(--text-color)" stroke-width="1.5" marker-end="url(#arrow-label)"/>
+                    
+                    <text x="110" y="80" font-family="sans-serif" font-size="14" font-style="italic" fill="var(--text-color)">R = 3.5Ω</text>
+                    <text x="225" y="100" font-family="sans-serif" font-size="14" fill="var(--text-color)">Q = 14.3</text>
+                    
+                    <!-- Delta Omega Line -->
+                    <line x1="185" y1="202" x2="235" y2="202" stroke="var(--text-color)" stroke-width="1.5" marker-start="url(#arrow-delta1)" marker-end="url(#arrow-delta2)"/>
+                    <text x="200" y="195" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)">Δω</text>
+                    
+                    <!-- Labels Low Q -->
+                    <text x="310" y="275" font-family="sans-serif" font-size="14" font-style="italic" fill="var(--text-color)">R = 10Ω</text>
+                    <text x="320" y="295" font-family="sans-serif" font-size="14" fill="var(--text-color)">Q = 5</text>
+                    
+                    <!-- Lower ω0 arrow -->
+                    <text x="150" y="325" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)">ω₀</text>
+                    <line x1="175" y1="320" x2="205" y2="335" stroke="var(--text-color)" stroke-width="1.5" marker-end="url(#arrow-label)"/>
+                </svg>
+            </div>
 
         </div>
     </main>
