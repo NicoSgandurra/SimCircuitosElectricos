@@ -387,77 +387,134 @@
 
         // --- COMPONENTE DIAGRAMA LÓGICO ---
 
-        const LogicDiagram = ({ solvedData, outputName, darkMode }) => {
-            const Wire = ({ w = "w-6" }) => <div className={`h-[2px] ${w} ${darkMode ? 'bg-[#444]' : 'bg-slate-300'} shrink-0`}></div>;
+        const LogicDiagram = ({ solvedData, outputName, darkMode, simState }) => {
+            const getWireColor = (val) => val 
+                ? 'bg-red-500 drop-shadow-[0_0_3px_rgba(239,68,68,0.8)]' 
+                : (darkMode ? 'bg-[#555]' : 'bg-slate-300');
 
-            const FinalBadge = ({ text }) => (
-                <div className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full font-black font-mono text-sm md:text-lg border-2 shadow-md z-10 shrink-0 ${darkMode ? 'bg-blue-500/20 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'bg-blue-100 border-blue-500 text-blue-700 shadow-lg shadow-blue-500/20'}`}>
-                    {text}
-                </div>
-            );
+            const Wire = ({ w = "w-6", val = false }) => <div className={`h-[2px] ${w} ${getWireColor(val)} shrink-0 transition-all duration-300`}></div>;
 
-            const InputBadge = ({ p }) => (
-                <div className={`px-2 md:px-3 py-1 md:py-1.5 flex items-center justify-center rounded-md font-bold font-mono text-xs md:text-sm border shadow-sm z-10 shrink-0 ${darkMode ? 'bg-[#151515] border-[#333] text-gray-200' : 'bg-white border-slate-200 text-slate-700'}`}>
-                    <span className={p.isNegated ? "overline decoration-2" : ""}>{p.varName}</span>
-                </div>
-            );
+            const FinalBadge = ({ text, val }) => {
+                const isActive = val;
+                const badgeStyle = isActive
+                    ? 'bg-red-500 border-red-600 text-white shadow-lg shadow-red-500/40 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                    : (darkMode ? 'bg-blue-500/10 border-blue-500/50 text-blue-400' : 'bg-blue-50 border-blue-300 text-blue-600');
 
-            const BusAndGate = ({ items, type, darkMode }) => {
-                if (items.length === 1) return items[0];
+                return (
+                    <div className={`w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full font-black font-mono text-sm md:text-lg border-2 z-10 shrink-0 transition-all duration-300 ${badgeStyle}`}>
+                        {text}
+                    </div>
+                );
+            };
+
+            const InputBadge = ({ p, val }) => {
+                const isActive = val;
+                const badgeStyle = isActive
+                    ? 'bg-red-50 border-red-500 text-red-700 shadow-red-500/20 dark:bg-red-500/20 dark:border-red-500 dark:text-red-400'
+                    : (darkMode ? 'bg-[#151515] border-[#333] text-gray-200' : 'bg-white border-slate-200 text-slate-700');
+
+                return (
+                    <div className={`px-2 md:px-3 py-1 md:py-1.5 flex items-center justify-center rounded-md font-bold font-mono text-xs md:text-sm border shadow-sm z-10 shrink-0 transition-all duration-300 ${badgeStyle}`}>
+                        <span className={p.isNegated ? "overline decoration-2" : ""}>{p.varName}</span>
+                    </div>
+                );
+            };
+
+            const BusAndGate = ({ items, type, darkMode, outVal }) => {
+                if (items.length === 1) return items[0].element;
 
                 const isAND = type === 'AND';
-                const gateBg = isAND
-                    ? (darkMode ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.2)]' : 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-sm')
-                    : (darkMode ? 'bg-pink-500/20 border-pink-500/30 text-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.2)]' : 'bg-pink-50 border-pink-200 text-pink-700 shadow-sm');
-
-                // Estilo de forma visual: AND es plano de un lado y redondo del otro, OR es más ovalado
-                const shape = isAND ? 'rounded-l-sm rounded-r-2xl' : 'rounded-3xl';
+                const gateColor = isAND 
+                    ? (darkMode ? '#818cf8' : '#4f46e5') 
+                    : (darkMode ? '#f472b6' : '#db2777');
+                const gateFill = isAND 
+                    ? (darkMode ? '#1e1b4b' : '#eef2ff') 
+                    : (darkMode ? '#500724' : '#fdf2f8');
+                const count = items.length;
+                
+                const gateActiveShadow = outVal ? `drop-shadow-[0_0_8px_${isAND ? 'rgba(99,102,241,0.6)' : 'rgba(236,72,153,0.6)'}]` : 'drop-shadow-sm';
 
                 return (
                     <div className="flex items-center shrink-0">
-                        <div className="flex flex-col gap-3 md:gap-4 relative py-2 shrink-0">
-                            {items.map((item, i) => (
-                                <div key={i} className="flex items-center relative shrink-0">
-                                    {item}
-                                    <Wire w="w-4 md:w-8" />
-                                    {/* Bus vertical que conecta los cables */}
-                                    <div className={`absolute right-0 w-[2px] ${darkMode ? 'bg-[#444]' : 'bg-slate-300'}`}
-                                        style={{
-                                            top: i === 0 ? '50%' : '0',
-                                            bottom: i === items.length - 1 ? '50%' : '0'
-                                        }}>
+                        <div className="flex flex-col z-0 relative">
+                            {items.map((itemObj, i) => {
+                                const { val, element } = itemObj;
+                                const isFirst = i === 0;
+                                const isLast = i === count - 1;
+                                const wireCls = getWireColor(val);
+
+                                return (
+                                    <div key={i} className="flex relative items-stretch w-full py-1.5 md:py-2">
+                                        <div className="flex items-center w-full z-10">
+                                            {element}
+                                            <div className={`h-[2px] flex-1 min-w-[16px] md:min-w-[24px] ${wireCls} transition-all duration-300`}></div>
+                                        </div>
+                                        
+                                        {count > 1 && (
+                                            <div className="absolute right-0 top-0 bottom-0 w-[2px] flex flex-col z-0">
+                                                <div className={`w-full h-1/2 transition-all duration-300 ${!isFirst ? wireCls : 'bg-transparent'}`}></div>
+                                                <div className={`w-full h-1/2 transition-all duration-300 ${!isLast ? wireCls : 'bg-transparent'}`}></div>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
-                        <Wire w="w-4 md:w-8" />
-                        <div className={`px-4 md:px-5 py-2 md:py-3 font-black text-[10px] md:text-xs tracking-widest border flex items-center justify-center z-10 shrink-0 ${gateBg} ${shape}`}>
-                            {type}
+                        
+                        <div className={`h-[2px] w-4 md:w-6 ${getWireColor(outVal)} transition-all duration-300 shrink-0`}></div>
+                        
+                        <div className={`relative flex items-center justify-center w-[50px] md:w-[60px] h-[40px] md:h-[50px] shrink-0 z-10 transition-all duration-300 ${gateActiveShadow}`}>
+                            <svg viewBox="0 0 60 50" className="absolute inset-0 w-full h-full">
+                                {isAND ? (
+                                    <path d="M 5 5 L 35 5 A 20 20 0 0 1 35 45 L 5 45 Z" fill={gateFill} stroke={gateColor} strokeWidth="2.5" />
+                                ) : (
+                                    <path d="M 5 5 C 25 5, 40 10, 55 25 C 40 40, 25 45, 5 45 C 15 35, 15 15, 5 5 Z" fill={gateFill} stroke={gateColor} strokeWidth="2.5" />
+                                )}
+                            </svg>
+                            <span className="z-10 font-black text-[9px] md:text-[10px] tracking-widest" style={{ color: gateColor, marginLeft: isAND ? '-5px' : '0' }}>
+                                {type}
+                            </span>
                         </div>
                     </div>
                 );
             };
 
             if (solvedData.isZero) {
-                return <div className="flex items-center min-w-max p-4"><InputBadge p={{ varName: '0', isNegated: false }} /><Wire w="w-12" /><FinalBadge text={outputName} /></div>;
+                return <div className="flex items-center min-w-max p-4"><InputBadge p={{ varName: '0', isNegated: false }} val={false} /><Wire w="w-12" val={false} /><FinalBadge text={outputName} val={false} /></div>;
             }
             if (solvedData.isOne) {
-                return <div className="flex items-center min-w-max p-4"><InputBadge p={{ varName: '1', isNegated: false }} /><Wire w="w-12" /><FinalBadge text={outputName} /></div>;
+                return <div className="flex items-center min-w-max p-4"><InputBadge p={{ varName: '1', isNegated: false }} val={true} /><Wire w="w-12" val={true} /><FinalBadge text={outputName} val={true} /></div>;
             }
 
+            let finalOrVal = false;
             const termBlocks = solvedData.terms.map((term, tIdx) => {
                 if (!term.termParts || term.termParts.length === 0) {
-                    return <InputBadge key={tIdx} p={{ varName: '1', isNegated: false }} />;
+                    finalOrVal = true;
+                    return { val: true, element: <InputBadge key={tIdx} p={{ varName: '1', isNegated: false }} val={true} /> };
                 }
-                const inputBadges = term.termParts.map((p, i) => <InputBadge key={`inp-${tIdx}-${i}`} p={p} />);
-                return <BusAndGate key={`and-${tIdx}`} items={inputBadges} type="AND" darkMode={darkMode} />;
+                
+                let termVal = true;
+                const inputBlocks = term.termParts.map((p, i) => {
+                    const varVal = simState[p.varName] || false;
+                    const val = p.isNegated ? !varVal : varVal;
+                    termVal = termVal && val;
+                    return { val, element: <InputBadge key={`inp-${tIdx}-${i}`} p={p} val={val} /> };
+                });
+                
+                finalOrVal = finalOrVal || termVal;
+
+                if (inputBlocks.length === 1) {
+                    return inputBlocks[0];
+                }
+
+                return { val: termVal, element: <BusAndGate key={`and-${tIdx}`} items={inputBlocks} type="AND" darkMode={darkMode} outVal={termVal} /> };
             });
 
             return (
                 <div className="flex items-center min-w-max p-4 shrink-0">
-                    <BusAndGate items={termBlocks} type="OR" darkMode={darkMode} />
-                    <Wire w="w-6 md:w-12" />
-                    <FinalBadge text={outputName} />
+                    <BusAndGate items={termBlocks} type="OR" darkMode={darkMode} outVal={finalOrVal} />
+                    <Wire w="w-6 md:w-12" val={finalOrVal} />
+                    <FinalBadge text={outputName} val={finalOrVal} />
                 </div>
             );
         };
@@ -465,20 +522,71 @@
         // --- APP PRINCIPAL ---
 
         function App() {
-            const [darkMode, setDarkMode] = useState(false);
-            const [numVars, setNumVars] = useState(4);
+            const [darkMode, setDarkMode] = useState(() => {
+                const saved = localStorage.getItem('karnaugh_darkMode');
+                return saved !== null ? JSON.parse(saved) : false;
+            });
+            const [numVars, setNumVars] = useState(() => {
+                const saved = localStorage.getItem('karnaugh_numVars');
+                return saved !== null ? JSON.parse(saved) : 4;
+            });
 
-            const [inputNames, setInputNames] = useState(['A', 'B', 'C', 'D', 'E', 'F']);
-            const [outputs, setOutputs] = useState([{ id: 'out-1', name: 'F', values: Array(16).fill(0) }]);
-            const [activeOutputId, setActiveOutputId] = useState('out-1');
+            const [inputNames, setInputNames] = useState(() => {
+                const saved = localStorage.getItem('karnaugh_inputNames');
+                return saved !== null ? JSON.parse(saved) : ['A', 'B', 'C', 'D', 'E', 'F'];
+            });
+            const [outputs, setOutputs] = useState(() => {
+                const saved = localStorage.getItem('karnaugh_outputs');
+                return saved !== null ? JSON.parse(saved) : [{ id: 'out-1', name: 'F', values: Array(16).fill(0) }];
+            });
+            const [activeOutputId, setActiveOutputId] = useState(() => {
+                const saved = localStorage.getItem('karnaugh_activeOutputId');
+                return saved !== null ? JSON.parse(saved) : 'out-1';
+            });
 
             // Estado para la confirmación de borrado
             const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
             const [copied, setCopied] = useState(false);
 
+            useEffect(() => { localStorage.setItem('karnaugh_darkMode', JSON.stringify(darkMode)); }, [darkMode]);
+            useEffect(() => { localStorage.setItem('karnaugh_numVars', JSON.stringify(numVars)); }, [numVars]);
+            useEffect(() => { localStorage.setItem('karnaugh_inputNames', JSON.stringify(inputNames)); }, [inputNames]);
+            useEffect(() => { localStorage.setItem('karnaugh_outputs', JSON.stringify(outputs)); }, [outputs]);
+            useEffect(() => { localStorage.setItem('karnaugh_activeOutputId', JSON.stringify(activeOutputId)); }, [activeOutputId]);
+
             const ALL_TERMS = useMemo(() => generateAllTerms(numVars, inputNames), [numVars, inputNames]);
             const activeOutput = outputs.find(o => o.id === activeOutputId) || outputs[0];
             const solvedData = useMemo(() => solveKMap(activeOutput.values, ALL_TERMS, numVars), [activeOutput.values, ALL_TERMS, numVars]);
+
+            // SIMULATOR STATE
+            const [simState, setSimState] = useState({});
+
+            const simVars = useMemo(() => {
+                if (solvedData.isZero || solvedData.isOne) return [];
+                const vars = new Set();
+                solvedData.terms.forEach(t => {
+                    if (t.termParts) t.termParts.forEach(p => vars.add(p.varName));
+                });
+                return Array.from(vars).sort();
+            }, [solvedData]);
+
+            useEffect(() => {
+                setSimState(prev => {
+                    const next = { ...prev };
+                    let changed = false;
+                    simVars.forEach(v => {
+                        if (next[v] === undefined) {
+                            next[v] = false;
+                            changed = true;
+                        }
+                    });
+                    return changed ? next : prev;
+                });
+            }, [simVars]);
+
+            const toggleSimVar = (v) => {
+                setSimState(prev => ({ ...prev, [v]: !prev[v] }));
+            };
             const gridsToRender = useMemo(() => getMapConfigs(numVars, inputNames), [numVars, inputNames]);
 
             useEffect(() => {
@@ -824,17 +932,40 @@
 
                                 {/* DIAGRAMA LÓGICO FULL WIDTH */}
                                 <div className={`${panelClass} mt-6 mb-4 p-6 md:p-8 shrink-0 relative overflow-hidden flex flex-col justify-center min-h-[200px]`}>
-                                    <div className="flex justify-between items-start mb-6">
-                                        <h3 className={`font-bold text-xs tracking-widest uppercase ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>
-                                            Diagrama de Compuertas Lógicas
-                                        </h3>
-                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
-                                            {activeOutput.name}
-                                        </span>
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <h3 className={`font-bold text-xs tracking-widest uppercase ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>
+                                                Diagrama de Compuertas Lógicas
+                                            </h3>
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
+                                                {activeOutput.name}
+                                            </span>
+                                        </div>
+                                        
+                                        {/* CONTROLES DEL SIMULADOR */}
+                                        {simVars.length > 0 && (
+                                            <div className="flex flex-wrap items-center gap-2 z-10">
+                                                <span className={`text-[10px] uppercase font-bold mr-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Simulador:</span>
+                                                {simVars.map(v => (
+                                                    <button 
+                                                        key={v}
+                                                        onClick={() => toggleSimVar(v)}
+                                                        className={`w-7 h-7 rounded flex items-center justify-center font-bold text-xs transition-all duration-300 border shadow-sm
+                                                            ${simState[v] 
+                                                                ? 'bg-red-500 border-red-600 text-white shadow-red-500/30 drop-shadow-[0_0_5px_rgba(239,68,68,0.5)]' 
+                                                                : (darkMode ? 'bg-[#222] border-[#333] text-gray-400 hover:bg-[#333]' : 'bg-white border-slate-200 text-slate-400 hover:bg-slate-50')
+                                                            }`}
+                                                        title={`Alternar estado de ${v}`}
+                                                    >
+                                                        {v}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex-1 w-full overflow-x-auto custom-scrollbar flex items-center justify-start pb-4 md:pl-4">
-                                        <LogicDiagram solvedData={solvedData} outputName={activeOutput.name} darkMode={darkMode} />
+                                        <LogicDiagram solvedData={solvedData} outputName={activeOutput.name} darkMode={darkMode} simState={simState} />
                                     </div>
                                 </div>
 
