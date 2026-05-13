@@ -305,17 +305,16 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 750px;
             background: var(--surface);
         }
 
         th,
         td {
-            padding: 12px;
+            padding: 8px 4px;
             text-align: left;
             border-bottom: 1px solid var(--border);
             color: var(--title);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         th {
@@ -323,14 +322,16 @@
             font-weight: 700;
             color: var(--text);
             text-transform: uppercase;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             letter-spacing: 0.5px;
         }
 
         .input-cell input,
         .input-cell select {
             width: 100%;
-            padding: 6px;
+            max-width: 85px;
+            padding: 6px 4px;
+            font-size: 0.85rem;
             background: var(--input-bg);
             border: 1px solid transparent;
         }
@@ -525,6 +526,24 @@
                             <input type="number" id="sys-max-drop" value="8" step="0.5"
                                 oninput="handleManualDropChange()">
                         </div>
+                        <div class="form-group">
+                            <label>Trafo (kVA)</label>
+                            <select id="sys-trafo-kva" onchange="calculate()">
+                                <option value="16">16 kVA</option>
+                                <option value="25">25 kVA</option>
+                                <option value="50">50 kVA</option>
+                                <option value="63">63 kVA</option>
+                                <option value="100" selected>100 kVA</option>
+                                <option value="160">160 kVA</option>
+                                <option value="250">250 kVA</option>
+                                <option value="315">315 kVA</option>
+                                <option value="400">400 kVA</option>
+                                <option value="500">500 kVA</option>
+                                <option value="630">630 kVA</option>
+                                <option value="800">800 kVA</option>
+                                <option value="1000">1000 kVA</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -552,7 +571,8 @@
                     </div>
 
                     <div class="btn-group">
-                        <button class="btn-primary" onclick="addNode()">+ Añadir Tramo</button>
+                        <button class="btn-primary" onclick="addNode(false)">+ Añadir Tramo</button>
+                        <button class="btn-secondary" onclick="addNode(true)" title="Inicia una nueva línea desde el Transformador">+ Nueva Línea</button>
                         <button class="btn-danger" onclick="clearNodes()">🗑️ Limpiar Todo</button>
                     </div>
 
@@ -574,7 +594,12 @@
                 </div>
 
                 <div class="card" id="results-card">
-                    <h2 class="card-title">Resultados Analíticos</h2>
+                    <h2 class="card-title" style="justify-content: space-between;">
+                        <span>Resultados Analíticos</span>
+                        <span style="font-size: 0.9rem; background: var(--secondary); padding: 5px 12px; border-radius: 8px; color: var(--primary);">
+                            Trafo: <span id="trafo-power" style="font-weight: 800;">0.00 kVA</span>
+                        </span>
+                    </h2>
                     <div class="table-responsive">
                         <table id="results-table">
                             <thead>
@@ -699,7 +724,8 @@
                 voltage: document.getElementById('sys-voltage').value,
                 netType: document.getElementById('sys-net-type').value,
                 fp: document.getElementById('sys-fp').value,
-                maxDrop: document.getElementById('sys-max-drop').value
+                maxDrop: document.getElementById('sys-max-drop').value,
+                trafoKva: document.getElementById('sys-trafo-kva').value
             }));
         }
 
@@ -710,6 +736,7 @@
                 document.getElementById('sys-net-type').value = config.netType || "aerea";
                 document.getElementById('sys-fp').value = config.fp || "0.85";
                 document.getElementById('sys-max-drop').value = config.maxDrop || "8";
+                if(config.trafoKva) document.getElementById('sys-trafo-kva').value = config.trafoKva;
             }
         }
 
@@ -727,6 +754,10 @@
 
             nodes.forEach((node, index) => {
                 const tr = document.createElement('tr');
+                if (node.isNewBranch) {
+                    tr.style.borderTop = "3px solid var(--primary)";
+                    tr.style.backgroundColor = "rgba(0,0,0,0.02)";
+                }
 
                 let sectionOptions = STANDARD_SECTIONS.map(s =>
                     `<option value="${s}" ${node.seccion == s ? 'selected' : ''}>${s}</option>`
@@ -737,8 +768,13 @@
                 <option value="0.0172" ${node.material == 0.0172 ? 'selected' : ''}>Cobre</option>
             `;
 
+                let nameLabel = `<b>N${index + 1}</b>`;
+                if (node.isNewBranch) {
+                    nameLabel += `<br><span style="font-size:0.65rem; color: var(--danger); font-weight:800; background: var(--secondary); padding: 2px 4px; border-radius:4px; text-transform:uppercase;">NUEVA LÍNEA</span>`;
+                }
+
                 tr.innerHTML = `
-                <td><b>N${index + 1}</b></td>
+                <td>${nameLabel}</td>
                 <td class="input-cell"><input type="number" min="0" value="${node.casas}" oninput="updateNode(${index}, 'casas', this.value)"></td>
                 <td class="input-cell"><input type="number" min="0" step="0.1" value="${node.kwCasa}" oninput="updateNode(${index}, 'kwCasa', this.value)"></td>
                 <td class="input-cell"><input type="number" min="0" step="0.1" value="${node.extra}" oninput="updateNode(${index}, 'extra', this.value)"></td>
@@ -759,16 +795,18 @@
             calculate();
         }
 
-        function addNode() {
+        function addNode(isNewBranch = false) {
             const lastSection = nodes.length > 0 ? nodes[nodes.length - 1].seccion : 50;
             const lastMaterial = nodes.length > 0 ? nodes[nodes.length - 1].material : 0.0282;
-            nodes.push({ id: nodes.length + 1, casas: 0, kwCasa: 0, extra: 0, dist: 20, material: lastMaterial, seccion: lastSection });
+            const actualIsNewBranch = nodes.length === 0 ? false : isNewBranch;
+            nodes.push({ id: nodes.length + 1, casas: 0, kwCasa: 0, extra: 0, dist: 20, material: lastMaterial, seccion: lastSection, isNewBranch: actualIsNewBranch });
             renderNodes();
             showEditNotice(); // Lanzamos el aviso para pedirle al usuario que edite
         }
 
         function removeNode(index) {
             nodes.splice(index, 1);
+            if (nodes.length > 0) nodes[0].isNewBranch = false;
             renderNodes();
         }
 
@@ -777,6 +815,7 @@
             saveState();
 
             if (nodes.length === 0) {
+                document.getElementById('trafo-power').innerText = `0.00 kVA`;
                 document.getElementById('results-body').innerHTML = '<tr><td colspan="5" style="text-align:center;">Agregue nodos para calcular.</td></tr>';
                 drawChart([], 380, 5);
                 return;
@@ -789,41 +828,73 @@
             const isTrifasico = (vBase === 380 || vBase === 13200);
             const factorSistema = isTrifasico ? Math.sqrt(3) : 2;
 
-            // 1. Potencia propia
-            let results = nodes.map(n => {
-                return {
+            // 1. Identify Branches
+            let branches = [];
+            let currentBranch = [];
+            
+            nodes.forEach((n, i) => {
+                let isNew = n.isNewBranch;
+                if (i === 0) isNew = true; // First node always starts a branch
+
+                if (isNew && currentBranch.length > 0) {
+                    branches.push(currentBranch);
+                    currentBranch = [];
+                }
+                currentBranch.push({
                     ...n,
+                    globalIndex: i,
                     potenciaPropia: (n.casas * n.kwCasa) + n.extra,
                     potenciaPasante: 0,
                     corriente: 0,
                     caidaTramo: 0,
-                    caidaAcumulada: 0,
-                };
+                    caidaAcumulada: 0
+                });
+            });
+            if (currentBranch.length > 0) {
+                branches.push(currentBranch);
+            }
+
+            let totalPowerKW = 0;
+            let flatResults = [];
+
+            // 2. Process each branch independently
+            branches.forEach(branch => {
+                let potAcumulada = 0;
+                for (let i = branch.length - 1; i >= 0; i--) {
+                    potAcumulada += branch[i].potenciaPropia;
+                    branch[i].potenciaPasante = potAcumulada;
+                }
+                
+                if (branch.length > 0) {
+                    totalPowerKW += branch[0].potenciaPasante;
+                }
+
+                let caidaAcum = 0;
+                for (let i = 0; i < branch.length; i++) {
+                    let r = branch[i];
+                    r.corriente = (r.potenciaPasante * 1000) / (factorSistema * vBase * cosPhi);
+                    let resistenciaTramo = (r.material * r.dist) / r.seccion;
+                    r.caidaTramo = factorSistema * r.corriente * resistenciaTramo * cosPhi;
+                    caidaAcum += r.caidaTramo;
+                    r.caidaAcumulada = caidaAcum;
+                    flatResults.push(r);
+                }
             });
 
-            // 2. Potencia Pasante
-            let potAcumulada = 0;
-            for (let i = results.length - 1; i >= 0; i--) {
-                potAcumulada += results[i].potenciaPropia;
-                results[i].potenciaPasante = potAcumulada;
-            }
+            // Update Total Transformer Power (VA)
+            const nominalTrafoKVA = parseFloat(document.getElementById('sys-trafo-kva').value) || 100;
+            const totalVA = (totalPowerKW * 1000) / cosPhi;
+            const totalKVA = totalVA / 1000;
+            const utilPercent = (totalKVA / nominalTrafoKVA) * 100;
+            
+            let utilColor = "var(--primary)"; // default/ok color
+            if (utilPercent > 95) utilColor = "var(--danger)";
+            else if (utilPercent > 80) utilColor = "var(--accent)";
 
-            // 3. Corriente y Caída (AQUÍ USA EL MATERIAL INDIVIDUAL)
-            let caidaAcum = 0;
-            for (let i = 0; i < results.length; i++) {
-                let r = results[i];
-                r.corriente = (r.potenciaPasante * 1000) / (factorSistema * vBase * cosPhi);
+            document.getElementById('trafo-power').innerHTML = `${totalKVA.toFixed(2)} kVA <span style="color: ${utilColor}; margin-left: 6px;">(${utilPercent.toFixed(1)}%)</span>`;
 
-                // r.material contiene la resistividad específica elegida (0.0282 Alum o 0.0172 Cobre)
-                let resistenciaTramo = (r.material * r.dist) / r.seccion;
-
-                r.caidaTramo = factorSistema * r.corriente * resistenciaTramo * cosPhi;
-                caidaAcum += r.caidaTramo;
-                r.caidaAcumulada = caidaAcum;
-            }
-
-            renderResults(results, vBase, maxDrop);
-            drawChart(results, vBase, maxDrop);
+            renderResults(flatResults, vBase, maxDrop);
+            drawChart(branches, vBase, maxDrop);
         }
 
         function renderResults(results, vBase, maxDrop) {
@@ -849,7 +920,7 @@
         // --- GRÁFICO CHART.JS ---
         let voltageChartInstance = null;
 
-        function drawChart(results, vBase, maxDrop) {
+        function drawChart(branches, vBase, maxDrop) {
             const canvas = document.getElementById('voltageChart');
             const ctx = canvas.getContext('2d');
 
@@ -857,34 +928,40 @@
                 voltageChartInstance.destroy();
             }
 
-            if (results.length === 0) return;
+            if (branches.length === 0) return;
 
             // Leer variables CSS para el tema actual
             const computedStyle = getComputedStyle(document.documentElement);
             const textColor = computedStyle.getPropertyValue('--title').trim();
             const gridColor = computedStyle.getPropertyValue('--chart-grid').trim();
-            const lineColor = computedStyle.getPropertyValue('--chart-line').trim();
             const dangerColor = computedStyle.getPropertyValue('--danger').trim();
             const surfaceColor = computedStyle.getPropertyValue('--surface').trim();
             const fontFamily = computedStyle.getPropertyValue('--font-main').trim();
 
             const vLimit = vBase * (1 - maxDrop / 100);
 
+            const maxDepth = Math.max(...branches.map(b => b.length));
             const labels = ['Trafo'];
-            const dataPuntos = [vBase];
-            const dataLimit = []; 
+            for(let i=1; i<=maxDepth; i++) labels.push(`Tramo ${i}`);
 
-            results.forEach((r, i) => {
-                labels.push(`N${i + 1}`);
-                dataPuntos.push(vBase - r.caidaAcumulada);
+            const datasets = [];
+            const dataLimit = labels.map(() => vLimit);
+            
+            datasets.push({
+                label: `Límite (${maxDrop}%)`,
+                data: dataLimit,
+                borderColor: dangerColor,
+                borderWidth: 2,
+                borderDash: [5, 5],
+                pointRadius: 0,
+                pointHitRadius: 0,
+                fill: false,
+                tension: 0
             });
 
-            labels.forEach(() => {
-                dataLimit.push(vLimit);
-            });
-
-            // Helper para transparencia dinámica del gradiente
+            // Helper para transparencia
             function hexToRgba(hex, alpha) {
+                if(!hex) return `rgba(128, 128, 128, ${alpha})`;
                 hex = hex.replace('#', '').trim();
                 if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
                 if (hex.length !== 6) return `rgba(128, 128, 128, ${alpha})`;
@@ -894,50 +971,52 @@
                 return `rgba(${r}, ${g}, ${b}, ${alpha})`;
             }
 
-            // Gradiente para el área bajo la curva
-            const gradientFill = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradientFill.addColorStop(0, hexToRgba(lineColor, 0.4));
-            gradientFill.addColorStop(1, hexToRgba(lineColor, 0.0));
+            // Colores para las distintas ramas
+            const branchColors = [
+                computedStyle.getPropertyValue('--chart-line').trim(),
+                '#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#14b8a6'
+            ];
+
+            branches.forEach((b, index) => {
+                const bColor = branchColors[index % branchColors.length];
+                const gradientFill = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                gradientFill.addColorStop(0, hexToRgba(bColor, 0.4));
+                gradientFill.addColorStop(1, hexToRgba(bColor, 0.0));
+
+                const dataPuntos = [vBase];
+                b.forEach(r => {
+                    dataPuntos.push(vBase - r.caidaAcumulada);
+                });
+
+                datasets.push({
+                    label: `Línea ${index + 1}`,
+                    data: dataPuntos,
+                    borderColor: bColor,
+                    backgroundColor: gradientFill,
+                    borderWidth: 4,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: function(context) {
+                        const val = context.dataset.data[context.dataIndex];
+                        return val < vLimit ? dangerColor : surfaceColor;
+                    },
+                    pointBorderColor: function(context) {
+                        const val = context.dataset.data[context.dataIndex];
+                        return val < vLimit ? dangerColor : bColor;
+                    },
+                    pointBorderWidth: 3,
+                    fill: true,
+                    tension: 0.3,
+                    // custom data for tooltips
+                    nodeNames: ['Trafo', ...b.map(r => `N${r.globalIndex + 1}`)]
+                });
+            });
 
             voltageChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [
-                        {
-                            label: `Límite (${maxDrop}%)`,
-                            data: dataLimit,
-                            borderColor: dangerColor,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            pointHitRadius: 0,
-                            fill: false,
-                            tension: 0
-                        },
-                        {
-                            label: 'Voltaje (V)',
-                            data: dataPuntos,
-                            borderColor: lineColor,
-                            backgroundColor: gradientFill,
-                            borderWidth: 4,
-                            pointRadius: 5,
-                            pointHoverRadius: 8,
-                            pointBackgroundColor: function(context) {
-                                const index = context.dataIndex;
-                                const value = context.dataset.data[index];
-                                return value < vLimit ? dangerColor : surfaceColor;
-                            },
-                            pointBorderColor: function(context) {
-                                const index = context.dataIndex;
-                                const value = context.dataset.data[index];
-                                return value < vLimit ? dangerColor : lineColor;
-                            },
-                            pointBorderWidth: 3,
-                            fill: true,
-                            tension: 0.3
-                        }
-                    ]
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
@@ -965,28 +1044,24 @@
                             bodyFont: { family: fontFamily, size: 13 },
                             callbacks: {
                                 label: function(context) {
-                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} V`;
+                                    const dataset = context.chart.data.datasets[context.datasetIndex];
+                                    if (dataset.label.startsWith('Límite')) {
+                                        return `Límite: ${context.parsed.y.toFixed(2)} V`;
+                                    }
+                                    const nodeName = dataset.nodeNames ? dataset.nodeNames[context.dataIndex] : '';
+                                    return `${dataset.label} (${nodeName}): ${context.parsed.y.toFixed(2)} V`;
                                 }
                             }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { 
-                                display: false 
-                            },
+                            grid: { display: false },
                             ticks: { color: textColor, font: { family: fontFamily, weight: 'bold' } }
                         },
                         y: {
-                            grid: { 
-                                color: gridColor,
-                                borderDash: [5, 5]
-                            },
-                            ticks: { 
-                                color: textColor, 
-                                font: { family: fontFamily, weight: 'bold' },
-                                padding: 10
-                            },
+                            grid: { color: gridColor, borderDash: [5, 5] },
+                            ticks: { color: textColor, font: { family: fontFamily, weight: 'bold' }, padding: 10 },
                             min: vLimit - (vBase * 0.05),
                             max: vBase + (vBase * 0.01)
                         }
@@ -997,16 +1072,19 @@
 
         // --- EXPORTAR / IMPORTAR CSV ---
         function exportCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            // Añadida la columna Material al CSV
-            csvContent += "Tramo,Casas,KWCasa,CargaExtraKW,DistanciaM,MaterialRho,SeccionMM2\n";
+            let csvContent = "\uFEFF"; // BOM para Excel
+            csvContent += "Tramo;Casas;kW/Casa;Extra (kW);Distancia (m);Material;Seccion (mm2);NuevaLinea\n";
             nodes.forEach((n, index) => {
-                let row = `${index + 1},${n.casas},${n.kwCasa},${n.extra},${n.dist},${n.material},${n.seccion}`;
+                let matStr = n.material == 0.0282 ? "Aluminio" : "Cobre";
+                let isNewStr = n.isNewBranch ? "SI" : "NO";
+                // Usamos punto y coma para que Excel lo separe correctamente en columnas en español
+                let row = `N${index + 1};${n.casas};${n.kwCasa};${n.extra};${n.dist};${matStr};${n.seccion};${isNewStr}`;
                 csvContent += row + "\n";
             });
-            const encodedUri = encodeURI(csvContent);
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            link.setAttribute("href", url);
             link.setAttribute("download", "tramos_red.csv");
             document.body.appendChild(link);
             link.click();
@@ -1024,27 +1102,39 @@
                     alert("El archivo CSV parece estar vacío.");
                     return;
                 }
+                
+                // Detectar separador (; o ,)
+                const separator = lines[0].includes(';') ? ';' : ',';
+
                 let newNodes = [];
                 for (let i = 1; i < lines.length; i++) {
                     if (lines[i].trim() === '') continue;
-                    const cols = lines[i].split(',');
-                    // Adaptado para soportar los 7 campos (añadiendo el Material)
+                    const cols = lines[i].split(separator);
                     if (cols.length >= 6) {
+                        let isNew = false;
+                        if (cols.length >= 8 && cols[7].trim().toUpperCase() === "SI") isNew = true;
+                        
+                        let matVal = 0.0282; // Alum default
+                        if(cols[5].toLowerCase().includes("cobre")) matVal = 0.0172;
+                        else if (!isNaN(parseFloat(cols[5]))) matVal = parseFloat(cols[5]);
+
                         newNodes.push({
                             id: newNodes.length + 1,
-                            casas: parseFloat(cols[1]) || 0,
-                            kwCasa: parseFloat(cols[2]) || 0,
-                            extra: parseFloat(cols[3]) || 0,
-                            dist: parseFloat(cols[4]) || 0,
-                            material: parseFloat(cols[5]) || 0.0282, // Lee material, default Alum
-                            seccion: parseFloat(cols[6] || cols[5]) || 50 // Compatibilidad si suben CSV viejo
+                            casas: parseFloat(cols[1].replace(',', '.')) || 0,
+                            kwCasa: parseFloat(cols[2].replace(',', '.')) || 0,
+                            extra: parseFloat(cols[3].replace(',', '.')) || 0,
+                            dist: parseFloat(cols[4].replace(',', '.')) || 0,
+                            material: matVal,
+                            seccion: parseFloat((cols[6] || cols[5]).replace(',', '.')) || 50,
+                            isNewBranch: isNew
                         });
                     }
                 }
                 if (newNodes.length > 0) {
                     nodes = newNodes;
+                    if(nodes.length > 0) nodes[0].isNewBranch = false;
                     renderNodes();
-                    showEditNotice(); // Lanzamos el aviso al terminar de importar datos nuevos
+                    showEditNotice(); 
                 }
             };
             reader.readAsText(file);
