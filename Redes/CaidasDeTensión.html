@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Caída de Tensión</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* --- VARIABLES DE MODO CLARO (Cute & Cosy Pastel - Estilo Teoría) --- */
+        :root[data-theme="light"] {
+            --bg: #FFF5F7;
+            --surface: #ffffff;
+            --title: #e56b73;
+            --text: #2b2124;
+            --border: #F8D0D4;
+            --primary: #e56b73;
+            --primary-hover: #d4565e;
+            --primary-text: #ffffff;
+            --secondary: #fff0f2;
+            --secondary-hover: #F8D0D4;
+            --danger: #ef4444;
+            --accent: #fcd34d;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --radius: 16px;
+            --input-bg: #ffffff;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --chart-grid: #F8D0D4;
+            --chart-line: #e56b73;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+        }
+
+        /* --- VARIABLES DE MODO OSCURO (Vercel Style) --- */
+        :root[data-theme="dark"] {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --title: #ededed;
+            --text: #a1a1aa;
+            --border: #333333;
+            --primary: #ededed;
+            --primary-hover: #ffffff;
+            --primary-text: #000000;
+            --secondary: #1a1a1a;
+            --secondary-hover: #333333;
+            --danger: #e5484d;
+            --accent: #f5a623;
+            --shadow: 0 0 0 1px #333333;
+            --radius: 6px;
+            --input-bg: #000000;
+            --font-main: 'Inter', sans-serif;
+            --chart-grid: #333333;
+            --chart-line: #ededed;
+            --transition: all 0.2s ease;
+            --dot-color: #111111;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text);
+            font-family: var(--font-main);
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header & Toggle */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 15px;
+            transition: var(--transition);
+        }
+
+        .title-area {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--title);
+            letter-spacing: -0.5px;
+            transition: var(--transition);
+        }
+
+        /* Switch Toggle (Modos) */
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "☀️";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #333;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+            content: "🌙";
+            background-color: #111;
+        }
+
+        /* Layout */
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            padding: 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 25px;
+            transition: var(--transition);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--title);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form Elements */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input,
+        select {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) / 2);
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: var(--font-main);
+            background-color: var(--input-bg);
+            color: var(--title);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255, 183, 178, 0.2);
+        }
+
+        :root[data-theme="dark"] input:focus,
+        :root[data-theme="dark"] select:focus {
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        /* Ocultar las flechas (spinners) de los inputs numéricos para mayor limpieza */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+            /* Para Firefox */
+        }
+
+        /* Botones */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: 1px solid transparent;
+            border-radius: calc(var(--radius) / 2);
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: var(--font-main);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--primary-text);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--title);
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Tablas */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: calc(var(--radius) / 2);
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+            background: var(--surface);
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            color: var(--title);
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: var(--input-bg);
+            font-weight: 700;
+            color: var(--text);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .input-cell input,
+        .input-cell select {
+            width: 100%;
+            padding: 6px;
+            background: var(--input-bg);
+            border: 1px solid transparent;
+        }
+
+        .input-cell input:focus,
+        .input-cell select:focus {
+            border: 1px solid var(--primary);
+        }
+
+        /* Gráfico Canvas */
+        .chart-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: calc(var(--radius) / 2);
+            border: 1px solid var(--border);
+            padding: 10px;
+            background: var(--surface);
+            transition: var(--transition);
+        }
+
+        canvas {
+            min-width: 500px;
+            width: 100%;
+            height: 320px;
+        }
+
+        .edit-notice {
+            background-color: var(--accent);
+            color: #111827;
+            padding: 12px 18px;
+            border-radius: calc(var(--radius) / 2);
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.4s ease;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Estilos de la Teoría Final */
+        .theory-card {
+            margin-top: 5px;
+            line-height: 1.6;
+        }
+
+        .theory-card h3 {
+            color: var(--title);
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .theory-card p,
+        .theory-card li {
+            color: var(--text);
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .theory-card ul {
+            padding-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        .theory-card strong {
+            color: var(--title);
+        }
+
+        .alert-high {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .alert-ok {
+            color: #10b981;
+            font-weight: 800;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* --- ESTILOS DE IMPRESIÓN --- */
+        @media print {
+            body {
+                background: white !important;
+                background-image: none !important;
+                color: black !important;
+                padding: 0;
+            }
+            .theme-switch, .btn-group, header, .edit-notice, td button, th:last-child, td:last-child, .theory-card {
+                display: none !important;
+            }
+            .container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                margin-bottom: 15px;
+                break-inside: avoid;
+            }
+            .input-cell input, .input-cell select {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+                color: black !important;
+                font-weight: bold;
+                width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <div class="title-area">
+                <h1>⚡ Simulador Eléctrico</h1>
+                <label class="theme-switch" title="Alternar Modo Claro/Oscuro">
+                    <input type="checkbox" id="theme-toggle" onchange="toggleTheme(this)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="btn-group" style="margin-top: 0;">
+                <button class="btn-secondary" onclick="document.getElementById('file-upload').click()">
+                    📂 Importar
+                </button>
+                <input type="file" id="file-upload" accept=".csv" class="hidden" onchange="importCSV(event)">
+                <button class="btn-secondary" onclick="exportCSV()">
+                    💾 Exportar CSV
+                </button>
+                <button class="btn-primary" onclick="window.print()">
+                    🖨️ Imprimir Reporte
+                </button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+
+            <!-- COLUMNA IZQUIERDA: CONFIGURACIÓN Y DATOS -->
+            <div class="left-col">
+                <!-- Configuración Global -->
+                <div class="card">
+                    <h2 class="card-title">Parámetros de Red</h2>
+                    <div class="settings-grid">
+                        <div class="form-group">
+                            <label>Tensión (V)</label>
+                            <select id="sys-voltage" onchange="calculate()">
+                                <option value="380" selected>380 V (Trifásica)</option>
+                                <option value="220">220 V (Monofásica)</option>
+                                <option value="13200">13.200 V (MT)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Instalación</label>
+                            <select id="sys-net-type" onchange="handleNetTypeChange()">
+                                <option value="aerea" selected>Red Aérea</option>
+                                <option value="subterranea">Red Subterránea</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cos φ</label>
+                            <input type="number" id="sys-fp" value="0.85" step="0.01" min="0.5" max="1"
+                                oninput="calculate()">
+                        </div>
+                        <div class="form-group">
+                            <label>Caída Máx (%)</label>
+                            <input type="number" id="sys-max-drop" value="8" step="0.5"
+                                oninput="handleManualDropChange()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entrada de Tramos -->
+                <div class="card">
+                    <h2 class="card-title">Tramos de la Red (Nodos)</h2>
+                    <div class="table-responsive">
+                        <table id="nodes-table">
+                            <thead>
+                                <tr>
+                                    <th>Tramo</th>
+                                    <th>Casas</th>
+                                    <th>kW/Casa</th>
+                                    <th>Extra(kW)</th>
+                                    <th>Dist.(m)</th>
+                                    <th>Material</th>
+                                    <th>Sec.(mm²)</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="nodes-body">
+                                <!-- Filas generadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="btn-group">
+                        <button class="btn-primary" onclick="addNode()">+ Añadir Tramo</button>
+                        <button class="btn-danger" onclick="clearNodes()">🗑️ Limpiar Todo</button>
+                    </div>
+
+                    <div id="edit-notice" class="edit-notice hidden">
+                        ⚠️ Se han añadido nuevos datos. Por favor, edite los valores de las cargas y distancias según su
+                        proyecto.
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: RESULTADOS Y GRÁFICO -->
+            <div class="right-col">
+
+                <div class="card">
+                    <h2 class="card-title">Perfil de Tensión</h2>
+                    <div class="chart-container">
+                        <canvas id="voltageChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" id="results-card">
+                    <h2 class="card-title">Resultados Analíticos</h2>
+                    <div class="table-responsive">
+                        <table id="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Nodo</th>
+                                    <th>P. Pasante (kW)</th>
+                                    <th>Corriente (A)</th>
+                                    <th>Caída (V)</th>
+                                    <th>Caída (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-body">
+                                <!-- Resultados por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- SECCIÓN TEÓRICA / CONSIDERACIONES NORMATIVAS -->
+        <article class="card theory-card">
+            <h2 class="card-title">📖 Consideraciones Normativas y de Diseño</h2>
+            <p>Este simulador aplica las fórmulas estándar de caída de tensión, pero al diseñar una red de distribución
+                real, es fundamental cumplir con las normativas locales (como <strong>EDEMSA</strong> y la
+                <strong>AEA</strong>).</p>
+
+            <h3>1. Salida del Transformador y Sección Mínima</h3>
+            <p>Según la <strong>E.T. 106</strong> y los esquemas unifilares típicos de EDEMSA, la salida desde la
+                subestación hacia la red de Baja Tensión (L.A.B.T.) debe realizarse preferentemente con conductor
+                Preensamblado de Aluminio de <strong>3x95+50+25 mm²</strong>. Se recomienda fuertemente que el
+                <strong>Tramo 1</strong> de su cálculo mantenga o supere esta sección de 95 mm² para soportar la
+                corriente total de la línea sin sobrecalentamientos.</p>
+
+            <h3>2. Límites de Caída de Tensión Admisibles</h3>
+            <ul>
+                <li><strong>Redes Públicas:</strong> La norma <strong>ETO 102 R3</strong> de EDEMSA establece que los
+                    valores máximos admisibles de nivel de tensión medidos en cualquier punto de la red no deben exceder
+                    el <strong>±8%</strong>. Al seleccionar "Red Aérea", el simulador ajusta este límite
+                    automáticamente.</li>
+                <li><strong>Instalaciones Internas / Acometidas (AEA 90364-7-770):</strong> Para circuitos interiores o
+                    tramos que van desde el medidor hacia adentro, la caída máxima admitida es más estricta: típicamente
+                    <strong>3%</strong> para iluminación y <strong>5%</strong> para fuerza motriz. El tipo "Red
+                    Subterránea" en el simulador asume por defecto un límite conservador del <strong>5%</strong>, a
+                    menos que lo modifique.</li>
+            </ul>
+
+            <h3>3. Loteos y Baterías de Medidores</h3>
+            <p>En el diseño de loteos o PH, la <strong>ETO 102 (Anexo 3)</strong> especifica que una batería de
+                medidores agrupada en un mismo nodo <strong>no debe superar los 12 medidores</strong> y la potencia
+                instalada de ese conjunto <strong>no debe ser mayor a 70 kW</strong>. Si su cálculo excede estos
+                parámetros en un solo nodo, deberá dividir las cargas en múltiples cajas de toma o requerir
+                subestaciones adicionales.</p>
+
+            <h3>4. Cables Subterráneos y Factores de Simultaneidad</h3>
+            <p>Si opta por cables de <strong>Cobre</strong> en tendidos subterráneos, asegúrese de dimensionar con
+                aislamiento XLPE (IRAM 2178-1) empleando secciones mínimas de <strong>25 mm²</strong> para la línea
+                principal. Además, recuerde que en la vida real se aplican <strong>coeficientes de
+                    simultaneidad</strong>; no todas las casas en una rama consumen su potencia máxima al mismo
+                instante, lo que en la práctica reduce la potencia pasante real respecto a la teórica.</p>
+        </article>
+
+    </div>
+
+    <script>
+        // Theme Toggle Logic
+        function toggleTheme(checkbox) {
+            document.documentElement.setAttribute('data-theme', checkbox.checked ? 'dark' : 'light');
+            // Usar setTimeout para permitir que las variables CSS se actualicen antes de redibujar
+            setTimeout(calculate, 50);
+        }
+
+        // Variables globales para la detección de cambios de límite
+        let userModifiedDrop = false;
+
+        function handleManualDropChange() {
+            userModifiedDrop = true;
+            calculate();
+        }
+
+        function handleNetTypeChange() {
+            if (!userModifiedDrop) {
+                const type = document.getElementById('sys-net-type').value;
+                const dropInput = document.getElementById('sys-max-drop');
+                if (type === 'aerea') {
+                    dropInput.value = 8; // Límite ETO 102 para red pública EDEMSA
+                } else if (type === 'subterranea') {
+                    dropInput.value = 5; // Límite más estricto tipo interno/AEA
+                }
+            }
+            calculate();
+        }
+
+        // Lógica visual del aviso
+        function showEditNotice() {
+            document.getElementById('edit-notice').classList.remove('hidden');
+        }
+
+        function hideEditNotice() {
+            document.getElementById('edit-notice').classList.add('hidden');
+        }
+
+        // Secciones estándar normalizadas (mm²)
+        const STANDARD_SECTIONS = [16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300];
+
+        // Estado inicial de la red (Agregamos la propiedad 'material')
+        let nodes = JSON.parse(localStorage.getItem('simElectrico_nodes')) || [
+            { id: 1, casas: 15, kwCasa: 8, extra: 0, dist: 12, material: 0.0282, seccion: 95 },
+            { id: 2, casas: 13, kwCasa: 8, extra: 30, dist: 40, material: 0.0282, seccion: 70 },
+            { id: 3, casas: 5, kwCasa: 8, extra: 0, dist: 60, material: 0.0172, seccion: 50 } // Cobre de ejemplo
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadConfig();
+            renderNodes();
+        });
+
+        function saveState() {
+            localStorage.setItem('simElectrico_nodes', JSON.stringify(nodes));
+            localStorage.setItem('simElectrico_config', JSON.stringify({
+                voltage: document.getElementById('sys-voltage').value,
+                netType: document.getElementById('sys-net-type').value,
+                fp: document.getElementById('sys-fp').value,
+                maxDrop: document.getElementById('sys-max-drop').value
+            }));
+        }
+
+        function loadConfig() {
+            const config = JSON.parse(localStorage.getItem('simElectrico_config'));
+            if (config) {
+                document.getElementById('sys-voltage').value = config.voltage || "380";
+                document.getElementById('sys-net-type').value = config.netType || "aerea";
+                document.getElementById('sys-fp').value = config.fp || "0.85";
+                document.getElementById('sys-max-drop').value = config.maxDrop || "8";
+            }
+        }
+
+        function clearNodes() {
+            if (confirm("¿Estás seguro de que deseas eliminar todos los tramos?")) {
+                nodes = [];
+                renderNodes();
+            }
+        }
+
+        // Renderizar inputs
+        function renderNodes() {
+            const tbody = document.getElementById('nodes-body');
+            tbody.innerHTML = '';
+
+            nodes.forEach((node, index) => {
+                const tr = document.createElement('tr');
+
+                let sectionOptions = STANDARD_SECTIONS.map(s =>
+                    `<option value="${s}" ${node.seccion == s ? 'selected' : ''}>${s}</option>`
+                ).join('');
+
+                let materialOptions = `
+                <option value="0.0282" ${node.material == 0.0282 ? 'selected' : ''}>Alum</option>
+                <option value="0.0172" ${node.material == 0.0172 ? 'selected' : ''}>Cobre</option>
+            `;
+
+                tr.innerHTML = `
+                <td><b>N${index + 1}</b></td>
+                <td class="input-cell"><input type="number" min="0" value="${node.casas}" oninput="updateNode(${index}, 'casas', this.value)"></td>
+                <td class="input-cell"><input type="number" min="0" step="0.1" value="${node.kwCasa}" oninput="updateNode(${index}, 'kwCasa', this.value)"></td>
+                <td class="input-cell"><input type="number" min="0" step="0.1" value="${node.extra}" oninput="updateNode(${index}, 'extra', this.value)"></td>
+                <td class="input-cell"><input type="number" min="0" step="0.1" value="${node.dist}" oninput="updateNode(${index}, 'dist', this.value)"></td>
+                <td class="input-cell"><select onchange="updateNode(${index}, 'material', this.value)">${materialOptions}</select></td>
+                <td class="input-cell"><select onchange="updateNode(${index}, 'seccion', this.value)">${sectionOptions}</select></td>
+                <td><button class="btn-danger" onclick="removeNode(${index})">X</button></td>
+            `;
+                tbody.appendChild(tr);
+            });
+
+            calculate();
+        }
+
+        function updateNode(index, field, value) {
+            nodes[index][field] = parseFloat(value) || 0;
+            hideEditNotice(); // Ocultamos el aviso porque el usuario ya comenzó a editar
+            calculate();
+        }
+
+        function addNode() {
+            const lastSection = nodes.length > 0 ? nodes[nodes.length - 1].seccion : 50;
+            const lastMaterial = nodes.length > 0 ? nodes[nodes.length - 1].material : 0.0282;
+            nodes.push({ id: nodes.length + 1, casas: 0, kwCasa: 0, extra: 0, dist: 20, material: lastMaterial, seccion: lastSection });
+            renderNodes();
+            showEditNotice(); // Lanzamos el aviso para pedirle al usuario que edite
+        }
+
+        function removeNode(index) {
+            nodes.splice(index, 1);
+            renderNodes();
+        }
+
+        // --- ALGORITMO DE CÁLCULO ---
+        function calculate() {
+            saveState();
+
+            if (nodes.length === 0) {
+                document.getElementById('results-body').innerHTML = '<tr><td colspan="5" style="text-align:center;">Agregue nodos para calcular.</td></tr>';
+                drawChart([], 380, 5);
+                return;
+            }
+
+            const vBase = parseFloat(document.getElementById('sys-voltage').value);
+            const cosPhi = parseFloat(document.getElementById('sys-fp').value) || 0.85;
+            const maxDrop = parseFloat(document.getElementById('sys-max-drop').value) || 5;
+
+            const isTrifasico = (vBase === 380 || vBase === 13200);
+            const factorSistema = isTrifasico ? Math.sqrt(3) : 2;
+
+            // 1. Potencia propia
+            let results = nodes.map(n => {
+                return {
+                    ...n,
+                    potenciaPropia: (n.casas * n.kwCasa) + n.extra,
+                    potenciaPasante: 0,
+                    corriente: 0,
+                    caidaTramo: 0,
+                    caidaAcumulada: 0,
+                };
+            });
+
+            // 2. Potencia Pasante
+            let potAcumulada = 0;
+            for (let i = results.length - 1; i >= 0; i--) {
+                potAcumulada += results[i].potenciaPropia;
+                results[i].potenciaPasante = potAcumulada;
+            }
+
+            // 3. Corriente y Caída (AQUÍ USA EL MATERIAL INDIVIDUAL)
+            let caidaAcum = 0;
+            for (let i = 0; i < results.length; i++) {
+                let r = results[i];
+                r.corriente = (r.potenciaPasante * 1000) / (factorSistema * vBase * cosPhi);
+
+                // r.material contiene la resistividad específica elegida (0.0282 Alum o 0.0172 Cobre)
+                let resistenciaTramo = (r.material * r.dist) / r.seccion;
+
+                r.caidaTramo = factorSistema * r.corriente * resistenciaTramo * cosPhi;
+                caidaAcum += r.caidaTramo;
+                r.caidaAcumulada = caidaAcum;
+            }
+
+            renderResults(results, vBase, maxDrop);
+            drawChart(results, vBase, maxDrop);
+        }
+
+        function renderResults(results, vBase, maxDrop) {
+            const tbody = document.getElementById('results-body');
+            tbody.innerHTML = '';
+
+            results.forEach((r, index) => {
+                const tr = document.createElement('tr');
+                let dropPercent = (r.caidaAcumulada / vBase) * 100;
+                let percentClass = dropPercent > maxDrop ? 'alert-high' : 'alert-ok';
+
+                tr.innerHTML = `
+                <td><b>N${index + 1}</b></td>
+                <td>${r.potenciaPasante.toFixed(2)}</td>
+                <td>${r.corriente.toFixed(2)}</td>
+                <td>${r.caidaAcumulada.toFixed(2)} V</td>
+                <td><span class="${percentClass}">${dropPercent.toFixed(2)} %</span></td>
+            `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- GRÁFICO CHART.JS ---
+        let voltageChartInstance = null;
+
+        function drawChart(results, vBase, maxDrop) {
+            const canvas = document.getElementById('voltageChart');
+            const ctx = canvas.getContext('2d');
+
+            if (voltageChartInstance) {
+                voltageChartInstance.destroy();
+            }
+
+            if (results.length === 0) return;
+
+            // Leer variables CSS para el tema actual
+            const computedStyle = getComputedStyle(document.documentElement);
+            const textColor = computedStyle.getPropertyValue('--title').trim();
+            const gridColor = computedStyle.getPropertyValue('--chart-grid').trim();
+            const lineColor = computedStyle.getPropertyValue('--chart-line').trim();
+            const dangerColor = computedStyle.getPropertyValue('--danger').trim();
+            const surfaceColor = computedStyle.getPropertyValue('--surface').trim();
+            const fontFamily = computedStyle.getPropertyValue('--font-main').trim();
+
+            const vLimit = vBase * (1 - maxDrop / 100);
+
+            const labels = ['Trafo'];
+            const dataPuntos = [vBase];
+            const dataLimit = []; 
+
+            results.forEach((r, i) => {
+                labels.push(`N${i + 1}`);
+                dataPuntos.push(vBase - r.caidaAcumulada);
+            });
+
+            labels.forEach(() => {
+                dataLimit.push(vLimit);
+            });
+
+            // Helper para transparencia dinámica del gradiente
+            function hexToRgba(hex, alpha) {
+                hex = hex.replace('#', '').trim();
+                if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+                if (hex.length !== 6) return `rgba(128, 128, 128, ${alpha})`;
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+
+            // Gradiente para el área bajo la curva
+            const gradientFill = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradientFill.addColorStop(0, hexToRgba(lineColor, 0.4));
+            gradientFill.addColorStop(1, hexToRgba(lineColor, 0.0));
+
+            voltageChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `Límite (${maxDrop}%)`,
+                            data: dataLimit,
+                            borderColor: dangerColor,
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            pointHitRadius: 0,
+                            fill: false,
+                            tension: 0
+                        },
+                        {
+                            label: 'Voltaje (V)',
+                            data: dataPuntos,
+                            borderColor: lineColor,
+                            backgroundColor: gradientFill,
+                            borderWidth: 4,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: function(context) {
+                                const index = context.dataIndex;
+                                const value = context.dataset.data[index];
+                                return value < vLimit ? dangerColor : surfaceColor;
+                            },
+                            pointBorderColor: function(context) {
+                                const index = context.dataIndex;
+                                const value = context.dataset.data[index];
+                                return value < vLimit ? dangerColor : lineColor;
+                            },
+                            pointBorderWidth: 3,
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    color: textColor,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: textColor,
+                                font: { family: fontFamily, weight: 'bold' },
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: surfaceColor,
+                            titleColor: textColor,
+                            bodyColor: textColor,
+                            borderColor: gridColor,
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 12,
+                            displayColors: false,
+                            titleFont: { family: fontFamily, size: 14, weight: 'bold' },
+                            bodyFont: { family: fontFamily, size: 13 },
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} V`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { 
+                                display: false 
+                            },
+                            ticks: { color: textColor, font: { family: fontFamily, weight: 'bold' } }
+                        },
+                        y: {
+                            grid: { 
+                                color: gridColor,
+                                borderDash: [5, 5]
+                            },
+                            ticks: { 
+                                color: textColor, 
+                                font: { family: fontFamily, weight: 'bold' },
+                                padding: 10
+                            },
+                            min: vLimit - (vBase * 0.05),
+                            max: vBase + (vBase * 0.01)
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- EXPORTAR / IMPORTAR CSV ---
+        function exportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            // Añadida la columna Material al CSV
+            csvContent += "Tramo,Casas,KWCasa,CargaExtraKW,DistanciaM,MaterialRho,SeccionMM2\n";
+            nodes.forEach((n, index) => {
+                let row = `${index + 1},${n.casas},${n.kwCasa},${n.extra},${n.dist},${n.material},${n.seccion}`;
+                csvContent += row + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "tramos_red.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const content = e.target.result;
+                const lines = content.split('\n');
+                if (lines.length < 2) {
+                    alert("El archivo CSV parece estar vacío.");
+                    return;
+                }
+                let newNodes = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].trim() === '') continue;
+                    const cols = lines[i].split(',');
+                    // Adaptado para soportar los 7 campos (añadiendo el Material)
+                    if (cols.length >= 6) {
+                        newNodes.push({
+                            id: newNodes.length + 1,
+                            casas: parseFloat(cols[1]) || 0,
+                            kwCasa: parseFloat(cols[2]) || 0,
+                            extra: parseFloat(cols[3]) || 0,
+                            dist: parseFloat(cols[4]) || 0,
+                            material: parseFloat(cols[5]) || 0.0282, // Lee material, default Alum
+                            seccion: parseFloat(cols[6] || cols[5]) || 50 // Compatibilidad si suben CSV viejo
+                        });
+                    }
+                }
+                if (newNodes.length > 0) {
+                    nodes = newNodes;
+                    renderNodes();
+                    showEditNotice(); // Lanzamos el aviso al terminar de importar datos nuevos
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+    </script>
+</body>
+
+</html>
