@@ -243,7 +243,7 @@
         }
 
         input[type="number"] {
-            -moz-appearance: textfield;
+            appearance: textfield;
             /* Para Firefox */
         }
 
@@ -439,21 +439,33 @@
                 color: black !important;
                 padding: 0;
             }
-            .theme-switch, .btn-group, header, .edit-notice, td button, th:last-child, td:last-child, .theory-card {
+
+            .theme-switch,
+            .btn-group,
+            header,
+            .edit-notice,
+            td button,
+            th:last-child,
+            td:last-child,
+            .theory-card {
                 display: none !important;
             }
+
             .container {
                 max-width: 100%;
                 margin: 0;
                 padding: 0;
             }
+
             .card {
                 box-shadow: none !important;
                 border: 1px solid #ccc !important;
                 margin-bottom: 15px;
                 break-inside: avoid;
             }
-            .input-cell input, .input-cell select {
+
+            .input-cell input,
+            .input-cell select {
                 border: none !important;
                 background: transparent !important;
                 padding: 0 !important;
@@ -572,7 +584,8 @@
 
                     <div class="btn-group">
                         <button class="btn-primary" onclick="addNode(false)">+ Añadir Tramo</button>
-                        <button class="btn-secondary" onclick="addNode(true)" title="Inicia una nueva línea desde el Transformador">+ Nueva Línea</button>
+                        <button class="btn-secondary" onclick="addNode(true)"
+                            title="Inicia una nueva línea desde el Transformador">+ Nueva Línea</button>
                         <button class="btn-danger" onclick="clearNodes()">🗑️ Limpiar Todo</button>
                     </div>
 
@@ -596,7 +609,8 @@
                 <div class="card" id="results-card">
                     <h2 class="card-title" style="justify-content: space-between;">
                         <span>Resultados Analíticos</span>
-                        <span style="font-size: 0.9rem; background: var(--secondary); padding: 5px 12px; border-radius: 8px; color: var(--primary);">
+                        <span
+                            style="font-size: 0.9rem; background: var(--secondary); padding: 5px 12px; border-radius: 8px; color: var(--primary);">
                             Trafo: <span id="trafo-power" style="font-weight: 800;">0.00 kVA</span>
                         </span>
                     </h2>
@@ -626,14 +640,16 @@
             <h2 class="card-title">📖 Consideraciones Normativas y de Diseño</h2>
             <p>Este simulador aplica las fórmulas estándar de caída de tensión, pero al diseñar una red de distribución
                 real, es fundamental cumplir con las normativas locales (como <strong>EDEMSA</strong> y la
-                <strong>AEA</strong>).</p>
+                <strong>AEA</strong>).
+            </p>
 
             <h3>1. Salida del Transformador y Sección Mínima</h3>
             <p>Según la <strong>E.T. 106</strong> y los esquemas unifilares típicos de EDEMSA, la salida desde la
                 subestación hacia la red de Baja Tensión (L.A.B.T.) debe realizarse preferentemente con conductor
                 Preensamblado de Aluminio de <strong>3x95+50+25 mm²</strong>. Se recomienda fuertemente que el
                 <strong>Tramo 1</strong> de su cálculo mantenga o supere esta sección de 95 mm² para soportar la
-                corriente total de la línea sin sobrecalentamientos.</p>
+                corriente total de la línea sin sobrecalentamientos.
+            </p>
 
             <h3>2. Límites de Caída de Tensión Admisibles</h3>
             <ul>
@@ -645,7 +661,8 @@
                     tramos que van desde el medidor hacia adentro, la caída máxima admitida es más estricta: típicamente
                     <strong>3%</strong> para iluminación y <strong>5%</strong> para fuerza motriz. El tipo "Red
                     Subterránea" en el simulador asume por defecto un límite conservador del <strong>5%</strong>, a
-                    menos que lo modifique.</li>
+                    menos que lo modifique.
+                </li>
             </ul>
 
             <h3>3. Loteos y Baterías de Medidores</h3>
@@ -736,7 +753,7 @@
                 document.getElementById('sys-net-type').value = config.netType || "aerea";
                 document.getElementById('sys-fp').value = config.fp || "0.85";
                 document.getElementById('sys-max-drop').value = config.maxDrop || "8";
-                if(config.trafoKva) document.getElementById('sys-trafo-kva').value = config.trafoKva;
+                if (config.trafoKva) document.getElementById('sys-trafo-kva').value = config.trafoKva;
             }
         }
 
@@ -831,7 +848,7 @@
             // 1. Identify Branches
             let branches = [];
             let currentBranch = [];
-            
+
             nodes.forEach((n, i) => {
                 let isNew = n.isNewBranch;
                 if (i === 0) isNew = true; // First node always starts a branch
@@ -864,7 +881,7 @@
                     potAcumulada += branch[i].potenciaPropia;
                     branch[i].potenciaPasante = potAcumulada;
                 }
-                
+
                 if (branch.length > 0) {
                     totalPowerKW += branch[0].potenciaPasante;
                 }
@@ -886,7 +903,7 @@
             const totalVA = (totalPowerKW * 1000) / cosPhi;
             const totalKVA = totalVA / 1000;
             const utilPercent = (totalKVA / nominalTrafoKVA) * 100;
-            
+
             let utilColor = "var(--primary)"; // default/ok color
             if (utilPercent > 95) utilColor = "var(--danger)";
             else if (utilPercent > 80) utilColor = "var(--accent)";
@@ -942,11 +959,11 @@
 
             const maxDepth = Math.max(...branches.map(b => b.length));
             const labels = ['Trafo'];
-            for(let i=1; i<=maxDepth; i++) labels.push(`Tramo ${i}`);
+            for (let i = 1; i <= maxDepth; i++) labels.push(`Tramo ${i}`);
 
             const datasets = [];
             const dataLimit = labels.map(() => vLimit);
-            
+
             datasets.push({
                 label: `Límite (${maxDrop}%)`,
                 data: dataLimit,
@@ -961,7 +978,7 @@
 
             // Helper para transparencia
             function hexToRgba(hex, alpha) {
-                if(!hex) return `rgba(128, 128, 128, ${alpha})`;
+                if (!hex) return `rgba(128, 128, 128, ${alpha})`;
                 hex = hex.replace('#', '').trim();
                 if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
                 if (hex.length !== 6) return `rgba(128, 128, 128, ${alpha})`;
@@ -996,11 +1013,11 @@
                     borderWidth: 4,
                     pointRadius: 5,
                     pointHoverRadius: 8,
-                    pointBackgroundColor: function(context) {
+                    pointBackgroundColor: function (context) {
                         const val = context.dataset.data[context.dataIndex];
                         return val < vLimit ? dangerColor : surfaceColor;
                     },
-                    pointBorderColor: function(context) {
+                    pointBorderColor: function (context) {
                         const val = context.dataset.data[context.dataIndex];
                         return val < vLimit ? dangerColor : bColor;
                     },
@@ -1043,7 +1060,7 @@
                             titleFont: { family: fontFamily, size: 14, weight: 'bold' },
                             bodyFont: { family: fontFamily, size: 13 },
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     const dataset = context.chart.data.datasets[context.datasetIndex];
                                     if (dataset.label.startsWith('Límite')) {
                                         return `Límite: ${context.parsed.y.toFixed(2)} V`;
@@ -1102,7 +1119,7 @@
                     alert("El archivo CSV parece estar vacío.");
                     return;
                 }
-                
+
                 // Detectar separador (; o ,)
                 const separator = lines[0].includes(';') ? ';' : ',';
 
@@ -1113,9 +1130,9 @@
                     if (cols.length >= 6) {
                         let isNew = false;
                         if (cols.length >= 8 && cols[7].trim().toUpperCase() === "SI") isNew = true;
-                        
+
                         let matVal = 0.0282; // Alum default
-                        if(cols[5].toLowerCase().includes("cobre")) matVal = 0.0172;
+                        if (cols[5].toLowerCase().includes("cobre")) matVal = 0.0172;
                         else if (!isNaN(parseFloat(cols[5]))) matVal = parseFloat(cols[5]);
 
                         newNodes.push({
@@ -1132,9 +1149,9 @@
                 }
                 if (newNodes.length > 0) {
                     nodes = newNodes;
-                    if(nodes.length > 0) nodes[0].isNewBranch = false;
+                    if (nodes.length > 0) nodes[0].isNewBranch = false;
                     renderNodes();
-                    showEditNotice(); 
+                    showEditNotice();
                 }
             };
             reader.readAsText(file);
