@@ -566,7 +566,8 @@
                         <table id="nodes-table">
                             <thead>
                                 <tr>
-                                    <th>Tramo</th>
+                                    <th>Tramo (Nombre)</th>
+                                    <th>Deriva de</th>
                                     <th>Casas</th>
                                     <th>kW/Casa</th>
                                     <th>Extra(kW)</th>
@@ -723,12 +724,23 @@
         // Secciones estándar normalizadas (mm²)
         const STANDARD_SECTIONS = [16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300];
 
-        // Estado inicial de la red (Agregamos la propiedad 'material')
+        // Estado inicial de la red
         let nodes = JSON.parse(localStorage.getItem('simElectrico_nodes')) || [
-            { id: 1, casas: 15, kwCasa: 8, extra: 0, dist: 12, material: 0.0282, seccion: 95 },
-            { id: 2, casas: 13, kwCasa: 8, extra: 30, dist: 40, material: 0.0282, seccion: 70 },
-            { id: 3, casas: 5, kwCasa: 8, extra: 0, dist: 60, material: 0.0172, seccion: 50 } // Cobre de ejemplo
+            { id: 1, nombre: "N1", parentIndex: -1, casas: 15, kwCasa: 8, extra: 0, dist: 12, material: 0.0282, seccion: 95 },
+            { id: 2, nombre: "N2", parentIndex: 0, casas: 13, kwCasa: 8, extra: 30, dist: 40, material: 0.0282, seccion: 70 },
+            { id: 3, nombre: "N3", parentIndex: 1, casas: 5, kwCasa: 8, extra: 0, dist: 60, material: 0.0172, seccion: 50 } 
         ];
+
+        // MIGRATION FOR OLD SAVES
+        nodes.forEach((n, i) => {
+            if (n.nombre === undefined) {
+                n.nombre = n.isNewBranch ? "L" + (i+1) : "N" + (i+1);
+            }
+            if (n.parentIndex === undefined) {
+                if (i === 0 || n.isNewBranch) n.parentIndex = -1;
+                else n.parentIndex = i - 1;
+            }
+        });
 
         document.addEventListener("DOMContentLoaded", () => {
             loadConfig();
@@ -769,12 +781,57 @@
             const tbody = document.getElementById('nodes-body');
             tbody.innerHTML = '';
 
+            // Contar hijos de cada nodo para saber si hay derivaciones
+            let childCount = {};
+            nodes.forEach(n => {
+                if (n.parentIndex !== -1) {
+                    childCount[n.parentIndex] = (childCount[n.parentIndex] || 0) + 1;
+                }
+            });
+
+            // Determinar colores por rama
+            let nodeColorIndex = {};
+            let nextColor = 0;
+            let firstChild = {};
+            
+            nodes.forEach((n, i) => {
+                let p = n.parentIndex;
+                if (p === -1) {
+                    nodeColorIndex[i] = nextColor++;
+                } else {
+                    if (firstChild[p] === undefined) {
+                        firstChild[p] = i; // Mantiene el color de la línea principal
+                        nodeColorIndex[i] = nodeColorIndex[p]; 
+                    } else {
+                        nodeColorIndex[i] = nextColor++; // Nueva rama derivada, nuevo color
+                    }
+                }
+            });
+
+            const rowColors = [
+                "rgba(229, 107, 115, 0.08)", // primary tint
+                "rgba(59, 130, 246, 0.08)", // blue
+                "rgba(16, 185, 129, 0.08)", // green
+                "rgba(139, 92, 246, 0.08)", // purple
+                "rgba(245, 158, 11, 0.08)", // amber
+                "rgba(236, 72, 153, 0.08)", // pink
+                "rgba(20, 184, 166, 0.08)", // teal
+            ];
+            const solidColors = ["var(--primary)", "#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ec4899", "#14b8a6"];
+
             nodes.forEach((node, index) => {
                 const tr = document.createElement('tr');
-                if (node.isNewBranch) {
-                    tr.style.borderTop = "3px solid var(--primary)";
-                    tr.style.backgroundColor = "rgba(0,0,0,0.02)";
+                
+                let cIdx = nodeColorIndex[index] % rowColors.length;
+                tr.style.backgroundColor = rowColors[cIdx];
+
+                // Borde superior si es inicio de nueva rama
+                if (node.parentIndex === -1 || firstChild[node.parentIndex] !== index) {
+                    let sCol = solidColors[cIdx];
+                    tr.style.borderTop = `2px solid ${sCol}`;
                 }
+
+                let isDerivacion = (childCount[index] || 0) > 1;
 
                 let sectionOptions = STANDARD_SECTIONS.map(s =>
                     `<option value="${s}" ${node.seccion == s ? 'selected' : ''}>${s}</option>`
@@ -785,20 +842,30 @@
                 <option value="0.0172" ${node.material == 0.0172 ? 'selected' : ''}>Cobre</option>
             `;
 
-                let nameLabel = `<b>N${index + 1}</b>`;
-                if (node.isNewBranch) {
-                    nameLabel += `<br><span style="font-size:0.65rem; color: var(--danger); font-weight:800; background: var(--secondary); padding: 2px 4px; border-radius:4px; text-transform:uppercase;">NUEVA LÍNEA</span>`;
+                let parentOptions = `<option value="-1" ${node.parentIndex == -1 ? 'selected' : ''}>Trafo</option>`;
+                for (let i = 0; i < index; i++) {
+                    let nName = nodes[i].nombre || `N${i+1}`;
+                    parentOptions += `<option value="${i}" ${node.parentIndex == i ? 'selected' : ''}>${nName}</option>`;
+                }
+
+                let badge = "";
+                if (isDerivacion) {
+                    badge = `<br><span style="font-size:0.65rem; color: #d97706; font-weight:800; background: rgba(245, 158, 11, 0.2); padding: 2px 4px; border-radius:4px; text-transform:uppercase; display: inline-block; margin-top: 4px;">🔀 Derivación</span>`;
                 }
 
                 tr.innerHTML = `
-                <td>${nameLabel}</td>
-                <td class="input-cell"><input type="number" min="0" value="${node.casas}" oninput="updateNode(${index}, 'casas', this.value)"></td>
-                <td class="input-cell"><input type="number" min="0" step="0.1" value="${node.kwCasa}" oninput="updateNode(${index}, 'kwCasa', this.value)"></td>
-                <td class="input-cell"><input type="number" min="0" step="0.1" value="${node.extra}" oninput="updateNode(${index}, 'extra', this.value)"></td>
-                <td class="input-cell"><input type="number" min="0" step="0.1" value="${node.dist}" oninput="updateNode(${index}, 'dist', this.value)"></td>
-                <td class="input-cell"><select onchange="updateNode(${index}, 'material', this.value)">${materialOptions}</select></td>
-                <td class="input-cell"><select onchange="updateNode(${index}, 'seccion', this.value)">${sectionOptions}</select></td>
-                <td><button class="btn-danger" onclick="removeNode(${index})">X</button></td>
+                <td class="input-cell" style="vertical-align: middle;">
+                    <input type="text" style="width: 80px; font-weight: bold;" value="${node.nombre}" onchange="updateNodeStrAndRender(${index}, 'nombre', this.value)">
+                    ${badge}
+                </td>
+                <td class="input-cell" style="vertical-align: middle;"><select style="width: 90px;" onchange="updateNode(${index}, 'parentIndex', this.value)">${parentOptions}</select></td>
+                <td class="input-cell" style="vertical-align: middle;"><input type="number" min="0" value="${node.casas}" oninput="updateNode(${index}, 'casas', this.value)"></td>
+                <td class="input-cell" style="vertical-align: middle;"><input type="number" min="0" step="0.1" value="${node.kwCasa}" oninput="updateNode(${index}, 'kwCasa', this.value)"></td>
+                <td class="input-cell" style="vertical-align: middle;"><input type="number" min="0" step="0.1" value="${node.extra}" oninput="updateNode(${index}, 'extra', this.value)"></td>
+                <td class="input-cell" style="vertical-align: middle;"><input type="number" min="0" step="0.1" value="${node.dist}" oninput="updateNode(${index}, 'dist', this.value)"></td>
+                <td class="input-cell" style="vertical-align: middle;"><select onchange="updateNode(${index}, 'material', this.value)">${materialOptions}</select></td>
+                <td class="input-cell" style="vertical-align: middle;"><select onchange="updateNode(${index}, 'seccion', this.value)">${sectionOptions}</select></td>
+                <td style="vertical-align: middle;"><button class="btn-danger" onclick="removeNode(${index})">X</button></td>
             `;
                 tbody.appendChild(tr);
             });
@@ -808,22 +875,49 @@
 
         function updateNode(index, field, value) {
             nodes[index][field] = parseFloat(value) || 0;
-            hideEditNotice(); // Ocultamos el aviso porque el usuario ya comenzó a editar
+            hideEditNotice();
             calculate();
+        }
+
+        function updateNodeStrAndRender(index, field, value) {
+            nodes[index][field] = value;
+            hideEditNotice();
+            renderNodes();
         }
 
         function addNode(isNewBranch = false) {
             const lastSection = nodes.length > 0 ? nodes[nodes.length - 1].seccion : 50;
             const lastMaterial = nodes.length > 0 ? nodes[nodes.length - 1].material : 0.0282;
-            const actualIsNewBranch = nodes.length === 0 ? false : isNewBranch;
-            nodes.push({ id: nodes.length + 1, casas: 0, kwCasa: 0, extra: 0, dist: 20, material: lastMaterial, seccion: lastSection, isNewBranch: actualIsNewBranch });
+            
+            let parentIdx = -1;
+            let defaultName = "L" + (nodes.length + 1);
+            if (!isNewBranch && nodes.length > 0) {
+                parentIdx = nodes.length - 1;
+                defaultName = "N" + (nodes.length + 1);
+            }
+
+            nodes.push({ 
+                id: Date.now(), 
+                nombre: defaultName,
+                parentIndex: parentIdx,
+                casas: 0, 
+                kwCasa: 0, 
+                extra: 0, 
+                dist: 20, 
+                material: lastMaterial, 
+                seccion: lastSection 
+            });
             renderNodes();
-            showEditNotice(); // Lanzamos el aviso para pedirle al usuario que edite
+            showEditNotice();
         }
 
         function removeNode(index) {
             nodes.splice(index, 1);
-            if (nodes.length > 0) nodes[0].isNewBranch = false;
+            // Re-vincular índices de padres ya que la lista se achicó
+            nodes.forEach(n => {
+                if (n.parentIndex === index) n.parentIndex = -1; // Los hijos quedan "huerfanos" y se unen al Trafo
+                else if (n.parentIndex > index) n.parentIndex--;
+            });
             renderNodes();
         }
 
@@ -845,60 +939,43 @@
             const isTrifasico = (vBase === 380 || vBase === 13200);
             const factorSistema = isTrifasico ? Math.sqrt(3) : 2;
 
-            // 1. Identify Branches
-            let branches = [];
-            let currentBranch = [];
-
-            nodes.forEach((n, i) => {
-                let isNew = n.isNewBranch;
-                if (i === 0) isNew = true; // First node always starts a branch
-
-                if (isNew && currentBranch.length > 0) {
-                    branches.push(currentBranch);
-                    currentBranch = [];
-                }
-                currentBranch.push({
-                    ...n,
-                    globalIndex: i,
-                    potenciaPropia: (n.casas * n.kwCasa) + n.extra,
-                    potenciaPasante: 0,
-                    corriente: 0,
-                    caidaTramo: 0,
-                    caidaAcumulada: 0
-                });
+            // 1. Inicializar nodos
+            nodes.forEach(n => {
+                n.potenciaPropia = (n.casas * n.kwCasa) + n.extra;
+                n.potenciaPasante = n.potenciaPropia;
+                n.corriente = 0;
+                n.caidaTramo = 0;
+                n.caidaAcumulada = 0;
             });
-            if (currentBranch.length > 0) {
-                branches.push(currentBranch);
+
+            // 2. Cálculo "Bottom-Up" de Potencia Pasante (De hojas hacia Trafo)
+            for (let i = nodes.length - 1; i >= 0; i--) {
+                let p = nodes[i].parentIndex;
+                if (p !== -1 && p !== undefined && p < i) { // Padre válido
+                    nodes[p].potenciaPasante += nodes[i].potenciaPasante;
+                }
             }
 
+            // 3. Cálculo "Top-Down" de Caída de Tensión
             let totalPowerKW = 0;
-            let flatResults = [];
-
-            // 2. Process each branch independently
-            branches.forEach(branch => {
-                let potAcumulada = 0;
-                for (let i = branch.length - 1; i >= 0; i--) {
-                    potAcumulada += branch[i].potenciaPropia;
-                    branch[i].potenciaPasante = potAcumulada;
+            for (let i = 0; i < nodes.length; i++) {
+                let r = nodes[i];
+                r.corriente = (r.potenciaPasante * 1000) / (factorSistema * vBase * cosPhi);
+                let resistenciaTramo = (r.material * r.dist) / r.seccion;
+                r.caidaTramo = factorSistema * r.corriente * resistenciaTramo * cosPhi;
+                
+                let p = r.parentIndex;
+                if (p === -1 || p === undefined || p >= i) {
+                    // Raíz que sale del Trafo
+                    r.caidaAcumulada = r.caidaTramo;
+                    totalPowerKW += r.potenciaPasante;
+                } else {
+                    // Derivación de un nodo anterior
+                    r.caidaAcumulada = nodes[p].caidaAcumulada + r.caidaTramo;
                 }
+            }
 
-                if (branch.length > 0) {
-                    totalPowerKW += branch[0].potenciaPasante;
-                }
-
-                let caidaAcum = 0;
-                for (let i = 0; i < branch.length; i++) {
-                    let r = branch[i];
-                    r.corriente = (r.potenciaPasante * 1000) / (factorSistema * vBase * cosPhi);
-                    let resistenciaTramo = (r.material * r.dist) / r.seccion;
-                    r.caidaTramo = factorSistema * r.corriente * resistenciaTramo * cosPhi;
-                    caidaAcum += r.caidaTramo;
-                    r.caidaAcumulada = caidaAcum;
-                    flatResults.push(r);
-                }
-            });
-
-            // Update Total Transformer Power (VA)
+            // 4. Update Total Transformer Power (VA)
             const nominalTrafoKVA = parseFloat(document.getElementById('sys-trafo-kva').value) || 100;
             const totalVA = (totalPowerKW * 1000) / cosPhi;
             const totalKVA = totalVA / 1000;
@@ -910,8 +987,36 @@
 
             document.getElementById('trafo-power').innerHTML = `${totalKVA.toFixed(2)} kVA <span style="color: ${utilColor}; margin-left: 6px;">(${utilPercent.toFixed(1)}%)</span>`;
 
-            renderResults(flatResults, vBase, maxDrop);
-            drawChart(branches, vBase, maxDrop);
+            // 5. Build paths para el Gráfico
+            let children = {};
+            nodes.forEach((n, i) => {
+                let p = n.parentIndex;
+                if (!children[p]) children[p] = [];
+                children[p].push(i);
+            });
+
+            let leaves = [];
+            nodes.forEach((n, i) => {
+                if (!children[i] || children[i].length === 0) {
+                    leaves.push(i);
+                }
+            });
+
+            let paths = [];
+            leaves.forEach(leaf => {
+                let path = [];
+                let curr = leaf;
+                let failsafe = 0;
+                while(curr !== -1 && curr !== undefined && failsafe < 1000) {
+                    path.unshift(nodes[curr]);
+                    curr = nodes[curr].parentIndex;
+                    failsafe++;
+                }
+                paths.push(path);
+            });
+
+            renderResults(nodes, vBase, maxDrop);
+            drawChart(paths, vBase, maxDrop);
         }
 
         function renderResults(results, vBase, maxDrop) {
@@ -924,7 +1029,7 @@
                 let percentClass = dropPercent > maxDrop ? 'alert-high' : 'alert-ok';
 
                 tr.innerHTML = `
-                <td><b>N${index + 1}</b></td>
+                <td><b>${r.nombre}</b></td>
                 <td>${r.potenciaPasante.toFixed(2)}</td>
                 <td>${r.corriente.toFixed(2)}</td>
                 <td>${r.caidaAcumulada.toFixed(2)} V</td>
@@ -957,9 +1062,9 @@
 
             const vLimit = vBase * (1 - maxDrop / 100);
 
-            const maxDepth = Math.max(...branches.map(b => b.length));
+            const maxDepth = Math.max(0, ...branches.map(b => b.length));
             const labels = ['Trafo'];
-            for (let i = 1; i <= maxDepth; i++) labels.push(`Tramo ${i}`);
+            for (let i = 1; i <= maxDepth; i++) labels.push(`Nivel ${i}`);
 
             const datasets = [];
             const dataLimit = labels.map(() => vLimit);
@@ -1006,7 +1111,7 @@
                 });
 
                 datasets.push({
-                    label: `Línea ${index + 1}`,
+                    label: `Camino ${index + 1}`,
                     data: dataPuntos,
                     borderColor: bColor,
                     backgroundColor: gradientFill,
@@ -1025,7 +1130,7 @@
                     fill: true,
                     tension: 0.3,
                     // custom data for tooltips
-                    nodeNames: ['Trafo', ...b.map(r => `N${r.globalIndex + 1}`)]
+                    nodeNames: ['Trafo', ...b.map(r => r.nombre)]
                 });
             });
 
@@ -1090,12 +1195,11 @@
         // --- EXPORTAR / IMPORTAR CSV ---
         function exportCSV() {
             let csvContent = "\uFEFF"; // BOM para Excel
-            csvContent += "Tramo;Casas;kW/Casa;Extra (kW);Distancia (m);Material;Seccion (mm2);NuevaLinea\n";
+            csvContent += "Nombre;DerivaDe;Casas;kW/Casa;Extra (kW);Distancia (m);Material;Seccion (mm2)\n";
             nodes.forEach((n, index) => {
                 let matStr = n.material == 0.0282 ? "Aluminio" : "Cobre";
-                let isNewStr = n.isNewBranch ? "SI" : "NO";
-                // Usamos punto y coma para que Excel lo separe correctamente en columnas en español
-                let row = `N${index + 1};${n.casas};${n.kwCasa};${n.extra};${n.dist};${matStr};${n.seccion};${isNewStr}`;
+                let parentStr = n.parentIndex == -1 ? "Trafo" : (nodes[n.parentIndex]?.nombre || "Trafo");
+                let row = `${n.nombre};${parentStr};${n.casas};${n.kwCasa};${n.extra};${n.dist};${matStr};${n.seccion}`;
                 csvContent += row + "\n";
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1120,36 +1224,61 @@
                     return;
                 }
 
-                // Detectar separador (; o ,)
                 const separator = lines[0].includes(';') ? ';' : ',';
+                const headers = lines[0].split(separator).map(h => h.trim().toLowerCase());
+                const isNewFormat = headers.includes("derivade") || headers.includes("deriva de");
 
                 let newNodes = [];
                 for (let i = 1; i < lines.length; i++) {
                     if (lines[i].trim() === '') continue;
                     const cols = lines[i].split(separator);
-                    if (cols.length >= 6) {
+                    
+                    if (isNewFormat && cols.length >= 8) {
+                        let matVal = 0.0282;
+                        if (cols[6].toLowerCase().includes("cobre")) matVal = 0.0172;
+                        else if (!isNaN(parseFloat(cols[6]))) matVal = parseFloat(cols[6]);
+
+                        let parentStr = cols[1].trim();
+                        let pIdx = -1;
+                        if (parentStr !== "Trafo") {
+                            let found = newNodes.findIndex(nn => nn.nombre === parentStr);
+                            if (found !== -1) pIdx = found;
+                        }
+
+                        newNodes.push({
+                            id: Date.now() + i,
+                            nombre: cols[0].trim(),
+                            parentIndex: pIdx,
+                            casas: parseFloat(cols[2].replace(',', '.')) || 0,
+                            kwCasa: parseFloat(cols[3].replace(',', '.')) || 0,
+                            extra: parseFloat(cols[4].replace(',', '.')) || 0,
+                            dist: parseFloat(cols[5].replace(',', '.')) || 0,
+                            material: matVal,
+                            seccion: parseFloat(cols[7].replace(',', '.')) || 50
+                        });
+                    } else if (cols.length >= 6) {
                         let isNew = false;
                         if (cols.length >= 8 && cols[7].trim().toUpperCase() === "SI") isNew = true;
 
-                        let matVal = 0.0282; // Alum default
+                        let matVal = 0.0282;
                         if (cols[5].toLowerCase().includes("cobre")) matVal = 0.0172;
                         else if (!isNaN(parseFloat(cols[5]))) matVal = parseFloat(cols[5]);
 
                         newNodes.push({
-                            id: newNodes.length + 1,
+                            id: Date.now() + i,
+                            nombre: cols[0].trim(),
+                            parentIndex: (isNew || newNodes.length === 0) ? -1 : newNodes.length - 1,
                             casas: parseFloat(cols[1].replace(',', '.')) || 0,
                             kwCasa: parseFloat(cols[2].replace(',', '.')) || 0,
                             extra: parseFloat(cols[3].replace(',', '.')) || 0,
                             dist: parseFloat(cols[4].replace(',', '.')) || 0,
                             material: matVal,
-                            seccion: parseFloat((cols[6] || cols[5]).replace(',', '.')) || 50,
-                            isNewBranch: isNew
+                            seccion: parseFloat((cols[6] || cols[5]).replace(',', '.')) || 50
                         });
                     }
                 }
                 if (newNodes.length > 0) {
                     nodes = newNodes;
-                    if (nodes.length > 0) nodes[0].isNewBranch = false;
                     renderNodes();
                     showEditNotice();
                 }
