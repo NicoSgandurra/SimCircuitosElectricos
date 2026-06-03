@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 03/06/2026 - Corrección FP - Paso a Paso Detallado</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+                        mono: ['Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #3f3f46;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-[#fdfbf7] dark:bg-[#09090b] text-slate-700 dark:text-zinc-300 transition-colors duration-500 font-sans pb-12 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b border-slate-200 dark:border-zinc-800 pb-6">
+            <div>
+                <h1
+                    class="text-3xl md:text-5xl font-extrabold tracking-tight mb-3 text-indigo-600 dark:text-indigo-400 flex items-center gap-4">
+                    <i data-feather="book-open" class="text-indigo-500 dark:text-indigo-500 w-10 h-10"></i>
+                    Resolución Ejercicio 03-06
+                </h1>
+                <p class="text-slate-500 dark:text-zinc-400 font-medium text-lg">Guía detallada: Circuitos Mixtos y Corrección del Factor de Potencia</p>
+            </div>
+            <button onclick="toggleTheme()"
+                class="p-4 rounded-full transition-all duration-300 bg-white border-2 border-indigo-100 text-indigo-500 shadow-md hover:bg-indigo-50 dark:bg-zinc-900 dark:border-zinc-700 dark:text-indigo-400 dark:hover:border-indigo-500/50"
+                id="theme-btn">
+                <i data-feather="sun" id="theme-icon"></i>
+            </button>
+        </header>
+
+        <!-- Marco Teórico: Circuitos Mixtos y Divisores de Corriente -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-zinc-100 mb-6 flex items-center gap-2">
+                <i data-feather="compass" class="text-amber-500"></i> Marco Teórico: ¿Cómo abordar un circuito mixto en CA?
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Concepto 1: Topología Mixta -->
+                <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-6 rounded-2xl shadow-sm">
+                    <div class="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-xl flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400">
+                        <i data-feather="git-branch"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-2">Desarmando el Circuito (Serie y Paralelo)</h3>
+                    <p class="text-sm text-slate-600 dark:text-zinc-400 mb-3">
+                        En un circuito mixto, no podemos calcular todo de una vez. La estrategia es "colapsar" o simplificar partes pequeñas primero. 
+                    </p>
+                    <div class="bg-white/60 dark:bg-black/20 p-3 rounded-lg text-sm text-slate-700 dark:text-zinc-300 space-y-2">
+                        <p><strong>Paso A:</strong> Si hay capacitores o bobinas, pásalos a Ohmios (Impedancias). En corriente alterna, usamos <strong>números complejos</strong> para indicar los desfasajes (las partes reales son las resistencias, las imaginarias son bobinas y capacitores).</p>
+                        <p><strong>Paso B:</strong> Resuelve los paralelos aislando el bloque. La fórmula fundamental es: <code class="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded">Zp = (Z1 * Z2) / (Z1 + Z2)</code>.</p>
+                        <p><strong>Paso C:</strong> Suma lo que quedó en serie para obtener tu "único" bloque total (Z<sub>Total</sub>).</p>
+                    </div>
+                </div>
+
+                <!-- Concepto 2: Kirchhoff y Ley de Ohm -->
+                <div class="bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 p-6 rounded-2xl shadow-sm">
+                    <div class="w-12 h-12 bg-sky-100 dark:bg-sky-500/20 rounded-xl flex items-center justify-center mb-4 text-sky-600 dark:text-sky-400">
+                        <i data-feather="activity"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-sky-700 dark:text-sky-400 mb-2">Caídas de Tensión y Ley de Kirchhoff</h3>
+                    <p class="text-sm text-slate-600 dark:text-zinc-400 mb-3">
+                        ¿Cómo sabemos cuánta corriente se va por cada rama del paralelo? 
+                    </p>
+                    <div class="bg-white/60 dark:bg-black/20 p-3 rounded-lg text-sm text-slate-700 dark:text-zinc-300 space-y-2">
+                        <p>Imagina el agua en una tubería. Cuando el caño se divide en dos, el agua (Corriente) se reparte, pero la presión (Voltaje) en los extremos de esa división es la misma para ambas tuberías.</p>
+                        <p><strong>El truco:</strong> Primero calculamos cuánta "presión" (Voltaje V<sub>AB</sub>) se pierde exclusivamente en ese bloque paralelo multiplicando la Corriente Total por la Impedancia del paralelo.</p>
+                        <p>Luego aplicamos Ohm en cada rama: <code class="font-mono bg-sky-100 dark:bg-sky-900/40 px-1 rounded">I_rama = V_AB / Z_rama</code>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-purple-50 dark:bg-purple-900/10 border border-purple-200 dark:border-purple-900/30 p-5 rounded-xl flex gap-4 items-start shadow-sm">
+                <i data-feather="battery-charging" class="text-purple-500 mt-1 flex-shrink-0"></i>
+                <div class="text-slate-700 dark:text-zinc-300 text-sm space-y-2">
+                    <p><strong>Recordatorio sobre Potencias (Triángulo):</strong></p>
+                    <p>Al igual que en ejercicios anteriores, usaremos el desfase que sufre la Corriente Total para saber cuánta de nuestra energía es <strong>Activa (P)</strong> (trabajo útil), cuánta es <strong>Reactiva (Q)</strong> (campos magnéticos perdidos) y cuál es el <strong>Factor de Potencia (FP)</strong>. El objetivo siempre será evitar multas de la compañía eléctrica llevando el FP por encima de 0.95.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resolución Paso a Paso -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-zinc-100 mb-6 flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-4">
+                <i data-feather="edit-3" class="text-indigo-500"></i> Desarrollo del Ejercicio, Paso a Paso
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+                
+                <!-- Timeline vertical estético (solo visible en escritorio) -->
+                <div class="hidden lg:block absolute left-[39px] top-4 bottom-0 w-1 bg-indigo-100 dark:bg-indigo-900/50 rounded-full z-0"></div>
+
+                <!-- PASO 0: Datos -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-indigo-500 text-white rounded-2xl flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/30 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase opacity-80">Datos</span>
+                        <i data-feather="list" class="w-6 h-6 mt-1"></i>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Relevamiento del Circuito Mixto</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Tenemos una red con <strong>V = 220 V</strong> y <strong>f = 50 Hz</strong> conectada al siguiente arreglo:
+                        </p>
+                        <ul class="list-none space-y-3 text-slate-700 dark:text-zinc-300 mb-4">
+                            <li class="bg-slate-50 dark:bg-black p-4 rounded-xl border border-slate-100 dark:border-zinc-800">
+                                <span class="font-bold text-indigo-500">Un Bloque en Paralelo compuesto por:</span>
+                                <ul class="list-disc pl-5 mt-2 space-y-1 text-slate-600 dark:text-zinc-400">
+                                    <li>Rama 1: Resistencia pura de <strong>20 &Omega;</strong>.</li>
+                                    <li>Rama 2: Resistencia de <strong>15 &Omega;</strong> en serie con un Capacitor de <strong>450 &mu;F</strong>.</li>
+                                </ul>
+                            </li>
+                            <li class="bg-slate-50 dark:bg-black p-4 rounded-xl border border-slate-100 dark:border-zinc-800">
+                                <span class="font-bold text-emerald-500">Un Bloque en Serie con la fuente:</span>
+                                <p class="text-slate-600 dark:text-zinc-400 mt-1 pl-5">
+                                    Justo antes de que el circuito se divida, tenemos una Resistencia de <strong>5 &Omega;</strong> y una Bobina de <strong>50 mHy</strong>.
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- PASO 1 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-indigo-500 text-indigo-500 dark:text-indigo-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">1</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Impedancias y Simplificación (Agrupando Bloques)</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Lo primero que hacemos es "convertir" todo a Ohmios y fusionar las cajas para que la fuente de 220V vea el circuito como si fuera un solo componente (Z<sub>Total</sub>).
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 dark:border-indigo-900/30">
+                                <p class="font-bold text-indigo-700 dark:text-indigo-400 mb-2">1. Preparando las Ramas del Paralelo:</p>
+                                <div class="font-mono text-sm space-y-2">
+                                    <p><strong>Rama 1:</strong> Z1 = 20 &Omega;</p>
+                                    <p class="font-sans text-xs text-slate-500">Transformamos los 450&mu;F a Ohmios usando la fórmula de reactancia capacitiva negativa:</p>
+                                    <p><strong>Rama 2:</strong> Z2 = 15 - 1 / (2&pi; &middot; 50 &middot; 450&times;10<sup>-6</sup>) i = <span class="text-indigo-600 dark:text-indigo-400">15 - 7.074i &Omega;</span></p>
+                                </div>
+                                <p class="font-sans text-xs text-slate-500 mt-3 mb-1">Calculamos el bloque completo en paralelo multiplicando ambas ramas y dividiéndolas por su suma:</p>
+                                <div class="font-mono text-sm">
+                                    <strong>Equivalente del Paralelo (Z12):</strong> (Z1 &middot; Z2) / (Z1 + Z2) = <span class="text-indigo-600 dark:text-indigo-400 font-bold">9.02 - 2.219i &Omega;</span>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                                <p class="font-bold text-emerald-700 dark:text-emerald-400 mb-2">2. Sumando la rama Serie final:</p>
+                                <p class="font-sans text-xs text-slate-500 mb-2">Convertimos los 50mHy a Ohmios (reactancia inductiva positiva) y sumamos el bloque en serie con el paralelo que acabamos de resolver.</p>
+                                <div class="font-mono text-sm space-y-2">
+                                    <p><strong>Rama Serie de la fuente:</strong> Z<sub>serie</sub> = 5 + (2&pi; &middot; 50 &middot; 50&times;10<sup>-3</sup>) i = <span class="text-emerald-600 dark:text-emerald-400">5 + 15.708i &Omega;</span></p>
+                                    <p><strong>Impedancia Total (Z<sub>T</sub>):</strong> Z12 + Z<sub>serie</sub> = (9.02 - 2.219i) + (5 + 15.708i) = <span class="text-emerald-600 dark:text-emerald-400 font-bold">14.02 + 13.489i &Omega;</span></p>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 text-center p-4 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg">
+                                Para poder dividir en el próximo paso, pasamos Z<sub>T</sub> a forma Polar:<br>
+                                <span class="text-lg font-mono text-purple-600 dark:text-purple-400 mt-2 inline-block"><strong>Z<sub>T</sub> = 19.455 &ang; 43.894&deg; &Omega;</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 2 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-indigo-500 text-indigo-500 dark:text-indigo-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">2</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Corriente Total y Corrientes de Rama</h3>
+                        
+                        <div class="font-mono text-sm space-y-4">
+                            <div>
+                                <p class="text-slate-600 dark:text-zinc-400 mb-2 font-sans text-sm">Sabiendo que todo el circuito se resume a <strong>Z<sub>T</sub></strong>, usamos la <strong>Ley de Ohm</strong> para descubrir cuánta corriente fluye en total desde la fuente:</p>
+                                <div class="bg-slate-50 dark:bg-black p-4 rounded border border-slate-200 dark:border-zinc-800">
+                                    <strong>Corriente Total (I<sub>t</sub>):</strong> V / Z<sub>T</sub> = 220&ang;0&deg; / 19.455&ang;43.894&deg; = <span class="text-indigo-600 dark:text-indigo-400 font-bold text-lg">11.308 &ang; -43.894&deg; A</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6 border-t border-slate-100 dark:border-zinc-800 pt-4">
+                                <p class="text-slate-600 dark:text-zinc-400 mb-3 font-sans text-sm">¡El agua llegó a la bifurcación! Para saber cuánta va por la Rama 1 y cuánta por la Rama 2, primero calculamos el <strong>Voltaje (Presión) en ese cruce</strong>. Esto se logra multiplicando la Corriente Total por la impedancia de ese nudo paralelo (Z12):</p>
+                                
+                                <div class="bg-rose-50 dark:bg-rose-900/10 p-3 rounded border border-rose-100 dark:border-rose-900/30 text-rose-800 dark:text-rose-400">
+                                    <strong>V<sub>AB</sub> (Caída en paralelo):</strong> I<sub>t</sub> &middot; Z12 = (11.308&ang;-43.894&deg;) &middot; (9.02 - 2.219i) = <span class="font-bold">105.038 &ang; -57.716&deg; V</span>
+                                </div>
+                            </div>
+
+                            <p class="text-slate-600 dark:text-zinc-400 mb-2 font-sans text-sm mt-3">Ahora, aplicamos la Ley de Ohm independientemente en cada rama usando ese voltaje V<sub>AB</sub>:</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-slate-50 dark:bg-black p-3 rounded border border-slate-200 dark:border-zinc-800">
+                                    <strong>I1:</strong> V<sub>AB</sub> / Z1 = <br><span class="text-emerald-600 dark:text-emerald-400 font-bold">5.252 &ang; -57.716&deg; A</span>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-black p-3 rounded border border-slate-200 dark:border-zinc-800">
+                                    <strong>I2:</strong> V<sub>AB</sub> / Z2 = <br><span class="text-emerald-600 dark:text-emerald-400 font-bold">6.334 &ang; -32.468&deg; A</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-400 italic font-sans mt-2">Nota: Si sumáramos vectorialmente I1 + I2, comprobaríamos la Ley de Kirchhoff, dándonos de nuevo la I<sub>t</sub> = 11.308 &ang; -43.894&deg; A.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-indigo-500 text-indigo-500 dark:text-indigo-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">3</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Triángulo de Potencias Inicial</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Observando la Corriente Total de la instalación, vemos que tiene un ángulo de desfasaje de <strong>-43.894&deg;</strong>. Usaremos este ángulo para desglosar la energía (Activa y Reactiva).
+                        </p>
+                        
+                        <div class="space-y-3 font-mono text-sm">
+                            <div class="flex flex-col md:flex-row justify-between items-center bg-amber-50 dark:bg-amber-900/10 p-3 rounded border border-amber-100 dark:border-amber-900/30">
+                                <span class="text-slate-700 dark:text-zinc-300"><strong>P (Energía Útil):</strong> |I<sub>t</sub>| &middot; V &middot; cos(-43.894&deg;)</span>
+                                <span class="font-bold text-amber-600 dark:text-amber-500 text-lg">1792.735 W</span>
+                            </div>
+                            <div class="flex flex-col md:flex-row justify-between items-center bg-sky-50 dark:bg-sky-900/10 p-3 rounded border border-sky-100 dark:border-sky-900/30">
+                                <span class="text-slate-700 dark:text-zinc-300"><strong>Q (Reactiva Perdida):</strong> |I<sub>t</sub>| &middot; V &middot; sin(-43.894&deg;)</span>
+                                <span class="font-bold text-sky-600 dark:text-sky-400 text-lg">-1724.831 VAr</span>
+                            </div>
+                            <div class="flex flex-col md:flex-row justify-between items-center bg-purple-50 dark:bg-purple-900/10 p-3 rounded border border-purple-100 dark:border-purple-900/30">
+                                <span class="text-slate-700 dark:text-zinc-300"><strong>S (Aparente Total):</strong> |I<sub>t</sub>| &middot; V</span>
+                                <span class="font-bold text-purple-600 dark:text-purple-400 text-lg">2487.758 VA</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 p-4 bg-rose-50 dark:bg-rose-900/10 rounded-lg border border-rose-200 dark:border-rose-900/30 text-rose-800 dark:text-rose-400 flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <span class="font-bold">Factor de Potencia (P / S):</span>
+                            <div class="text-center">
+                                <span class="text-2xl font-black">0.721</span>
+                                <p class="text-xs mt-1">¡Muy bajo! Debemos corregirlo a 0.95.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 4 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-emerald-500 text-emerald-500 dark:text-emerald-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-emerald-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">4</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">La Corrección del Factor de Potencia (a 0.95)</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4 text-sm">
+                            Nuestra máquina necesita consumir sus 1792 W de Activa sí o sí. Vamos a simular que el Factor de Potencia objetivo (<strong>fp' = 0.95</strong>) ya es una realidad. ¿Cómo quedaría nuestra Aparente (S') y Reactiva (Q') en ese escenario ideal?
+                        </p>
+                        
+                        <div class="font-mono text-sm space-y-3 mb-6">
+                            <div class="bg-emerald-50 dark:bg-emerald-900/10 p-3 rounded border border-emerald-100 dark:border-emerald-900/30 flex justify-between items-center">
+                                <span class="text-slate-700 dark:text-zinc-400"><strong>Nuevo S' =</strong> P / fp' = 1792.735 / 0.95</span>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400 text-lg">1887.089 VA</span>
+                            </div>
+                            <div class="bg-emerald-50 dark:bg-emerald-900/10 p-3 rounded border border-emerald-100 dark:border-emerald-900/30 flex justify-between items-center">
+                                <span class="text-slate-700 dark:text-zinc-400"><strong>Nueva Q' =</strong> &radic;(S'&sup2; - P&sup2;)</span>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400 text-lg">589.243 VAr</span>
+                            </div>
+                        </div>
+
+                        <p class="text-slate-600 dark:text-zinc-400 mb-3 text-sm">
+                            El banco de capacitores es el encargado de proveer la diferencia de Reactiva para aliviar a la red. Calculamos cuánta Reactiva inyectar (Q<sub>C</sub>):
+                        </p>
+
+                        <div class="bg-emerald-100 dark:bg-emerald-900/30 p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/50 flex flex-col md:flex-row justify-between items-center gap-2 mb-6 shadow-sm">
+                            <span class="font-mono text-emerald-800 dark:text-emerald-200"><strong>Potencia del Capacitor (Q<sub>C</sub>):</strong> -Q' - Q</span>
+                            <span class="font-bold text-emerald-700 dark:text-emerald-300 text-xl font-mono">1135.587 VAr</span>
+                        </div>
+
+                        <h4 class="font-bold text-slate-800 dark:text-zinc-100 mb-3 border-t border-slate-100 dark:border-zinc-800 pt-5">El valor físico del Capacitor en &mu;F</h4>
+                        
+                        <div class="space-y-4 font-mono text-sm">
+                            <p class="text-slate-600 dark:text-zinc-400 font-sans text-sm">En vez de usar potencias, podemos calcularlo viendo cómo se modificarían las impedancias reales. Conservamos nuestra parte real (Re(Zt) = 14.02 &Omega;):</p>
+                            
+                            <div class="bg-slate-50 dark:bg-black p-4 rounded-xl border border-slate-200 dark:border-zinc-800 space-y-2">
+                                <p><strong>Impedancia final deseada: Zt' =</strong> Re(Zt) / fp' = 14.02 / 0.95 = <span class="font-bold">14.758 &Omega;</span></p>
+                                <p><strong>Parte Imaginaria deseada: X' =</strong> &radic;(Zt'&sup2; - Re(Zt)&sup2;) = <span class="font-bold">4.608 &Omega;</span></p>
+                                <div class="bg-rose-50 dark:bg-rose-900/10 p-2 mt-2 border border-rose-100 dark:border-rose-900/30 rounded text-rose-800 dark:text-rose-400">
+                                    <strong>Lo que debemos compensar (X<sub>C</sub>):</strong> X' - Im(Zt) = 4.608 - 13.489 = <span class="font-bold">-8.881 &Omega;</span>
+                                </div>
+                            </div>
+
+                            <p class="text-slate-600 dark:text-zinc-400 font-sans text-sm mt-3">Finalmente, con la fórmula de reactancia (<code class="bg-slate-100 dark:bg-zinc-800 px-1 rounded text-slate-700 dark:text-zinc-300">Xc = 1 / (2&pi;fC)</code>), despejamos la capacitancia requerida (C):</p>
+
+                            <div class="bg-indigo-500 text-white p-6 rounded-2xl shadow-xl shadow-indigo-500/20 text-center mt-4">
+                                C = 1 / ( 2&pi; &middot; 50 Hz &middot; 8.881 &Omega; )<br><br>
+                                <span class="text-3xl font-extrabold bg-white/20 px-6 py-3 rounded-xl inline-block shadow-sm">C = 358.427 &mu;F</span>
+                            </div>
+                            <p class="text-center font-sans text-xs text-slate-500 dark:text-zinc-500 mt-2">¡Este es el capacitor que debes ir a comprar a la casa de electricidad!</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- THEME LOGIC ---
+        const html = document.documentElement;
+        const themeIcon = document.getElementById('theme-icon');
+        let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        function updateThemeUI() {
+            if (isDark) {
+                html.classList.add('dark');
+                themeIcon.setAttribute('data-feather', 'moon');
+            } else {
+                html.classList.remove('dark');
+                themeIcon.setAttribute('data-feather', 'sun');
+            }
+            feather.replace(); // Refresh icon
+        }
+
+        function toggleTheme() {
+            isDark = !isDark;
+            updateThemeUI();
+        }
+
+        window.onload = () => {
+            updateThemeUI();
+            feather.replace();
+        };
+    </script>
+</body>
+
+</html>

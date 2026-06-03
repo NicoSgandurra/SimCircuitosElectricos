@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Corrección FP - Paso a Paso Detallado</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
+                        mono: ['Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #3f3f46;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-[#fdfbf7] dark:bg-[#09090b] text-slate-700 dark:text-zinc-300 transition-colors duration-500 font-sans pb-12 min-h-screen">
+
+    <div class="max-w-7xl mx-auto px-4 py-8 md:py-12">
+
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10 border-b border-slate-200 dark:border-zinc-800 pb-6">
+            <div>
+                <h1
+                    class="text-3xl md:text-5xl font-extrabold tracking-tight mb-3 text-indigo-600 dark:text-indigo-400 flex items-center gap-4">
+                    <i data-feather="book-open" class="text-indigo-500 dark:text-indigo-500 w-10 h-10"></i>
+                    Cálculo Corrección FP
+                </h1>
+                <p class="text-slate-500 dark:text-zinc-400 font-medium text-lg">Guía definitiva paso a paso, pensada para entender el "por qué" de cada número.</p>
+            </div>
+            <button onclick="toggleTheme()"
+                class="p-4 rounded-full transition-all duration-300 bg-white border-2 border-indigo-100 text-indigo-500 shadow-md hover:bg-indigo-50 dark:bg-zinc-900 dark:border-zinc-700 dark:text-indigo-400 dark:hover:border-indigo-500/50"
+                id="theme-btn">
+                <i data-feather="sun" id="theme-icon"></i>
+            </button>
+        </header>
+
+        <!-- Conceptos Iniciales (Teoría Amigable) -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-zinc-100 mb-6 flex items-center gap-2">
+                <i data-feather="zap" class="text-amber-500"></i> Repaso Teórico: La analogía de la Cerveza
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Potencia Activa -->
+                <div class="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-6 rounded-2xl shadow-sm">
+                    <div class="w-12 h-12 bg-amber-100 dark:bg-amber-500/20 rounded-xl flex items-center justify-center mb-4 text-amber-600 dark:text-amber-400">
+                        <i data-feather="sun"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-amber-700 dark:text-amber-400 mb-2">Potencia Activa (P)</h3>
+                    <p class="text-sm text-slate-600 dark:text-zinc-400 mb-3">
+                        Es la energía que <strong>realmente hace el trabajo útil</strong> en una máquina. Es la que se transforma en calor, luz o movimiento mecánico.
+                    </p>
+                    <div class="bg-white/60 dark:bg-black/20 p-3 rounded-lg text-sm text-slate-700 dark:text-zinc-300">
+                        <strong>Ejemplo:</strong> La luz que emite una bombilla o la fuerza de un motor al levantar una carga. En la cerveza, es <strong>el líquido</strong> que te quita la sed. Se mide en <strong>Watts (W)</strong>.
+                    </div>
+                </div>
+
+                <!-- Potencia Reactiva -->
+                <div class="bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 p-6 rounded-2xl shadow-sm">
+                    <div class="w-12 h-12 bg-sky-100 dark:bg-sky-500/20 rounded-xl flex items-center justify-center mb-4 text-sky-600 dark:text-sky-400">
+                        <i data-feather="wind"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-sky-700 dark:text-sky-400 mb-2">Potencia Reactiva (Q)</h3>
+                    <p class="text-sm text-slate-600 dark:text-zinc-400 mb-3">
+                        Es la energía que "va y viene" entre la fuente y la carga. No hace trabajo útil, pero es <strong>indispensable</strong> para crear los campos magnéticos en motores y transformadores.
+                    </p>
+                    <div class="bg-white/60 dark:bg-black/20 p-3 rounded-lg text-sm text-slate-700 dark:text-zinc-300">
+                        <strong>Ejemplo:</strong> En la cerveza, es <strong>la espuma</strong>. Ocupa lugar en el vaso (en los cables), pero no te hidrata. Si hay mucha, te cobran un vaso grande por poco líquido. Se mide en <strong>Voltamperios Reactivos (VAr)</strong>.
+                    </div>
+                </div>
+
+                <!-- Potencia Aparente -->
+                <div class="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 p-6 rounded-2xl shadow-sm">
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400">
+                        <i data-feather="battery-charging"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-purple-700 dark:text-purple-400 mb-2">Potencia Aparente (S)</h3>
+                    <p class="text-sm text-slate-600 dark:text-zinc-400 mb-3">
+                        Es la potencia total que la red eléctrica tiene que suministrar a tu instalación. Es la suma (vectorial) de la Activa y la Reactiva.
+                    </p>
+                    <div class="bg-white/60 dark:bg-black/20 p-3 rounded-lg text-sm text-slate-700 dark:text-zinc-300">
+                        <strong>Ejemplo:</strong> Es el <strong>vaso de cerveza completo</strong> (Líquido + Espuma). La red (los cables, los transformadores de la calle) deben dimensionarse para soportar toda la Aparente. Se mide en <strong>Voltamperios (VA)</strong>.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-xl flex gap-4 items-start">
+                <i data-feather="target" class="text-rose-500 mt-1 flex-shrink-0"></i>
+                <p class="text-slate-700 dark:text-zinc-300">
+                    <strong>¿Qué es el Factor de Potencia (FP)?</strong> Es la relación entre la energía útil (P) y la total suministrada (S). Indica qué tan "eficientes" somos consumiendo energía de la red. Un FP de 1 (ideal) significa que todo es líquido y no hay espuma. Un FP bajo (ej. 0.537) significa que la mitad de lo que circula por nuestros cables es "espuma", saturando la instalación y provocando multas por parte de la distribuidora. Por eso usamos capacitores para corregirlo.
+                </p>
+            </div>
+        </section>
+
+        <!-- Resolución Paso a Paso -->
+        <section>
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-zinc-100 mb-6 flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-4">
+                <i data-feather="edit-3" class="text-indigo-500"></i> Desarrollo del Ejercicio Paso a Paso
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+                
+                <!-- Timeline vertical estético (solo visible en escritorio) -->
+                <div class="hidden lg:block absolute left-[39px] top-4 bottom-0 w-1 bg-indigo-100 dark:bg-indigo-900/50 rounded-full z-0"></div>
+
+                <!-- PASO 0: Datos -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-indigo-500 text-white rounded-2xl flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/30 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase opacity-80">Datos</span>
+                        <i data-feather="list" class="w-6 h-6 mt-1"></i>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Relevamiento de datos del circuito</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Tenemos un circuito conectado a una red con una Tensión <strong>V = 220 V</strong> y una Frecuencia <strong>f = 50 Hz</strong>. Las impedancias base son:
+                        </p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-slate-50 dark:bg-black p-3 rounded-lg border border-slate-100 dark:border-zinc-800">
+                                <span class="text-xs text-slate-500 block">Z<sub>A</sub></span>
+                                <span class="font-mono font-medium text-indigo-600 dark:text-indigo-400">900 + 400i &Omega;</span>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-black p-3 rounded-lg border border-slate-100 dark:border-zinc-800">
+                                <span class="text-xs text-slate-500 block">Z<sub>B</sub></span>
+                                <span class="font-mono font-medium text-indigo-600 dark:text-indigo-400">100 + 50i &Omega;</span>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-black p-3 rounded-lg border border-slate-100 dark:border-zinc-800">
+                                <span class="text-xs text-slate-500 block">Z<sub>C</sub></span>
+                                <span class="font-mono font-medium text-indigo-600 dark:text-indigo-400">200 + 300i &Omega;</span>
+                            </div>
+                            <div class="bg-slate-50 dark:bg-black p-3 rounded-lg border border-slate-100 dark:border-zinc-800">
+                                <span class="text-xs text-slate-500 block">Componentes</span>
+                                <span class="font-mono font-medium text-slate-700 dark:text-zinc-300">C = 1&mu;F | L = 4Hy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 1 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-indigo-500 text-indigo-500 dark:text-indigo-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">1</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Conversión a Reactancias</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Los capacitores y las bobinas no se pueden sumar directamente con las resistencias porque se comportan de manera distinta con la corriente alterna. Tenemos que pasarlos a "Ohmios" (&Omega;) calculando sus <strong>reactancias</strong>.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 dark:border-indigo-900/30">
+                                <h4 class="font-bold text-indigo-700 dark:text-indigo-400 mb-2">Capacitor (X<sub>C</sub>)</h4>
+                                <p class="text-sm text-slate-600 dark:text-zinc-400 mb-2">Su impedancia siempre es negativa imaginaria (va para abajo en el plano complejo):</p>
+                                <div class="font-mono text-sm bg-white dark:bg-black p-3 rounded border border-slate-200 dark:border-zinc-800">
+                                    X<sub>C</sub> = 1 / (2&pi; &middot; f &middot; C &middot; i)<br>
+                                    X<sub>C</sub> = 1 / (2&pi; &middot; 50 Hz &middot; 1&times;10<sup>-6</sup> F &middot; i) = <strong class="text-rose-500">-3183.099i &Omega;</strong>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                                <h4 class="font-bold text-emerald-700 dark:text-emerald-400 mb-2">Bobina (X<sub>L</sub>)</h4>
+                                <p class="text-sm text-slate-600 dark:text-zinc-400 mb-2">Su impedancia siempre es positiva imaginaria (va para arriba en el plano complejo):</p>
+                                <div class="font-mono text-sm bg-white dark:bg-black p-3 rounded border border-slate-200 dark:border-zinc-800">
+                                    X<sub>L</sub> = 2&pi; &middot; f &middot; L &middot; i<br>
+                                    X<sub>L</sub> = 2&pi; &middot; 50 Hz &middot; 4 H &middot; i = <strong class="text-emerald-500">1256.637i &Omega;</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 2 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-indigo-500 text-indigo-500 dark:text-indigo-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">2</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Reducción del Circuito (Impedancia Total)</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Ahora que todo está en Ohmios, simplificamos el circuito sumando las ramas. Al sumar números complejos, se suma Real con Real, e Imaginario con Imaginario.
+                        </p>
+                        
+                        <ol class="list-decimal pl-5 space-y-4 text-slate-700 dark:text-zinc-300">
+                            <li>
+                                <strong>Ramas principales:</strong> Sumamos las impedancias en cada rama.<br>
+                                <code class="bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded text-sm text-indigo-500 mt-1 inline-block">Z1 = Z<sub>A</sub> + X<sub>C</sub> = 900 - 2783.099i &Omega;</code><br>
+                                <code class="bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded text-sm text-indigo-500 mt-1 inline-block">Z2 = Z<sub>C</sub> + X<sub>L</sub> = 200 + 1556.637i &Omega;</code>
+                            </li>
+                            <li>
+                                <strong>Asociación en Paralelo (Z<sub>P</sub>):</strong> Como Z1 y Z2 están en paralelo, multiplicamos y dividimos por su suma.<br>
+                                <code class="bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded text-sm text-indigo-500 mt-1 inline-block">Z<sub>P</sub> = (Z1 &middot; Z2) / (Z1 + Z2) = 1447.175 + 2381.144i &Omega;</code>
+                            </li>
+                            <li>
+                                <strong>Impedancia Total (Z<sub>T</sub>):</strong> Le sumamos Z<sub>B</sub> que está en serie al resto.<br>
+                                <code class="bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded text-sm text-indigo-500 mt-1 inline-block">Z<sub>T</sub> = Z<sub>P</sub> + Z<sub>B</sub> = 1547.175 + 2431.144i &Omega;</code>
+                            </li>
+                        </ol>
+
+                        <div class="mt-4 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg border-l-4 border-amber-500 text-sm">
+                            <strong>Nota Clave:</strong> Para continuar, pasamos Z<sub>T</sub> a forma polar (Módulo y Ángulo), que es indispensable para usar la Ley de Ohm en CA. <br>
+                            Módulo: &radic;(1547.175&sup2; + 2431.144&sup2;) = 2881.703 <br>
+                            Ángulo: arctan(2431.144 / 1547.175) = 57.527&deg; <br>
+                            <span class="font-mono font-bold block mt-2 text-amber-700 dark:text-amber-500">Z<sub>T</sub> = 2881.703 &ang; 57.527&deg; &Omega;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-indigo-500 text-indigo-500 dark:text-indigo-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">3</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Calcular la Corriente y las Potencias Iniciales</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Aplicamos la vieja y confiable <strong>Ley de Ohm</strong> para obtener la corriente total (I<sub>T</sub>) que nos demanda el circuito a la red de 220V. (A 220V se le asigna ángulo 0&deg; como referencia).
+                        </p>
+                        
+                        <div class="font-mono text-lg text-center bg-slate-50 dark:bg-black p-4 rounded-xl border border-slate-200 dark:border-zinc-800 mb-6">
+                            I<sub>T</sub> = V / Z<sub>T</sub> = 220&ang;0&deg; / 2881.703&ang;57.527&deg;<br>
+                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">I<sub>T</sub> = 0.076 &ang; -57.527&deg; A</span>
+                        </div>
+
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Sabiendo Tensión y Corriente, calculamos el Triángulo de Potencias Inicial. El ángulo de la corriente (-57.527&deg;) es el desfase (conocido como ángulo <strong>&phi; (Fi)</strong>).
+                        </p>
+
+                        <div class="space-y-2 font-mono text-sm">
+                            <div class="flex flex-col md:flex-row justify-between bg-slate-50 dark:bg-[#111] p-3 rounded border border-slate-100 dark:border-zinc-800">
+                                <span><strong>Potencia Aparente (S):</strong> |V| &middot; |I<sub>T</sub>| = 220 &middot; 0.076</span>
+                                <span class="font-bold text-purple-600 dark:text-purple-400">= 16.796 VA</span>
+                            </div>
+                            <div class="flex flex-col md:flex-row justify-between bg-slate-50 dark:bg-[#111] p-3 rounded border border-slate-100 dark:border-zinc-800">
+                                <span><strong>Potencia Activa (P):</strong> S &middot; cos(&phi;) = 16.796 &middot; cos(-57.527&deg;)</span>
+                                <span class="font-bold text-amber-600 dark:text-amber-500">= 9.018 W</span>
+                            </div>
+                            <div class="flex flex-col md:flex-row justify-between bg-slate-50 dark:bg-[#111] p-3 rounded border border-slate-100 dark:border-zinc-800">
+                                <span><strong>Potencia Reactiva (Q):</strong> S &middot; sin(&phi;) = 16.796 &middot; sin(-57.527&deg;)</span>
+                                <span class="font-bold text-sky-600 dark:text-sky-400">= -14.17 VAr</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex flex-col md:flex-row items-center gap-4 p-5 bg-rose-50 dark:bg-rose-500/10 rounded-xl border border-rose-200 dark:border-rose-500/20">
+                            <div class="w-12 h-12 bg-white dark:bg-rose-500/20 text-rose-500 rounded-full flex items-center justify-center flex-shrink-0 text-xl font-bold">
+                                !
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-rose-700 dark:text-rose-400">El Problema</h4>
+                                <p class="text-sm text-rose-600 dark:text-rose-300">
+                                    El Factor de Potencia inicial es <strong>fp = P / S = cos(57.527&deg;) = 0.537</strong>. ¡Esto es bajísimo! La norma exige que sea mayor a 0.95. Tenemos mucha "espuma" (Q) para tan poca "cerveza útil" (P). Debemos corregirlo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 4 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-emerald-500 text-emerald-500 dark:text-emerald-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-emerald-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">4</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">La Solución: Corregir el FP a 0.95</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Para corregirlo, no tocamos la potencia útil (P = 9.018 W) porque las máquinas siguen necesitando lo mismo para trabajar. Lo que buscamos es <strong>bajar la Potencia Aparente total (S)</strong> disminuyendo la Reactiva.
+                        </p>
+                        
+                        <p class="text-sm text-slate-600 dark:text-zinc-400 mb-2">Despejamos de la fórmula del Factor de Potencia <code>(fp' = P / S)</code> para saber qué Potencia Aparente (S<sub>c</sub>) deberíamos tener si nuestro factor fuera 0.95:</p>
+                        <div class="font-mono text-center bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded border border-emerald-100 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 mb-4">
+                            S<sub>c</sub> = P / fp' = 9.018 W / 0.95 = <strong>9.492 VA</strong>
+                        </div>
+
+                        <p class="text-sm text-slate-600 dark:text-zinc-400 mb-2">Con ese nuevo "S", usamos el teorema de Pitágoras <code>S² = P² + Q²</code> para saber a cuánta Potencia Reactiva (Q') debemos reducir la instalación:</p>
+                        <div class="font-mono text-center bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded border border-emerald-100 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 mb-4">
+                            Q' = &radic;(S<sub>c</sub>&sup2; - P&sup2;) = &radic;(9.492&sup2; - 9.018&sup2;) = <strong>2.964 VAr</strong>
+                        </div>
+
+                        <p class="text-sm text-slate-600 dark:text-zinc-400 mb-2">Por lo tanto, la cantidad de Reactiva que tenemos que "restarle" al circuito agregando capacitores es la diferencia entre la Q objetivo y la Q que teníamos:</p>
+                        <div class="font-mono text-center bg-emerald-100 dark:bg-emerald-900/30 p-4 rounded border border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-bold text-lg">
+                            Q<sub>C</sub> = (-Q') - Q = -2.964 - (-14.17) = 11.206 VAr
+                        </div>
+                        <p class="text-center text-xs text-slate-500 mt-2">Como es positivo, confirma que necesitamos un Banco de Capacitores capaz de inyectar 11.2 VAr.</p>
+                    </div>
+                </div>
+
+                <!-- PASO 5 -->
+                <div class="lg:col-span-12 relative z-10 flex flex-col md:flex-row gap-6 mb-8">
+                    <div class="w-20 h-20 bg-white dark:bg-zinc-900 border-4 border-indigo-500 text-indigo-500 dark:text-indigo-400 rounded-full flex flex-col justify-center items-center font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0 mx-auto md:mx-0">
+                        <span class="text-xs uppercase">Paso</span>
+                        <span class="text-2xl">5</span>
+                    </div>
+                    <div class="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 md:p-8 shadow-sm">
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-zinc-100 mb-3">Determinando el valor del Capacitor comercial (&mu;F)</h3>
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            En la vida real, no vas a la ferretería a comprar "11.2 VAr", vas a comprar un capacitor en Microfaradios (&mu;F). Para eso, retrocedemos calculando la impedancia de este nuevo capacitor.
+                        </p>
+
+                        <p class="text-sm text-slate-600 dark:text-zinc-400 mb-2">Sabiendo que nuestro circuito original tenía Z<sub>R</sub> = 1547.175 &Omega; y Z<sub>X</sub> = 2431.144i &Omega;.</p>
+                        
+                        <div class="bg-slate-50 dark:bg-[#111] p-5 rounded-xl font-mono text-sm border border-slate-200 dark:border-zinc-800 space-y-3 mb-4">
+                            <p><strong>Impedancia final deseada para fp=0.95:</strong><br>
+                            Z' = Z<sub>R</sub> / fp' = 1547.175 / 0.95 = 1628.605 &Omega;</p>
+                            
+                            <p><strong>Parte imaginaria deseada para ese Z':</strong><br>
+                            Z<sub>X</sub>' = &radic;(Z'&sup2; - Z<sub>R</sub>&sup2;) &middot; i = 508.532i &Omega;</p>
+                            
+                            <p><strong>Reactancia Capacitiva requerida (Z<sub>XC</sub>):</strong><br>
+                            Es la diferencia entre lo que queremos y lo que teníamos:<br>
+                            Z<sub>XC</sub> = Z<sub>X</sub>' - Z<sub>X</sub> = 508.532i - 2431.144i = <span class="text-rose-500 font-bold">-1922.612i &Omega;</span></p>
+                        </div>
+
+                        <p class="text-slate-600 dark:text-zinc-400 mb-4">
+                            Finalmente, despejamos el valor de capacidad `C` de la fórmula fundamental de reactancia capacitiva `Xc = 1 / (2&pi;fC)`:
+                        </p>
+
+                        <div class="bg-indigo-500 text-white p-6 rounded-2xl shadow-xl shadow-indigo-500/20 text-center font-mono text-lg md:text-xl">
+                            C = 1 / ( 2&pi; &middot; 50 Hz &middot; 1922.612 &Omega; ) <br><br>
+                            <span class="text-2xl md:text-3xl font-extrabold bg-white/20 px-4 py-2 rounded-xl inline-block">C = 1.656 &mu;F</span>
+                        </div>
+                        <p class="text-center text-sm text-slate-500 dark:text-zinc-400 mt-4">
+                            (Recordar multiplicar el resultado en Faradios (F) por 1.000.000 para obtener Microfaradios (&mu;F)).
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- THEME LOGIC ---
+        const html = document.documentElement;
+        const themeIcon = document.getElementById('theme-icon');
+        let isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        function updateThemeUI() {
+            if (isDark) {
+                html.classList.add('dark');
+                themeIcon.setAttribute('data-feather', 'moon');
+            } else {
+                html.classList.remove('dark');
+                themeIcon.setAttribute('data-feather', 'sun');
+            }
+            feather.replace(); // Refresh icon
+        }
+
+        function toggleTheme() {
+            isDark = !isDark;
+            updateThemeUI();
+        }
+
+        window.onload = () => {
+            updateThemeUI();
+            feather.replace();
+        };
+    </script>
+</body>
+
+</html>
