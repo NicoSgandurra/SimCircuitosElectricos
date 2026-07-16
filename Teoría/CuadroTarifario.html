@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuadro Tarifario - Teoría</title>
+    <meta name="description" content="Análisis completo del cuadro tarifario de EDEMSA, mercado eléctrico argentino, CAMMESA, y análisis de facturas reales.">
+    <style>
+        :root {
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+        }
+        body.dark-mode {
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --dot-color: #2a2a3a;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+        .back-btn:hover { color: var(--primary-color); }
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        h2:first-child { margin-top: 0; }
+        h3 {
+            color: var(--text-color);
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+        h4 {
+            color: var(--text-color);
+            margin-top: 1.2rem;
+            margin-bottom: 0.6rem;
+            font-size: 1.1rem;
+        }
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-color);
+            opacity: 0.9;
+            font-size: 1.05rem;
+            text-align: justify;
+        }
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--primary-color);
+        }
+        ul {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+        .example-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .example-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        .formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 1.5rem 0;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .formula-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .formula-item span {
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+        .math-formula {
+            font-family: inherit;
+            font-size: 1.6rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            flex-wrap: wrap;
+        }
+        .math-var { font-style: italic; }
+        .math-op {
+            margin: 0 0.4rem;
+            color: var(--text-color);
+            font-weight: 400;
+        }
+        .math-sub {
+            font-size: 0.6em;
+            vertical-align: sub;
+        }
+        .img-container {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+        .img-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.6rem;
+            text-align: left;
+            color: var(--text-color);
+        }
+        th {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background-color: var(--bg-color); }
+        .highlight-row {
+            background-color: var(--secondary-color) !important;
+            font-weight: 600;
+        }
+        .comparison-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .comparison-card {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        .comparison-card h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+        .comparison-card .big-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0.5rem 0;
+        }
+        .comparison-card .difference {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+        }
+        .arrow-up { color: #F44336; }
+        .arrow-down { color: #4CAF50; }
+        .note {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+        .svg-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+        @media (max-width: 600px) {
+            main { padding: 1rem; }
+            .content-card { padding: 1.5rem; }
+            .formula { flex-direction: column; gap: 1rem; }
+            .comparison-box { grid-template-columns: 1fr; }
+            table { font-size: 0.85rem; }
+            th, td { padding: 0.4rem; }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al Hub">⬅️</a>
+            📖 Teoría: Cuadro Tarifario y Análisis de Facturas
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <main>
+        <div class="content-card">
+            <div class="statement">
+                El análisis del cuadro tarifario es fundamental para comprender cómo se estructura el costo de la energía eléctrica en Argentina, cómo opera el mercado mayorista a través de CAMMESA, y cómo cada usuario —desde un hogar hasta una industria— paga por la energía consumida según su tarifa, potencia contratada y horarios de uso.
+            </div>
+
+            <h2>1. El Mercado Eléctrico Argentino y CAMMESA</h2>
+            <p>El sistema eléctrico argentino está organizado en tres actividades principales: <strong>generación</strong>, <strong>transmisión</strong> y <strong>distribución</strong>. La coordinación central de este sistema recae en <strong>CAMMESA (Compañía Administradora del Mercado Mayorista Eléctrico Sociedad Anónima)</strong>.</p>
+            <p>CAMMESA fue creada en 1992 y tiene como función principal operar el <strong>Mercado Eléctrico Mayorista (MEM)</strong>, donde los generadores (centrales hidroeléctricas, termoeléctricas, nucleares, eólicas y solares) venden energía a los distribuidores y comercializadores. CAMMESA no es una empresa estatal, sino una sociedad anónima con participación mayoritaria del Estado Nacional, que administra el Sistema Argentino de Interconexión (SADI).</p>
+
+            <h3>1.1. Funciones de CAMMESA</h3>
+            <ul>
+                <li><strong>Despacho económico de cargas:</strong> CAMMESA determina qué centrales generadoras deben operar en cada momento, priorizando las fuentes de menor costo variable (primero hidroeléctricas, luego nucleares, luego gas natural, y finalmente carbón o gasoil según la demanda).</li>
+                <li><strong>Fijación del Precio de la Energía en Barra (PEB):</strong> Calcula el precio mayorista de la energía en cada punto de la red (barra), considerando el costo marginal del último generador despachado.</li>
+                <li><strong>Administración del SADI:</strong> Supervisa la operación del sistema interconectado nacional, garantizando la estabilidad de frecuencia y tensión.</li>
+                <li><strong>Facturación mayorista:</strong> Emite las facturas a distribuidoras y comercializadores por la energía y potencia adquiridas.</li>
+                <li><strong>Coordinación de subsidios:</strong> Administra la segmentación tarifaria y los subsidios nacionales (SeF) que aplican a los usuarios finales.</li>
+            </ul>
+
+            <h3>1.2. Cadena de Valor de la Energía Eléctrica</h3>
+            <p>Para que la energía llegue a un usuario final, debe atravesar varias etapas, cada una con su costo asociado:</p>
+            <div class="svg-container">
+                <svg width="700" height="200" viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <marker id="arrow-gen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--primary-color)" />
+                        </marker>
+                    </defs>
+                    <rect x="20" y="60" width="120" height="80" rx="10" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="2"/>
+                    <text x="80" y="95" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)" text-anchor="middle">Generación</text>
+                    <text x="80" y="115" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Usinas Hidro/</text>
+                    <text x="80" y="130" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Termo/Nuclear</text>
+
+                    <rect x="200" y="60" width="120" height="80" rx="10" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="2"/>
+                    <text x="260" y="95" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)" text-anchor="middle">Transmisión</text>
+                    <text x="260" y="115" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Líneas de Alta</text>
+                    <text x="260" y="130" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Tensión (AT)</text>
+
+                    <rect x="380" y="60" width="120" height="80" rx="10" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="2"/>
+                    <text x="440" y="95" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)" text-anchor="middle">Distribución</text>
+                    <text x="440" y="115" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Redes BT/MT</text>
+                    <text x="440" y="130" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">EDEMSA/EDES</text>
+
+                    <rect x="560" y="60" width="120" height="80" rx="10" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="2"/>
+                    <text x="620" y="95" font-family="sans-serif" font-size="14" font-weight="bold" fill="var(--text-color)" text-anchor="middle">Usuario</text>
+                    <text x="620" y="115" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Residencial/</text>
+                    <text x="620" y="130" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Industrial</text>
+
+                    <line x1="140" y1="100" x2="200" y2="100" stroke="var(--primary-color)" stroke-width="2" marker-end="url(#arrow-gen)"/>
+                    <line x1="320" y1="100" x2="380" y2="100" stroke="var(--primary-color)" stroke-width="2" marker-end="url(#arrow-gen)"/>
+                    <line x1="500" y1="100" x2="560" y2="100" stroke="var(--primary-color)" stroke-width="2" marker-end="url(#arrow-gen)"/>
+
+                    <text x="170" y="90" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Costo Generación</text>
+                    <text x="350" y="90" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Costo Transmisión</text>
+                    <text x="530" y="90" font-family="sans-serif" font-size="11" fill="var(--text-light)" text-anchor="middle">Costo Distribución</text>
+                </svg>
+            </div>
+
+            <h3>1.3. Segmentación Tarifaria y Subsidios</h3>
+            <p>En Argentina, el Estado Nacional aplica <strong>Subsidios Energéticos Focalizados (SeF)</strong> para amortiguar el impacto de las tarifas en los usuarios de menor poder adquisitivo. La segmentación se divide en tres niveles:</p>
+            <ul>
+                <li><strong>Nivel 1 (Mayor subsidio):</strong> Usuarios que no superan ciertos umbrales de consumo y no poseen ciertos bienes de lujo. Reciben la tarifa más subsidiada. El consumo base subsidiado es de 600 kWh bimestral en invierno (enero, febrero, diciembre, mayo, junio, julio, agosto) y 300 kWh bimestral el resto del año.</li>
+                <li><strong>Nivel 2 (Subs parcial):</strong> Usuarios que no califican para el nivel 1 pero tampoco superan los umbrales de ingresos altos. Reciben un subsidio parcial sobre la tarifa base.</li>
+                <li><strong>Nivel 3 (Sin subsidio):</strong> Usuarios de alto ingreso o con bienes de lujo. Abonan la tarifa plena sin subsidios estatales.</li>
+            </ul>
+            <p>Esta segmentación se aplica tanto en el cargo fijo como en el cargo variable de la factura. El usuario puede consultar su segmentación en el portal de su distribuidora (en Mendoza, EDEMSA) y solicitar el mantenimiento de subsidios si cumple los requisitos.</p>
+
+            <h3>1.4. Normativa Aplicable</h3>
+            <ul>
+                <li><strong>Res. EPRE N° 111/2026:</strong> Establece el cuadro tarifario vigente para EDEMSA en junio 2026.</li>
+                <li><strong>Ley 6497:</strong> Ley de Suministro de Energía Eléctrica de Mendoza, que regula la actividad distribuidora y establece la CCCE (Contribución de Compensación de Costos Eléctricos).</li>
+                <li><strong>CCCE (Contribución de Compensación de Costos Eléctricos):</strong> Impuesto provincial del 9% sobre la facturación total del servicio eléctrico sin impuestos ni subsidios, creado para compensar la diferencia entre el costo real de generación y el precio que pagan los usuarios subsidiados.</li>
+                <li><strong>Impuesto Provincial (IIBB):</strong> Leyes 6922/8398, alícuota del 3,09% sobre la base imponible.</li>
+                <li><strong>Sobretasa Provincial (Ley 2539):</strong> 1% sobre la base imponible.</li>
+                <li><strong>Tasa Fiscal y Control (Art. 64 Ley 6497):</strong> 1,5% sobre la base imponible.</li>
+                <li><strong>Impuesto Sellos (Art. 240 Código Fiscal, Ley 8523):</strong> 0,5% sobre ciertos conceptos.</li>
+                <li><strong>Ordenanza Municipal 15.077 (San Rafael):</strong> Aplica a usuarios de esa zona.</li>
+                <li><strong>Cargo AP Municipal (Ordenanza 13153):</strong> Cargo municipal por alumbrado público.</li>
+            </ul>
+        </div>
+
+        <div class="content-card">
+            <h2>2. Cuadro Tarifario de EDEMSA (Junio 2026)</h2>
+            <p>EDEMSA (Empresa Distribuidora de Energía Eléctrica de Mendoza S.A.) es la distribuidora de la provincia de Mendoza. Su cuadro tarifario está regulado por la <strong>Res. EPRE N° 111/2026</strong> y se divide en varios anexos. A continuación se analizan las tarifas más relevantes para un técnico electricista.</p>
+
+            <h3>2.1. Tipos de Tarifas</h3>
+            <p>El cuadro tarifario clasifica a los usuarios según su potencia contratada, tensión de suministro y actividad:</p>
+            <ul>
+                <li><strong>Tarifa 1 (T1):</strong> Pequeñas Demandas. Potencias hasta 10 kW. Aplica a usuarios residenciales (R), comercios pequeños (G), y alumbrado público (ALP).</li>
+                <li><strong>Tarifa 2 (T2):</strong> Grandes Demandas. Potencias mayores a 10 kW. Aplica a industrias, comercios grandes, instituciones. Se subdivide en:<br>
+                    • <strong>T2 R:</strong> Residencial (conectado a red de distribución y bornes del transformador)<br>
+                    • <strong>T2 B:</strong> Barrial / Clubes<br>
+                    • <strong>T2 MT/BT:</strong> Media Tensión con transformador propio<br>
+                    • <strong>T2 MT:</strong> Media Tensión directo<br>
+                    • <strong>T2 AT/MT:</strong> Alta Tensión<br>
+                    • <strong>T2 AT:</strong> Alta Tensión directo<br>
+                    • <strong>T2 Especial:</strong> Potencias hasta 50 kW con tarifa diferenciada</li>
+                <li><strong>Tarifa - Peaje (TP):</strong> Usuarios conectados a red de distribución y bornes del transformador, con estructura similar a T2 pero con costos de transporte incluidos.</li>
+                <li><strong>Tarifa - Riego Agrícola (RA):</strong> Tarifa especial para actividad agropecuaria con horarios diferenciados y precios preferenciales.</li>
+            </ul>
+
+            <h3>2.2. Tensiones de Suministro</h3>
+            <p>Según el nivel de tensión al que se conecta el usuario, varían los costos:</p>
+            <ul>
+                <li><strong>BT (Baja Tensión):</strong> Hasta 1 kV. Hogares, comercios pequeños, talleres. Es la más común.</li>
+                <li><strong>MT (Media Tensión):</strong> Entre 1 kV y 33 kV. Industrias medianas, grandes edificios.</li>
+                <li><strong>AT (Alta Tensión):</strong> Mayores a 33 kV. Grandes industrias, centros de transformación.</li>
+            </ul>
+
+            <h3>2.3. Horarios Tarifarios</h3>
+            <p>EDEMSA aplica una estructura de tres horarios para fomentar el uso eficiente de la energía:</p>
+            <ul>
+                <li><strong>Pico (P):</strong> 18:00 a 23:00 hs. Horario de máxima demanda del sistema. El precio de la energía es el más alto porque el sistema operativo debe despachar centrales termoeléctricas caras para cubrir la demanda. En el cuadro tarifario, la energía pico para T2 R BT cuesta <strong>117,07 $/kWh</strong> (junio 2026).</li>
+                <li><strong>Resto (R):</strong> 05:00 a 18:00 hs. Horario de demanda intermedia. El precio es intermedio: <strong>113,80 $/kWh</strong> para T2 R BT.</li>
+                <li><strong>Valle (V):</strong> 23:00 a 05:00 hs. Horario de mínima demanda. El precio es el más bajo: <strong>112,27 $/kWh</strong> para T2 R BT. Fomentar el consumo en este horario permite al sistema aprovechar centrales base (hidráulicas, nucleares) sin necesidad de activar termoeléctricas costosas.</li>
+            </ul>
+            <p class="note">Nota: Los precios exactos varían según la tarifa y nivel de tensión. La tarifa T2 R BT (con subsidio) tiene precios menores que la T2 R BT sin subsidio.</p>
+
+            <h3>2.4. Costos Fijos y Variables</h3>
+            <p>Cada factura se compone de cargos fijos (independientes del consumo) y variables (dependen del uso):</p>
+            <ul>
+                <li><strong>Cargo Fijo ($/bim):</strong> Se cobra por el mero hecho de estar conectado a la red. Cubre la disponibilidad del servicio y el mantenimiento de la infraestructura básica. Para T2 R BT con potencia entre 10 y 300 kW, ronda los <strong>7.255 $/bim</strong> con subsidio.</li>
+                <li><strong>Cargo Comercialización ($/bim):</strong> Cubre los costos administrativos de facturación, atención al cliente y lectura de medidores. Para T2 R BT, <strong>17.007 $/bim</strong> con subsidio.</li>
+                <li><strong>Uso de Red ($/kW-mes):</strong> Cargo por la capacidad de la red que el usuario reserva. Para T2 R BT, <strong>3.053,80 $/kW</strong> con subsidio (marzo 2026) y <strong>3.868,34 $/kW</strong> sin subsidio.</li>
+                <li><strong>Consumo de Potencia ($/kW):</strong> Se cobra por la potencia máxima registrada en el medidor. Para T2 R BT, <strong>358.909 $/kW</strong> con subsidio (marzo 2026) y <strong>309.800 $/kW</strong> sin subsidio (junio 2026). <strong>Nota: el precio bajó con la desgravación del subsidio.</strong></li>
+                <li><strong>Exceso de Potencia ($/kW):</strong> Si el usuario supera la potencia contratada, se cobra un exceso con un precio mucho mayor. Este es el concepto más crítico: en marzo 2026 costaba <strong>753.802 $/kW</strong> (con subsidio) y en junio 2026 costaba <strong>756.868 $/kW</strong> (sin subsidio). Superar la potencia contratada encarece dramáticamente la factura.</li>
+                <li><strong>Energía Pico, Resto, Valle ($/kWh):</strong> Precios variables según horario de consumo.</li>
+                <li><strong>Ordenanza Municipal:</strong> Aplicaciones locales (ej. San Rafael 15.077).</li>
+            </ul>
+
+            <h3>2.5. Tabla Resumen del Cuadro Tarifario T2 R BT (Junio 2026)</h3>
+            <p>Valores relevantes para un usuario de Grandes Demandas conectado en Baja Tensión (el caso de las facturas analizadas):</p>
+            <table>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Unidad</th>
+                    <th>Con Subsidio (Nivel 1/2)</th>
+                    <th>Sin Subsidio (Nivel 3)</th>
+                </tr>
+                <tr>
+                    <td>Cargo Comercialización</td>
+                    <td>$/bim</td>
+                    <td>17.007,29</td>
+                    <td>38.358,73</td>
+                </tr>
+                <tr>
+                    <td>Cargo Fijo</td>
+                    <td>$/bim</td>
+                    <td>7.254,98</td>
+                    <td>7.254,98</td>
+                </tr>
+                <tr>
+                    <td>Uso de Red</td>
+                    <td>$/kW-mes</td>
+                    <td>3.802,27</td>
+                    <td>4.835,81</td>
+                </tr>
+                <tr>
+                    <td>Consumo de Potencia</td>
+                    <td>$/kW</td>
+                    <td>309.800</td>
+                    <td>309.800</td>
+                </tr>
+                <tr>
+                    <td>Exceso de Potencia</td>
+                    <td>$/kW</td>
+                    <td>756.868,34</td>
+                    <td>756.868,34</td>
+                </tr>
+                <tr>
+                    <td>Energía Pico</td>
+                    <td>$/kWh</td>
+                    <td>117,07</td>
+                    <td>117,07</td>
+                </tr>
+                <tr>
+                    <td>Energía Resto</td>
+                    <td>$/kWh</td>
+                    <td>113,80</td>
+                    <td>113,80</td>
+                </tr>
+                <tr>
+                    <td>Energía Valle</td>
+                    <td>$/kWh</td>
+                    <td>112,27</td>
+                    <td>112,27</td>
+                </tr>
+                <tr>
+                    <td>Cargo Variable</td>
+                    <td>$/kWh</td>
+                    <td>286,6064</td>
+                    <td>286,6064</td>
+                </tr>
+            </table>
+            <p class="note">Los valores de energía sin subsidio (Nivel 3) son mayores. Los mostrados en la tabla corresponden a subsidios parciales. Para valores exactos según segmentación, consultar el Anexo I del cuadro tarifario.</p>
+        </div>
+
+        <div class="content-card">
+            <h2>3. Análisis de Facturas Reales</h2>
+
+            <h3>3.1. Factura UTN - Marzo 2026 (T2 R BT)</h3>
+            <p>La Universidad Tecnológica Nacional (UTN) de San Rafael, Mendoza, recibe suministro bajo la tarifa <strong>T2 R BT</strong> (Grandes Demandas, Residencial/Institucional, Baja Tensión). Los datos principales de la factura de marzo 2026 son:</p>
+            <ul>
+                <li><strong>Período facturado:</strong> 01/02/2026 a 01/03/2026 (28 días)</li>
+                <li><strong>Tarifa:</strong> T2 R BT</li>
+                <li><strong>Potencia Contratada:</strong> 30 kW</li>
+                <li><strong>Máxima Potencia Registrada:</strong> 37 kW</li>
+                <li><strong>Exceso de Potencia:</strong> 7 kW</li>
+                <li><strong>Factor de Potencia (cos φ):</strong> 0,990</li>
+                <li><strong>Consumos:</strong> Pico: 1.747 kWh | Valle: 1.441 kWh | Resto: 3.931 kWh</li>
+                <li><strong>Total Factura:</strong> <strong>$4.255.115,00</strong></li>
+            </ul>
+
+            <p><strong>Desglose de Conceptos:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Importe</th><th>% del Total</th></tr>
+                <tr><td>1. Conceptos Eléctricos</td><td>$3.160.119,60</td><td>74,27%</td></tr>
+                <tr><td>2. Conceptos no alcanzados por impuestos</td><td>$0,22</td><td>0,00%</td></tr>
+                <tr><td>3. Impuestos</td><td>$1.094.995,18</td><td>25,73%</td></tr>
+                <tr><td>4. Conceptos no eléctricos</td><td>$0,00</td><td>0,00%</td></tr>
+                <tr class="highlight-row"><td>TOTAL</td><td>$4.255.115,00</td><td>100%</td></tr>
+            </table>
+
+            <p><strong>Detalle de Conceptos Eléctricos:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Unidad</th><th>Consumo</th><th>P. Unitario</th><th>Importe</th></tr>
+                <tr><td>Cargo Comercialización</td><td>$/per</td><td>1</td><td>36.290,61</td><td>$36.290,61</td></tr>
+                <tr><td>Uso de Red</td><td>kW</td><td>30</td><td>3.802,27</td><td>$1.614.068,10</td></tr>
+                <tr><td>Energía Pico</td><td>kWh</td><td>1.747</td><td>89,2864</td><td>$155.983,34</td></tr>
+                <tr><td>Energía Valle</td><td>kWh</td><td>1.441</td><td>86,5724</td><td>$124.750,83</td></tr>
+                <tr><td>Energía Resto</td><td>kWh</td><td>3.931</td><td>87,4873</td><td>$343.912,58</td></tr>
+                <tr><td>Consumo de Potencia</td><td>kW</td><td>30</td><td>358.909,11</td><td>$311.818,96</td></tr>
+                <tr><td>Exceso de Potencia</td><td>kW</td><td>7</td><td>753.802,27</td><td>$376.615,89</td></tr>
+                <tr><td>Ordenanza 15.077 - San Rafael</td><td>-</td><td>-</td><td>-</td><td>$77.604,73</td></tr>
+                <tr class="highlight-row"><td>Subtotal Conceptos Eléctricos</td><td colspan="4">$3.160.119,60</td></tr>
+            </table>
+
+            <h3>3.2. Factura UTN - Junio 2026 (T2 R BT)</h3>
+            <p>La misma UTN, tres meses después, recibe su factura de junio 2026 con cambios significativos:</p>
+            <ul>
+                <li><strong>Período facturado:</strong> 01/05/2026 a 01/06/2026 (31 días)</li>
+                <li><strong>Tarifa:</strong> T2 R BT</li>
+                <li><strong>Potencia Contratada:</strong> 30 kW</li>
+                <li><strong>Máxima Potencia Registrada:</strong> 30 kW (antes era 37 kW)</li>
+                <li><strong>Exceso de Potencia:</strong> <strong>47 kW</strong> (¡Este es el dato crítico!)</li>
+                <li><strong>Factor de Potencia (cos φ):</strong> 0,990</li>
+                <li><strong>Consumos:</strong> Pico: 2.348 kWh | Valle: 1.576 kWh | Resto: 4.815 kWh</li>
+                <li><strong>Total Factura:</strong> <strong>$8.023.876,00</strong></li>
+            </ul>
+
+            <p><strong>Desglose de Conceptos:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Importe</th><th>% del Total</th></tr>
+                <tr><td>1. Conceptos Eléctricos</td><td>$5.981.564,62</td><td>74,55%</td></tr>
+                <tr><td>2. Conceptos no alcanzados por impuestos</td><td>-$0,08</td><td>0,00%</td></tr>
+                <tr><td>3. Impuestos</td><td>$2.042.311,46</td><td>25,45%</td></tr>
+                <tr class="highlight-row"><td>TOTAL</td><td>$8.023.876,00</td><td>100%</td></tr>
+            </table>
+
+            <p><strong>Detalle de Conceptos Eléctricos:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Unidad</th><th>Consumo</th><th>P. Unitario</th><th>Importe</th></tr>
+                <tr><td>Cargo Comercialización</td><td>$/per</td><td>1</td><td>38.358,73</td><td>$38.358,73</td></tr>
+                <tr><td>Uso de Red</td><td>kW</td><td>30</td><td>3.868,34</td><td>$1.706.050,05</td></tr>
+                <tr><td>Energía Pico</td><td>kWh</td><td>2.348</td><td>117,0692</td><td>$274.878,48</td></tr>
+                <tr><td>Energía Valle</td><td>kWh</td><td>1.576</td><td>112,2745</td><td>$176.944,61</td></tr>
+                <tr><td>Energía Resto</td><td>kWh</td><td>4.815</td><td>113,7974</td><td>$547.934,48</td></tr>
+                <tr><td>Consumo de Potencia</td><td>kW</td><td>30</td><td>309.799,82</td><td>$293.994,72</td></tr>
+                <tr class="highlight-row"><td>Exceso de Potencia</td><td>kW</td><td>47</td><td>756.868,34</td><td><strong>$2.672.811,75</strong></td></tr>
+                <tr><td>Ordenanza 15.077 - San Rafael</td><td>-</td><td>-</td><td>-</td><td>$91.144,83</td></tr>
+                <tr class="highlight-row"><td>Subtotal Conceptos Eléctricos</td><td colspan="4">$5.981.564,62</td></tr>
+            </table>
+
+            <h3>3.3. Comparativa UTN: Marzo vs. Junio 2026</h3>
+            <p>La diferencia entre ambas facturas es abismal: <strong>$4.255.115 vs. $8.023.876</strong>, un aumento del <strong>88,6%</strong>. Veamos por qué:</p>
+
+            <div class="comparison-box">
+                <div class="comparison-card">
+                    <h4>Marzo 2026</h4>
+                    <div class="big-number">$4.255.115</div>
+                    <div class="difference">28 días | 7.119 kWh</div>
+                    <div class="difference">Exceso Pot: <strong>7 kW</strong></div>
+                    <div class="difference">Costo exceso: $376.616</div>
+                </div>
+                <div class="comparison-card">
+                    <h4>Junio 2026</h4>
+                    <div class="big-number">$8.023.876</div>
+                    <div class="difference">31 días | 8.739 kWh</div>
+                    <div class="difference">Exceso Pot: <strong class="arrow-up">47 kW ↑</strong></div>
+                    <div class="difference">Costo exceso: <strong class="arrow-up">$2.672.812 ↑</strong></div>
+                </div>
+            </div>
+
+            <p><strong>Tabla Comparativa Detallada:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Marzo 2026</th><th>Junio 2026</th><th>Variación</th></tr>
+                <tr><td>Días</td><td>28</td><td>31</td><td>+10,7%</td></tr>
+                <tr><td>Total kWh</td><td>7.119</td><td>8.739</td><td>+22,8%</td></tr>
+                <tr><td>Precio Energía Pico</td><td>89,29 $/kWh</td><td>117,07 $/kWh</td><td>+31,1%</td></tr>
+                <tr><td>Precio Energía Valle</td><td>86,57 $/kWh</td><td>112,27 $/kWh</td><td>+29,7%</td></tr>
+                <tr><td>Precio Energía Resto</td><td>87,49 $/kWh</td><td>113,80 $/kWh</td><td>+30,1%</td></tr>
+                <tr><td>Potencia Contratada</td><td>30 kW</td><td>30 kW</td><td>0%</td></tr>
+                <tr><td>Exceso de Potencia</td><td>7 kW</td><td>47 kW</td><td class="arrow-up">+571%</td></tr>
+                <tr><td>Costo por Exceso</td><td>$376.616</td><td>$2.672.812</td><td class="arrow-up">+609%</td></tr>
+                <tr><td>Total Factura</td><td>$4.255.115</td><td>$8.023.876</td><td class="arrow-up">+88,6%</td></tr>
+            </table>
+
+            <div class="example-box">
+                <span class="example-title">Análisis Conclusivo: El Exceso de Potencia es el Villano</span>
+                <p>El consumo de energía (kWh) aumentó un 22,8% entre marzo y junio. Sin embargo, la factura aumentó un 88,6%. ¿Dónde está el resto del aumento?</p>
+                <p>La respuesta está en el <strong>Exceso de Potencia</strong>. En marzo, la UTN superó su potencia contratada de 30 kW en solo 7 kW (máxima registrada: 37 kW). En junio, el exceso fue de 47 kW, es decir, la máxima demanda registrada fue de <strong>77 kW</strong> (30 + 47), ¡más del <strong>250%</strong> de la potencia contratada!</p>
+                <p>El costo del exceso pasó de <strong>$376.616</strong> a <strong>$2.672.812</strong>, representando el <strong>33,3%</strong> del total de la factura de junio. Si la UTN hubiera mantenido su potencia dentro de los 30 kW contratados, la factura habría sido aproximadamente <strong>$5.351.064</strong>, un 33% menor.</p>
+                <p><strong>Lección técnica:</strong> El exceso de potencia es el concepto más penalizador de la factura eléctrica. Un técnico electricista debe verificar siempre que la potencia instalada y los horarios de uso de equipos de alta demanda no superen la potencia contratada. Si es inevitable, se debe solicitar un aumento de potencia contratada ante la distribuidora, que tiene un costo fijo mensual mucho menor que el exceso.</p>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h3>3.4. Factura Dirección General de Escuelas (DGE) - Junio 2026 (T2 Especial)</h3>
+            <p>La Dirección General de Escuelas de Mendoza es un organismo público provincial. Su factura de junio 2026 muestra datos interesantes bajo la tarifa <strong>T2 Especial</strong>:</p>
+            <ul>
+                <li><strong>Cliente:</strong> Dirección General de Escuelas</li>
+                <li><strong>Domicilio:</strong> CL Virgen del Carmen de Cuyo 306 2, 5500 Mendoza Capital</li>
+                <li><strong>CUIT:</strong> 30649076576</li>
+                <li><strong>NIC:</strong> 1501816</li>
+                <li><strong>Tarifa:</strong> T2 Especial</li>
+                <li><strong>Factura N°:</strong> 0003-32390297</li>
+                <li><strong>Período:</strong> MES 06/2026</li>
+                <li><strong>Total:</strong> <strong>$2.073.885,00</strong></li>
+                <li><strong>Medidor:</strong> 93735756</li>
+                <li><strong>Lecturas:</strong> 01/05/2026 a 01/06/2026 (31 días)</li>
+                <li><strong>Potencia Contratada:</strong> 29 kW</li>
+                <li><strong>Máxima Registrada:</strong> 21 kW</li>
+                <li><strong>Exceso:</strong> <strong>0 kW</strong> (¡Dentro de la potencia contratada!)</li>
+                <li><strong>Coseno de phi:</strong> 0,990</li>
+                <li><strong>Consumos:</strong> Pico: 1.097 kWh | Valle: 684 kWh | Resto: 3.190 kWh | Reactiva: 245 kWh</li>
+            </ul>
+
+            <div class="img-container">
+                <img src="../Cuadro tarifario/1501816_6-2026-001.png" alt="Factura DGE - Página 1">
+            </div>
+            <p class="note" style="text-align: center;">Factura DGE - Página 1 (Resumen y detalle de conceptos)</p>
+
+            <p><strong>Desglose de Conceptos:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Importe</th><th>% del Total</th></tr>
+                <tr><td>1. Conceptos Eléctricos</td><td>$1.510.806,89</td><td>72,85%</td></tr>
+                <tr><td>2. Conceptos no alcanzados por impuestos</td><td>$0,11</td><td>0,00%</td></tr>
+                <tr><td>3. Impuestos</td><td>$563.078,00</td><td>27,15%</td></tr>
+                <tr class="highlight-row"><td>TOTAL</td><td>$2.073.885,00</td><td>100%</td></tr>
+            </table>
+
+            <p><strong>Detalle de Conceptos Eléctricos:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Unidad</th><th>Consumo</th><th>P. Unitario</th><th>Importe</th></tr>
+                <tr><td>Cargo Comercialización</td><td>$/per</td><td>1</td><td>17.007,29</td><td>$17.007,29</td></tr>
+                <tr><td>Cargo Fijo</td><td>$/per</td><td>1</td><td>7.254,98</td><td>$7.254,98</td></tr>
+                <tr><td>Cargo Variable</td><td>kWh</td><td>4.971</td><td>286,6064</td><td>$1.424.720,41</td></tr>
+                <tr><td>Ordenanza 15.077 - San Rafael</td><td>-</td><td>-</td><td>-</td><td>$16.500,00</td></tr>
+                <tr><td>Impuestos Provinciales IIBB</td><td>-</td><td>-</td><td>3,09%</td><td>$45.324,21</td></tr>
+                <tr class="highlight-row"><td>Subtotal Conceptos Eléctricos</td><td colspan="4">$1.510.806,89</td></tr>
+            </table>
+
+            <p><strong>Detalle de Impuestos:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Alícuota</th><th>Base</th><th>Importe</th></tr>
+                <tr><td>IVA Exento</td><td>21%</td><td>$1.510.806,89</td><td>$317.269,45</td></tr>
+                <tr><td>Sobretasa Provincial Ley 2539</td><td>1%</td><td>$1.465.482,68</td><td>$14.654,83</td></tr>
+                <tr><td>Tasa Fiscal y Control</td><td>1,50%</td><td>$1.510.806,89</td><td>$22.662,10</td></tr>
+                <tr><td>CCCE Ley 6497</td><td>9%</td><td>$1.510.806,89</td><td>$135.972,62</td></tr>
+                <tr><td>Cargo AP Municipal</td><td>-</td><td>-</td><td>$72.519,00</td></tr>
+            </table>
+
+            <div class="example-box">
+                <span class="example-title">Análisis Comparativo: DGE vs. UTN (Junio 2026)</span>
+                <p>Ambas instituciones son públicas y están en Mendoza, pero pagan tarifas diferentes:</p>
+                <ul>
+                    <li><strong>DGE:</strong> T2 Especial | $2.073.885 | 4.971 kWh | <strong>Exceso: 0 kW</strong> | Sin exceso de potencia.</li>
+                    <li><strong>UTN:</strong> T2 R BT | $8.023.876 | 8.739 kWh | <strong>Exceso: 47 kW</strong> | Con exceso de potencia.</li>
+                </ul>
+                <p><strong>Costo por kWh:</strong> DGE paga aproximadamente <strong>417 $/kWh</strong> (incluyendo impuestos). UTN paga aproximadamente <strong>918 $/kWh</strong>. La diferencia no se explica solo por el consumo (la UTN consume 75% más), sino por la tarifa aplicada y, fundamentalmente, el exceso de potencia.</p>
+                <p><strong>Lección técnica:</strong> La T2 Especial tiene un cargo variable más alto (286,61 $/kWh) pero aparentemente un tratamiento diferente de potencia. Sin embargo, el dato más importante es que la DGE <strong>no tiene exceso de potencia</strong>, lo que demuestra una gestión del consumo más eficiente o una instalación mejor dimensionada respecto a la potencia contratada.</p>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h3>3.5. Factura Iberdrola España (Análisis Genérico de Mercado Europeo)</h3>
+            <p>Para comparar con un mercado eléctrico desarrollado, analizamos una factura genérica de <strong>Iberdrola</strong>, distribuidora española. Esta factura corresponde al mercado libre (no regulado), donde el usuario contrata directamente con una comercializadora. Los datos personales son omitidos; el análisis se centra en la estructura tarifaria.</p>
+            <ul>
+                <li><strong>País:</strong> España (Comunidad Autónoma del País Vasco)</li>
+                <li><strong>Distribuidora:</strong> i-DE, Redes Eléctricas Inteligentes, S.A.U. (antigua Iberdrola Distribución)</li>
+                <li><strong>Comercializadora:</strong> Iberdrola Clientes, S.A.U.</li>
+                <li><strong>Peaje de Acceso:</strong> 2.0TD (Tarifa regulada de acceso a la red, para potencias ≤ 15 kW)</li>
+                <li><strong>Mercado:</strong> Libre (no regulado)</li>
+                <li><strong>Segmento tarifario:</strong> 1</li>
+                <li><strong>Período:</strong> 16/05/2025 a 12/06/2025 (27 días)</li>
+                <li><strong>Consumo total:</strong> 84 kWh</li>
+                <li><strong>Total:</strong> <strong>38,44 €</strong></li>
+            </ul>
+
+            <div class="img-container">
+                <img src="../Cuadro tarifario/835602709_2025-06-17-16.34.28.001491-001.png" alt="Factura Iberdrola España - Resumen">
+            </div>
+            <p class="note" style="text-align: center;">Factura Iberdrola España - Resumen (Datos personales omitidos)</p>
+
+            <p><strong>Desglose de la Factura Española:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Importe</th><th>% del Total</th></tr>
+                <tr><td>Energía (Potencia + Consumo)</td><td>30,71 €</td><td>79,9%</td></tr>
+                <tr><td>Cargos Normativos</td><td>0,34 €</td><td>0,9%</td></tr>
+                <tr><td>Servicios y Otros Conceptos</td><td>0,72 €</td><td>1,9%</td></tr>
+                <tr><td>IVA (21%)</td><td>6,67 €</td><td>17,3%</td></tr>
+                <tr class="highlight-row"><td>TOTAL</td><td>38,44 €</td><td>100%</td></tr>
+            </table>
+
+            <p><strong>Detalle de Energía:</strong></p>
+            <table>
+                <tr><th>Concepto</th><th>Cálculo</th><th>Importe</th></tr>
+                <tr><td>Potencia facturada (Punta)</td><td>3,3 kW x 27 días x 0,098376 €/kW·día</td><td>8,77 €</td></tr>
+                <tr><td>Potencia facturada (Valle)</td><td>3,3 kW x 27 días x 0,013481 €/kW·día</td><td>1,20 €</td></tr>
+                <tr><td>Total importe potencia</td><td>-</td><td>9,97 €</td></tr>
+                <tr><td>Energía consumida</td><td>84 kWh x 0,228928 €/kWh</td><td>19,23 €</td></tr>
+                <tr><td>Cargos Normativos (Bono Social)</td><td>27 días x 0,012742 €/día</td><td>0,34 €</td></tr>
+                <tr><td>Impuesto sobre Electricidad</td><td>5,11269632% s/29,54 €</td><td>1,51 €</td></tr>
+                <tr><td>Total Energía</td><td>-</td><td>31,05 €</td></tr>
+                <tr><td>Alquiler equipos medida</td><td>27 días x 0,02663 €/día</td><td>0,72 €</td></tr>
+                <tr><td>Importe Total (sin IVA)</td><td>-</td><td>31,77 €</td></tr>
+                <tr><td>IVA 21%</td><td>21% s/31,77 €</td><td>6,67 €</td></tr>
+            </table>
+
+            <p><strong>Origen de la Electricidad (Mix de Generación):</strong></p>
+            <p>La factura española incluye una sección de transparencia medioambiental que muestra el origen de la electricidad consumida:</p>
+            <ul>
+                <li><strong>Renovable:</strong> 50,7% (Iberdrola) vs. 50,8% (mix nacional)</li>
+                <li><strong>Cogeneración de Alta Eficiencia:</strong> 3,0% vs. 2,6%</li>
+                <li><strong>CC Gas Natural:</strong> 18,1% vs. 18,3%</li>
+                <li><strong>Carbón:</strong> 2,9% vs. 1,5%</li>
+                <li><strong>Fuel/Gas:</strong> 1,1% vs. 1,2%</li>
+                <li><strong>Nuclear:</strong> 19,9% vs. 20,9%</li>
+                <li><strong>Otras no renovables:</strong> 4,3% vs. 4,7%</li>
+            </ul>
+            <p>El impacto ambiental se clasifica en una escala de A (mínimo) a G (máximo). Iberdrola tiene:</p>
+            <ul>
+                <li><strong>Emisiones de CO₂:</strong> 134 g/kWh (nivel E) vs. media nacional 121 g/kWh (nivel D).</li>
+                <li><strong>Residuos Radiactivos:</strong> 487 µg/kWh (nivel D) vs. media nacional 512 µg/kWh.</li>
+            </ul>
+
+            <div class="example-box">
+                <span class="example-title">Comparativa Estructural: Argentina vs. España</span>
+                <p>Las diferencias entre ambos mercados son notables:</p>
+                <table>
+                    <tr><th>Característica</th><th>Argentina (EDEMSA)</th><th>España (Iberdrola)</th></tr>
+                    <tr><td>Tipo de Mercado</td><td>Regulado nacionalmente con subsidios</td><td>Libre (comercializador a elección)</td></tr>
+                    <tr><td>Regulador</td><td>EPRE (Mendoza) + ENRE (Nacional)</td><td>CNMC (Comisión Nacional de Mercados)</td></tr>
+                    <tr><td>Impuesto Energía</td><td>IVA 21%, IIBB 3,09%, CCCE 9%, etc.</td><td>IVA 21%, Impuesto Electricidad 5,11%</td></tr>
+                    <tr><td>Costo por kWh (aprox)</td><td>~400-900 $/kWh (con subsidios)</td><td>~0,46 €/kWh (con todos los impuestos)</td></tr>
+                    <tr><td>Exceso de Potencia</td><td>Penalizado severamente ($756/kW)</td><td>No aplica en tarifa 2.0TD</td></tr>
+                    <tr><td>Transparencia Ambiental</td><td>No obligatoria</td><td>Obligatoria (origen de electricidad, CO₂)</td></tr>
+                    <tr><td>Alquiler Medidor</td><td>Incluido en uso de red</td><td>Desglosado (0,72 €)</td></tr>
+                </table>
+                <p><strong>Conclusión:</strong> El mercado español es más transparente en términos medioambientales y permite la competencia entre comercializadoras. El mercado argentino, aunque más subsidiado para ciertos niveles, tiene una estructura impositiva más compleja (múltiples impuestos provinciales y municipales) y una penalización severa por el exceso de potencia, lo que hace crítico el dimensionamiento correcto de las instalaciones eléctricas.</p>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2>4. Ejercicio de Aplicación: Sistema de Bombeo de 12 kW</h2>
+            <p>La consigna del trabajo integrador solicita analizar un <strong>sistema de riego</strong> con una bomba de <strong>12 kW</strong> que funciona <strong>18 horas diarias</strong>. Se debe comparar el caso de riego agrícola vs. industria y determinar la planificación de consumo para mayor ahorro.</p>
+
+            <h3>4.1. Datos del Sistema</h3>
+            <ul>
+                <li><strong>Potencia de la bomba:</strong> 12 kW (despreciar potencia de arranque)</li>
+                <li><strong>Horas de funcionamiento:</strong> 18 horas diarias</li>
+                <li><strong>Consumo diario:</strong> 12 kW x 18 h = <strong>216 kWh/día</strong></li>
+                <li><strong>Consumo mensual (30 días):</strong> 216 kWh x 30 = <strong>6.480 kWh/mes</strong></li>
+                <li><strong>Consumo bimestral:</strong> 6.480 x 2 = <strong>12.960 kWh/bim</strong></li>
+            </ul>
+
+            <h3>4.2. Caso A: Riego Agrícola (Tarifa RA)</h3>
+            <p>El riego agrícola tiene una tarifa especial en EDEMSA con precios diferenciados. Según el cuadro tarifario, para Riego Agrícola en BT (RA BT) con potencia hasta 10 kW (la bomba es de 12 kW, pero podría estar en el rango >10 y hasta 300 kW):</p>
+            <ul>
+                <li><strong>Energía Alta (de 14 a 23hs):</strong> 382,88 $/kWh (ALTA)</li>
+                <li><strong>Energía Baja (de 23 a 14hs):</strong> 150,42 $/kWh (BAJA)</li>
+                <li><strong>Cargo Fijo:</strong> 39.540,81 $/bim</li>
+                <li><strong>Uso de Red:</strong> 4.890,07 $/kW-mes</li>
+            </ul>
+            <p><strong>Planificación de Consumo:</strong> Para maximizar el ahorro, el sistema debe operar en su mayoría en el horario de <strong>Energía Baja</strong> (23:00 a 14:00), que cuesta un 60% menos que la energía alta.</p>
+            <p><strong>Escenario Óptimo para Riego Agrícola:</strong></p>
+            <ul>
+                <li>Supongamos que se pueden programar 14 horas de las 18 en horario bajo (23:00 a 14:00) y 4 horas en horario alto (14:00 a 23:00).</li>
+                <li>Consumo en horario bajo: 12 kW x 14 h = 168 kWh/día x 30 = 5.040 kWh/mes</li>
+                <li>Consumo en horario alto: 12 kW x 4 h = 48 kWh/día x 30 = 1.440 kWh/mes</li>
+                <li><strong>Costo energía baja:</strong> 5.040 kWh x 150,42 $/kWh = $758.116,80</li>
+                <li><strong>Costo energía alta:</strong> 1.440 kWh x 382,88 $/kWh = $551.347,20</li>
+                <li><strong>Total energía:</strong> $1.309.464,00</li>
+                <li><strong>Cargo fijo:</strong> $39.540,81</li>
+                <li><strong>Uso de red (12 kW):</strong> $58.680,84 (mensual aprox)</li>
+                <li><strong>Costo mensual aproximado:</strong> <strong>$1.407.686</strong> (sin impuestos)</li>
+            </ul>
+            <p class="note">Nota: Los valores son aproximados. La tarifa RA tiene estructuras adicionales para compensaciones tarifarias según Ley 9681. El cálculo exacto requiere consultar el Anexo V del cuadro tarifario.</p>
+
+            <h3>4.3. Caso B: Industria que no Accede a Riego Agrícola (Tarifa T2)</h3>
+            <p>Si la bomba pertenece a una industria que no puede acceder a la tarifa agrícola, debe usar la <strong>Tarifa T2 R BT</strong> (Grandes Demandas, Baja Tensión). Los precios son los del cuadro tarifario general:</p>
+            <ul>
+                <li><strong>Energía Pico:</strong> 117,07 $/kWh</li>
+                <li><strong>Energía Resto:</strong> 113,80 $/kWh</li>
+                <li><strong>Energía Valle:</strong> 112,27 $/kWh</li>
+                <li><strong>Cargo Comercialización:</strong> 17.007,29 $/bim</li>
+                <li><strong>Cargo Fijo:</strong> 7.254,98 $/bim</li>
+                <li><strong>Uso de Red:</strong> 3.868,34 $/kW-mes</li>
+                <li><strong>Consumo de Potencia:</strong> 309.799,82 $/kW</li>
+            </ul>
+            <p><strong>Planificación de Consumo:</strong> Para una industria, la estrategia óptima es desplazar el mayor consumo posible al horario <strong>Valle</strong> (23:00 a 05:00), donde el precio es ligeramente menor. Sin embargo, en la T2 la diferencia entre Pico y Valle es de solo ~4%, mucho menor que en la tarifa agrícola (donde la diferencia es de ~60%).</p>
+            <p><strong>Escenario Óptimo para Industria:</strong></p>
+            <ul>
+                <li>Supongamos 6 horas en Valle (23:00 a 05:00), 12 horas en Resto (05:00 a 18:00), y 0 horas en Pico (evitar 18:00 a 23:00).</li>
+                <li>Consumo Valle: 12 kW x 6 h = 72 kWh/día x 30 = 2.160 kWh/mes</li>
+                <li>Consumo Resto: 12 kW x 12 h = 144 kWh/día x 30 = 4.320 kWh/mes</li>
+                <li>Consumo Pico: 0 kWh</li>
+                <li><strong>Costo Valle:</strong> 2.160 x 112,27 = $242.503,20</li>
+                <li><strong>Costo Resto:</strong> 4.320 x 113,80 = $491.616,00</li>
+                <li><strong>Total energía:</strong> $734.119,20</li>
+                <li><strong>Cargo comercialización (prorrateado):</strong> $8.503,65</li>
+                <li><strong>Cargo fijo (prorrateado):</strong> $3.627,49</li>
+                <li><strong>Uso de red (12 kW):</strong> $46.420,08</li>
+                <li><strong>Consumo de potencia (12 kW):</strong> $371.759,78</li>
+                <li><strong>Costo mensual aproximado (sin impuestos):</strong> <strong>$1.554.430</strong></li>
+            </ul>
+
+            <h3>4.4. Comparativa y Conclusión</h3>
+            <table>
+                <tr><th>Concepto</th><th>Riego Agrícola (RA)</th><th>Industria (T2)</th></tr>
+                <tr><td>Tarifa</td><td>RA BT</td><td>T2 R BT</td></tr>
+                <tr><td>Costo mensual aprox. (sin impuestos)</td><td>$1.407.686</td><td>$1.554.430</td></tr>
+                <tr><td>Horario más económico</td><td>23:00 a 14:00 (Baja)</td><td>23:00 a 05:00 (Valle)</td></tr>
+                <tr><td>Diferencia de precio entre horarios</td><td>~60% (Alta vs Baja)</td><td>~4% (Pico vs Valle)</td></tr>
+                <tr><td>Flexibilidad horaria</td><td>Alta (puede programarse de noche)</td><td>Media (depende de la producción)</td></tr>
+                <tr><td>Requisito</td><td>Matricularse como actividad agrícola</td><td>Ninguno especial</td></tr>
+            </table>
+
+            <div class="example-box">
+                <span class="example-title">Conclusión del Ejercicio</span>
+                <p><strong>La tarifa de Riego Agrícola (RA) es más conveniente</strong> para una bomba de 12 kW funcionando 18 horas diarias, siempre que el usuario pueda acreditar la actividad agrícola. Las razones son:</p>
+                <ul>
+                    <li>La diferencia entre el horario de energía "Alta" y "Baja" en la tarifa RA es de aproximadamente <strong>60%</strong>, lo que permite un ahorro masivo si se programa el riego durante la noche y la madrugada.</li>
+                    <li>En la tarifa T2, la diferencia entre Pico y Valle es de solo <strong>4%</strong>, por lo que el ahorro por desplazamiento horario es mínimo.</li>
+                    <li>El costo total mensual de la tarifa RA es aproximadamente <strong>10% menor</strong> que el de la T2, a pesar de que la tarifa RA tiene un cargo fijo más alto.</li>
+                </ul>
+                <p><strong>Recomendación técnica:</strong> Para un sistema de riego agrícola, se debe instalar un <strong>timer o controlador programable</strong> que active la bomba preferentemente entre las 23:00 y las 14:00 hs. Incluso si no se pueden cubrir todas las 18 horas en ese rango, cada hora desplazada del horario alto al bajo representa un ahorro de 232 $/kWh. Para una bomba de 12 kW, cada hora desplazada ahorra <strong>$2.784</strong> por mes.</p>
+                <p><strong>Para la industria:</strong> Si no puede acceder a la tarifa agrícola, la mejor estrategia es evitar el horario Pico (18:00 a 23:00) y operar preferentemente en Valle y Resto. También debe dimensionarse la <strong>potencia contratada</strong> para que la bomba de 12 kW no genere excesos (ej. contratar 15 kW para tener margen).</p>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h2>5. Conclusiones Generales</h2>
+            <p>El análisis del cuadro tarifario y las facturas reales permite extraer las siguientes conclusiones clave para un técnico electricista:</p>
+            <ul>
+                <li><strong>El exceso de potencia es el enemigo:</strong> Es el concepto más penalizador de la factura. Superar la potencia contratada puede duplicar o triplicar el costo mensual. Siempre dimensionar la potencia contratada con margen sobre la potencia máxima estimada de la instalación.</li>
+                <li><strong>El horario de consumo importa:</strong> En tarifas como el Riego Agrícola (RA), la diferencia entre horarios puede ser de hasta 60%. Programar equipos de alto consumo en horarios valle o baja genera ahorros significativos.</li>
+                <li><strong>Los impuestos representan un 25-30% del total:</strong> En Argentina, IVA, CCCE, IIBB, tasa fiscal, sobretasa y cargos municipales suman más de una cuarta parte de la factura. Un proyecto eléctrico debe contemplar estos costos en el análisis de retorno de inversión.</li>
+                <li><strong>La tarifa correcta ahorra dinero:</strong> Elegir la tarifa adecuada según la actividad (residencial, comercial, industrial, agrícola, alumbrado público) es fundamental. Una mala clasificación puede encarecer innecesariamente el suministro.</li>
+                <li><strong>El factor de potencia importa:</strong> Un cos φ bajo (por debajo de 0,90) genera multas en la factura. Se recomienda instalar bancos de capacitores para mantener el factor de potencia por encima de 0,95.</li>
+                <li><strong>El mercado europeo es más transparente:</strong> En España, la factura incluye el origen de la electricidad y su impacto ambiental. En Argentina, esta información no es obligatoria en la factura, aunque CAMMESA publica el mix de generación en su portal.</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+    </footer>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.textContent = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true);
+        }
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+</html>
