@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teorema de Superposición y Método de Maxwell - Teoría</title>
+    <meta name="description" content="Teoría y ejemplos de resolución de circuitos con varias fuentes mediante superposición y mallas de Maxwell.">
+    <style>
+        :root {
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+            --code-color: #a83f49;
+            --success-color: #3d9b72;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            --dot-color: #2a2a3a;
+            --code-color: #e0b7ff;
+            --success-color: #7dd3ad;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            flex: 0 0 auto;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 980px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2.2rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin: 1.8rem 0 0.75rem;
+        }
+
+        h4 {
+            color: var(--text-color);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1.1rem;
+            color: var(--text-color);
+            opacity: 0.92;
+            font-size: 1.04rem;
+        }
+
+        ul,
+        ol {
+            margin: 0 0 1.3rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            opacity: 0.92;
+        }
+
+        strong {
+            color: var(--text-color);
+        }
+
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background-color: var(--secondary-color);
+            color: var(--code-color);
+            padding: 0.12rem 0.35rem;
+            border-radius: 4px;
+        }
+
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.35rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+            font-style: italic;
+            font-size: 1.12rem;
+            color: var(--primary-color);
+        }
+
+        .formula {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            border-radius: 12px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.18rem;
+            font-weight: bold;
+            color: var(--code-color);
+            margin: 1.4rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .formula code {
+            background: transparent;
+            padding: 0;
+            white-space: nowrap;
+        }
+
+        .example-box {
+            background-color: var(--secondary-color);
+            border-left: 4px solid var(--primary-color);
+            padding: 1.35rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .example-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+            margin-bottom: 0.7rem;
+            font-size: 1.1rem;
+        }
+
+        .step-title {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-style: italic;
+            font-weight: 700;
+            margin: 1.6rem 0 0.7rem;
+        }
+
+        .equation-list {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-family: "Courier New", Courier, monospace;
+            margin: 1rem 0;
+            padding: 0.85rem 1rem;
+            overflow-x: auto;
+        }
+
+        .equation-list p {
+            margin: 0.35rem 0;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .matrix-caption {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            font-style: italic;
+            margin: 0.8rem 0 0.2rem;
+            text-align: center;
+        }
+
+        .note {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin: 1.2rem 0;
+        }
+
+        .warning {
+            border-left: 4px solid var(--code-color);
+        }
+
+        .circuit-container {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .circuit-container svg {
+            display: block;
+            width: min(100%, 760px);
+            min-width: 660px;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        .wire {
+            stroke: var(--text-color);
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .component {
+            stroke: var(--primary-color);
+            stroke-width: 4;
+            fill: var(--card-bg);
+        }
+
+        .circuit-label {
+            fill: var(--text-color);
+            font-family: sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .source-label,
+        .polarity {
+            fill: var(--primary-color);
+            font-family: sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .mesh-arrow {
+            stroke: var(--primary-color);
+            stroke-width: 3;
+            fill: none;
+            stroke-dasharray: 7 5;
+        }
+
+        .mesh-label {
+            fill: var(--primary-color);
+            font-family: sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .matrix-section {
+            margin: 1.5rem 0;
+        }
+
+        .matrix-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .matrix-layout .operator {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .matrix {
+            border-collapse: collapse;
+            border-left: 3px solid var(--primary-color);
+            border-right: 3px solid var(--primary-color);
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.15rem;
+            color: var(--text-color);
+        }
+
+        .matrix td {
+            min-width: 4.2rem;
+            padding: 0.35rem 0.65rem;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .vector td {
+            min-width: 5rem;
+        }
+
+        .determinant {
+            border-left: 3px solid var(--primary-color);
+            border-right: 3px solid var(--primary-color);
+            border-collapse: collapse;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.05rem;
+            color: var(--text-color);
+        }
+
+        .determinant td {
+            padding: 0.25rem 0.55rem;
+            min-width: 3.8rem;
+            text-align: center;
+        }
+
+        .calculation {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .calculation p:last-child {
+            margin-bottom: 0;
+        }
+
+        .source-case {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1.2rem 0;
+        }
+
+        .source-case h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0 1.5rem;
+        }
+
+        .result-card {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .result-card strong {
+            display: block;
+            color: var(--success-color);
+            font-size: 1.25rem;
+            margin-top: 0.25rem;
+        }
+
+        .results-table-wrapper {
+            overflow-x: auto;
+            margin: 1.2rem 0;
+        }
+
+        .results-table {
+            width: 100%;
+            min-width: 620px;
+            border-collapse: collapse;
+            background-color: var(--bg-color);
+        }
+
+        .results-table th,
+        .results-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .results-table th {
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+
+        .results-table td:first-child {
+            text-align: left;
+            font-weight: 700;
+        }
+
+        .results-table .total {
+            color: var(--success-color);
+            font-weight: 700;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        @media (max-width: 700px) {
+            header {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 1.05rem;
+                line-height: 1.3;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .content-card {
+                padding: 1.35rem;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .formula {
+                justify-content: flex-start;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al Hub">&#x2B05;&#xFE0F;</a>
+            &#x1F4D6; Teor&iacute;a: Superposici&oacute;n y Mallas de Maxwell
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar tema">&#x1F319;</button>
+    </header>
+
+    <main>
+        <div class="content-card">
+            <h2>Introducci&oacute;n</h2>
+            <p>Cuando un circuito de corriente continua contiene varias fuentes independientes y sus resistencias no pueden reducirse mediante asociaciones serie-paralelo, necesitamos un procedimiento sistem&aacute;tico. En esta p&aacute;gina se presentan dos herramientas complementarias: el <strong>teorema de superposici&oacute;n</strong> y el <strong>m&eacute;todo de las mallas de Maxwell</strong>.</p>
+            <p>Ambos m&eacute;todos se apoyan en las leyes de Kirchhoff. El resultado puede expresarse como un sistema de ecuaciones lineales, que resolvemos mediante matrices y determinantes usando la regla de Cramer.</p>
+
+            <div class="statement">
+                En una red lineal, la respuesta total es la suma algebraica de las respuestas producidas por cada fuente independiente actuando por separado.
+            </div>
+
+            <h2>1. Teorema de Superposici&oacute;n</h2>
+            <p>El teorema se aplica a circuitos <strong>lineales</strong>, por ejemplo redes formadas por resistencias ideales. Permite analizar una fuente por vez y luego sumar las corrientes o tensiones obtenidas en cada caso.</p>
+
+            <div class="formula">
+                <code>x<sub>total</sub> = x<sub>1</sub> + x<sub>2</sub> + ... + x<sub>n</sub></code>
+            </div>
+
+            <h3>Procedimiento general</h3>
+            <ol>
+                <li>Elegir la magnitud que se desea calcular: corriente, tensi&oacute;n o una variable de malla.</li>
+                <li>Dejar activa una sola fuente independiente.</li>
+                <li>Desactivar las dem&aacute;s fuentes: una fuente ideal de tensi&oacute;n se reemplaza por un cortocircuito y una fuente ideal de corriente por un circuito abierto.</li>
+                <li>Resolver el circuito parcial respetando las referencias y los signos elegidos.</li>
+                <li>Repetir el proceso para cada fuente y sumar algebraicamente los resultados.</li>
+            </ol>
+
+            <div class="note warning">
+                <strong>Importante:</strong> las fuentes dependientes no se desactivan. Adem&aacute;s, la superposici&oacute;n se aplica directamente a tensiones y corrientes, pero no a potencias, porque la potencia depende del cuadrado de la magnitud (<code>P = I<sup>2</sup>R</code> o <code>P = V<sup>2</sup>/R</code>).
+            </div>
+
+            <h3>Procedimiento general con matrices y determinantes</h3>
+            <p>El siguiente procedimiento sigue el orden utilizado en los apuntes: primero se plantea el sistema, luego se construye la matriz principal, se reemplaza una columna por los t&eacute;rminos independientes y finalmente se aplica Cramer.</p>
+
+            <div class="step-title">Paso 1: Plantear el sistema</div>
+            <p>Un sistema t&iacute;pico de tres inc&oacute;gnitas puede escribirse como:</p>
+            <div class="equation-list">
+                <p>a<sub>1</sub>x + b<sub>1</sub>y + c<sub>1</sub>z = d<sub>1</sub></p>
+                <p>a<sub>2</sub>x + b<sub>2</sub>y + c<sub>2</sub>z = d<sub>2</sub></p>
+                <p>a<sub>3</sub>x + b<sub>3</sub>y + c<sub>3</sub>z = d<sub>3</sub></p>
+            </div>
+
+            <div class="step-title">Paso 2: Construir la matriz de coeficientes</div>
+            <p>La matriz principal contiene solamente los coeficientes de las inc&oacute;gnitas. Su determinante se denomina <code>&Delta;</code>:</p>
+            <div class="matrix-caption">Matriz de coeficientes y determinante principal</div>
+            <div class="matrix-layout">
+                <span class="operator">&Delta; =</span>
+                <table class="determinant" aria-label="Matriz principal de tres por tres">
+                    <tr><td>a<sub>1</sub></td><td>b<sub>1</sub></td><td>c<sub>1</sub></td></tr>
+                    <tr><td>a<sub>2</sub></td><td>b<sub>2</sub></td><td>c<sub>2</sub></td></tr>
+                    <tr><td>a<sub>3</sub></td><td>b<sub>3</sub></td><td>c<sub>3</sub></td></tr>
+                </table>
+            </div>
+            <p>Para un determinante de 3 &times; 3 se puede utilizar la regla de Sarrus:</p>
+            <div class="formula">
+                <code>&Delta; = a<sub>1</sub>b<sub>2</sub>c<sub>3</sub> + b<sub>1</sub>c<sub>2</sub>a<sub>3</sub> + c<sub>1</sub>a<sub>2</sub>b<sub>3</sub> - (c<sub>1</sub>b<sub>2</sub>a<sub>3</sub> + a<sub>1</sub>c<sub>2</sub>b<sub>3</sub> + b<sub>1</sub>a<sub>2</sub>c<sub>3</sub>)</code>
+            </div>
+
+            <div class="step-title">Paso 3: Construir una matriz para cada inc&oacute;gnita</div>
+            <p>Se reemplaza la columna correspondiente por la columna de t&eacute;rminos independientes <code>(d<sub>1</sub>, d<sub>2</sub>, d<sub>3</sub>)</code>:</p>
+            <div class="matrix-layout">
+                <div>
+                    <div class="matrix-caption">&Delta;<sub>x</sub></div>
+                    <table class="determinant" aria-label="Determinante de x">
+                        <tr><td>d<sub>1</sub></td><td>b<sub>1</sub></td><td>c<sub>1</sub></td></tr>
+                        <tr><td>d<sub>2</sub></td><td>b<sub>2</sub></td><td>c<sub>2</sub></td></tr>
+                        <tr><td>d<sub>3</sub></td><td>b<sub>3</sub></td><td>c<sub>3</sub></td></tr>
+                    </table>
+                </div>
+                <div>
+                    <div class="matrix-caption">&Delta;<sub>y</sub></div>
+                    <table class="determinant" aria-label="Determinante de y">
+                        <tr><td>a<sub>1</sub></td><td>d<sub>1</sub></td><td>c<sub>1</sub></td></tr>
+                        <tr><td>a<sub>2</sub></td><td>d<sub>2</sub></td><td>c<sub>2</sub></td></tr>
+                        <tr><td>a<sub>3</sub></td><td>d<sub>3</sub></td><td>c<sub>3</sub></td></tr>
+                    </table>
+                </div>
+                <div>
+                    <div class="matrix-caption">&Delta;<sub>z</sub></div>
+                    <table class="determinant" aria-label="Determinante de z">
+                        <tr><td>a<sub>1</sub></td><td>b<sub>1</sub></td><td>d<sub>1</sub></td></tr>
+                        <tr><td>a<sub>2</sub></td><td>b<sub>2</sub></td><td>d<sub>2</sub></td></tr>
+                        <tr><td>a<sub>3</sub></td><td>b<sub>3</sub></td><td>d<sub>3</sub></td></tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="step-title">Paso 4: Aplicar la regla de Cramer</div>
+            <div class="formula">
+                <code>x = &Delta;<sub>x</sub> / &Delta;&nbsp;&nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;y = &Delta;<sub>y</sub> / &Delta;&nbsp;&nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;z = &Delta;<sub>z</sub> / &Delta;</code>
+            </div>
+            <div class="note">
+                <strong>Consideraciones:</strong> si <code>&Delta; &ne; 0</code>, el sistema tiene una &uacute;nica soluci&oacute;n. Si <code>&Delta; = 0</code> y todos los determinantes auxiliares tambi&eacute;n son cero, existen infinitas soluciones; si al menos uno es distinto de cero, el sistema es incompatible. Una verificaci&oacute;n &uacute;til consiste en reemplazar los valores calculados en las ecuaciones originales.
+            </div>
+
+            <h3>Superposici&oacute;n con matrices</h3>
+            <p>En cada caso de superposici&oacute;n se conserva la matriz de resistencias y se modifica solamente el vector de fuentes activas:</p>
+            <div class="matrix-layout" aria-label="Sistema matricial de superposición">
+                <table class="matrix" aria-label="Matriz de resistencias">
+                    <tr><td>R<sub>11</sub></td><td>-R<sub>m</sub></td></tr>
+                    <tr><td>-R<sub>m</sub></td><td>R<sub>22</sub></td></tr>
+                </table>
+                <table class="matrix vector" aria-label="Corrientes de malla parciales">
+                    <tr><td>I<sub>1</sub><sup>(k)</sup></td></tr>
+                    <tr><td>I<sub>2</sub><sup>(k)</sup></td></tr>
+                </table>
+                <span class="operator">=</span>
+                <table class="matrix vector" aria-label="Fuentes equivalentes parciales">
+                    <tr><td>E<sub>1</sub><sup>(k)</sup></td></tr>
+                    <tr><td>E<sub>2</sub><sup>(k)</sup></td></tr>
+                </table>
+            </div>
+            <p>Luego de resolver cada caso, se suman las respuestas con sus signos:</p>
+            <div class="formula"><code>I<sub>total</sub> = I<sub>(24 V)</sub> + I<sub>(12 V)</sub></code></div>
+
+            <h2>2. M&eacute;todo de las Mallas de Maxwell</h2>
+            <p>El m&eacute;todo de Maxwell asigna una corriente imaginaria a cada malla independiente, normalmente todas en el mismo sentido, por ejemplo horario. Despu&eacute;s se aplica la segunda ley de Kirchhoff a cada recorrido cerrado.</p>
+
+            <h3>Construcci&oacute;n de la matriz</h3>
+            <ul>
+                <li><strong>Diagonal principal:</strong> cada t&eacute;rmino es la suma de todas las resistencias pertenecientes a esa malla.</li>
+                <li><strong>Fuera de la diagonal:</strong> cada t&eacute;rmino es la resistencia compartida entre dos mallas, con signo negativo cuando las corrientes de malla se definieron en el mismo sentido.</li>
+                <li><strong>Vector de fuentes:</strong> se suman algebraicamente las fuentes que se recorren en cada malla. Una elevaci&oacute;n de potencial se toma positiva y una ca&iacute;da negativa.</li>
+            </ul>
+
+            <p>La forma habitual utiliza diagonales positivas y t&eacute;rminos mutuos negativos. En los apuntes se multiplican todas las ecuaciones por <code>-1</code>; por eso la forma equivalente utilizada en el ejemplo tiene diagonales negativas y t&eacute;rminos mutuos positivos. Ambas formas producen exactamente las mismas corrientes.</p>
+
+            <div class="formula">
+                <code>R<sub>11</sub>I<sub>1</sub> - R<sub>m</sub>I<sub>2</sub> = E<sub>1</sub>&nbsp;&nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;-R<sub>m</sub>I<sub>1</sub> + R<sub>22</sub>I<sub>2</sub> = E<sub>2</sub></code>
+            </div>
+
+            <h3>Resoluci&oacute;n mediante determinantes</h3>
+            <p>Para el sistema de dos mallas:</p>
+
+            <div class="matrix-layout" aria-label="Sistema general de dos mallas">
+                <table class="matrix">
+                    <tr><td>R<sub>11</sub></td><td>-R<sub>m</sub></td></tr>
+                    <tr><td>-R<sub>m</sub></td><td>R<sub>22</sub></td></tr>
+                </table>
+                <table class="matrix vector">
+                    <tr><td>I<sub>1</sub></td></tr>
+                    <tr><td>I<sub>2</sub></td></tr>
+                </table>
+                <span class="operator">=</span>
+                <table class="matrix vector">
+                    <tr><td>E<sub>1</sub></td></tr>
+                    <tr><td>E<sub>2</sub></td></tr>
+                </table>
+            </div>
+
+            <div class="matrix-layout">
+                <span class="operator">&Delta; =</span>
+                <table class="determinant" aria-label="Determinante general">
+                    <tr><td>R<sub>11</sub></td><td>-R<sub>m</sub></td></tr>
+                    <tr><td>-R<sub>m</sub></td><td>R<sub>22</sub></td></tr>
+                </table>
+                <span class="operator">= R<sub>11</sub>R<sub>22</sub> - R<sub>m</sub><sup>2</sup></span>
+            </div>
+
+            <div class="matrix-layout">
+                <span class="operator">I<sub>1</sub> =</span>
+                <span class="operator">&Delta;<sub>1</sub> / &Delta;</span>
+                <span class="operator">;&nbsp;&nbsp;&nbsp; I<sub>2</sub> =</span>
+                <span class="operator">&Delta;<sub>2</sub> / &Delta;</span>
+            </div>
+
+            <p>Para obtener <code>&Delta;<sub>1</sub></code>, se reemplaza la primera columna por el vector de fuentes; para obtener <code>&Delta;<sub>2</sub></code>, se reemplaza la segunda. Si <code>&Delta; &ne; 0</code>, existe una soluci&oacute;n &uacute;nica para las corrientes de malla.</p>
+
+            <h2>3. Ejemplo: circuito con fuentes de 24 V y 12 V</h2>
+            <p>Se analiza el circuito mostrado, que posee dos mallas y dos fuentes independientes. Se toman las polaridades indicadas en el dibujo, con el terminal positivo de ambas fuentes hacia arriba. Las corrientes de malla <strong>I<sub>1</sub></strong> e <strong>I<sub>2</sub></strong> se eligen en sentido horario; cumplen el mismo papel que las corrientes A y B de los apuntes.</p>
+
+            <div class="circuit-container">
+                <svg viewBox="0 0 720 430" role="img" aria-labelledby="circuitTitle circuitDescription" xmlns="http://www.w3.org/2000/svg">
+                    <title id="circuitTitle">Circuito de dos mallas con fuentes de 24 y 12 voltios</title>
+                    <desc id="circuitDescription">Circuito con resistencias de 5, 3, 6, 9, 7 y 2 ohmios, una fuente de 24 voltios en la rama izquierda y una fuente de 12 voltios en la rama central.</desc>
+                    <defs>
+                        <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                            <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--primary-color)" />
+                        </marker>
+                    </defs>
+
+                    <!-- Rama izquierda: 5 ohmios y fuente de 24 V -->
+                    <path class="wire" d="M 120 80 H 360 M 120 80 V 105 M 120 165 V 214 M 120 248 V 350" />
+                    <rect class="component" x="102" y="105" width="36" height="60" rx="4" />
+                    <text class="circuit-label" x="75" y="140" text-anchor="middle">5 &#x3A9;</text>
+                    <line class="component" x1="92" y1="214" x2="148" y2="214" />
+                    <line class="component" x1="101" y1="248" x2="139" y2="248" />
+                    <text class="polarity" x="77" y="219" text-anchor="middle">+</text>
+                    <text class="polarity" x="77" y="254" text-anchor="middle">-</text>
+                    <text class="source-label" x="55" y="239" text-anchor="middle">24 V</text>
+
+                    <!-- Rama central: 3 ohmios, fuente de 12 V y 6 ohmios -->
+                    <path class="wire" d="M 360 80 V 105 M 360 165 V 214 M 360 248 V 270 M 360 330 V 350" />
+                    <rect class="component" x="342" y="105" width="36" height="60" rx="4" />
+                    <text class="circuit-label" x="405" y="140" text-anchor="middle">3 &#x3A9;</text>
+                    <line class="component" x1="332" y1="214" x2="388" y2="214" />
+                    <line class="component" x1="341" y1="248" x2="379" y2="248" />
+                    <text class="polarity" x="316" y="219" text-anchor="middle">+</text>
+                    <text class="polarity" x="316" y="254" text-anchor="middle">-</text>
+                    <text class="source-label" x="425" y="239" text-anchor="middle">12 V</text>
+                    <rect class="component" x="342" y="270" width="36" height="60" rx="4" />
+                    <text class="circuit-label" x="405" y="305" text-anchor="middle">6 &#x3A9;</text>
+
+                    <!-- Rama derecha: 9 ohmios, 7 ohmios y 2 ohmios -->
+                    <path class="wire" d="M 360 80 H 405 M 495 80 H 600 V 110 M 600 170 V 215 M 600 275 V 350 H 120" />
+                    <rect class="component" x="405" y="62" width="90" height="36" rx="4" />
+                    <text class="circuit-label" x="450" y="48" text-anchor="middle">9 &#x3A9;</text>
+                    <rect class="component" x="582" y="110" width="36" height="60" rx="4" />
+                    <text class="circuit-label" x="655" y="145" text-anchor="middle">7 &#x3A9;</text>
+                    <rect class="component" x="582" y="215" width="36" height="60" rx="4" />
+                    <text class="circuit-label" x="655" y="250" text-anchor="middle">2 &#x3A9;</text>
+
+                    <!-- Nodos y corrientes de malla -->
+                    <circle cx="120" cy="80" r="6" fill="var(--primary-color)" />
+                    <circle cx="360" cy="80" r="6" fill="var(--primary-color)" />
+                    <circle cx="600" cy="80" r="6" fill="var(--primary-color)" />
+                    <path class="mesh-arrow" d="M 175 125 H 305" marker-end="url(#arrowhead)" />
+                    <text class="mesh-label" x="240" y="115" text-anchor="middle">I&#x2081; horario</text>
+                    <path class="mesh-arrow" d="M 415 125 H 545" marker-end="url(#arrowhead)" />
+                    <text class="mesh-label" x="480" y="115" text-anchor="middle">I&#x2082; horario</text>
+                    <text class="circuit-label" x="360" y="390" text-anchor="middle">Nodo de referencia com&uacute;n</text>
+                </svg>
+            </div>
+
+            <div class="note">
+                <strong>Referencia de signos:</strong> en la rama central, la corriente hacia abajo es <code>I<sub>1</sub> - I<sub>2</sub></code>. Si este resultado es negativo, la corriente real circula hacia arriba. Cambiar la polaridad de una fuente solo cambia el signo con el que aparece en las ecuaciones.
+            </div>
+
+            <h3>3.1 Resoluci&oacute;n directa con mallas de Maxwell</h3>
+            <p>En esta resoluci&oacute;n se utiliza la misma convenci&oacute;n de los apuntes: las resistencias propias aparecen con signo negativo en la diagonal y las resistencias compartidas con signo positivo fuera de la diagonal.</p>
+
+            <div class="step-title">Paso 1: Plantear las ecuaciones de malla</div>
+            <p>La primera malla contiene la fuente de 24 V, la fuente de 12 V y las resistencias de 5 &#x3A9;, 3 &#x3A9; y 6 &#x3A9;. La segunda contiene las resistencias de 9 &#x3A9;, 7 &#x3A9;, 2 &#x3A9;, 3 &#x3A9; y 6 &#x3A9;.</p>
+            <div class="equation-list">
+                <p>Malla 1: -(24 - 12) V = -(5 + 3 + 6) &#x3A9; I<sub>1</sub> + (3 + 6) &#x3A9; I<sub>2</sub></p>
+                <p>Malla 2: -(12) V = +(3 + 6) &#x3A9; I<sub>1</sub> - (9 + 7 + 2 + 3 + 6) &#x3A9; I<sub>2</sub></p>
+            </div>
+
+            <div class="step-title">Paso 2: Reordenar y construir la matriz</div>
+            <p>Al simplificar las sumas de resistencias:</p>
+            <div class="equation-list">
+                <p>-14 I<sub>1</sub> + 9 I<sub>2</sub> = -12</p>
+                <p>+9 I<sub>1</sub> - 27 I<sub>2</sub> = -12</p>
+            </div>
+            <div class="matrix-layout" aria-label="Matriz del circuito completo con la convención de los apuntes">
+                <table class="matrix">
+                    <tr><td>-14</td><td>9</td></tr>
+                    <tr><td>9</td><td>-27</td></tr>
+                </table>
+                <table class="matrix vector">
+                    <tr><td>I<sub>1</sub></td></tr>
+                    <tr><td>I<sub>2</sub></td></tr>
+                </table>
+                <span class="operator">=</span>
+                <table class="matrix vector">
+                    <tr><td>-12</td></tr>
+                    <tr><td>-12</td></tr>
+                </table>
+            </div>
+            <p>La resistencia propia de la primera malla es <code>5 + 3 + 6 = 14 &#x3A9;</code>, la de la segunda es <code>9 + 7 + 2 + 3 + 6 = 27 &#x3A9;</code> y la resistencia compartida es <code>3 + 6 = 9 &#x3A9;</code>.</p>
+
+            <div class="step-title">Paso 3: Calcular el determinante principal &Delta;</div>
+            <div class="calculation">
+                <div class="matrix-layout">
+                    <span class="operator">&Delta; =</span>
+                    <table class="determinant">
+                        <tr><td>-14</td><td>9</td></tr>
+                        <tr><td>9</td><td>-27</td></tr>
+                    </table>
+                    <span class="operator">= (-14 &times; -27) - (9 &times; 9) = 378 - 81 = 297</span>
+                </div>
+                <p><strong>Resultado:</strong> <code>&Delta; = 297</code>. Como es distinto de cero, el sistema tiene una &uacute;nica soluci&oacute;n.</p>
+            </div>
+
+            <div class="step-title">Paso 4: Calcular los determinantes auxiliares</div>
+            <div class="calculation">
+                <p><strong>Reemplazamos la columna de I<sub>1</sub> por los t&eacute;rminos independientes:</strong></p>
+                <div class="matrix-layout">
+                    <span class="operator">&Delta;<sub>1</sub> =</span>
+                    <table class="determinant">
+                        <tr><td>-12</td><td>9</td></tr>
+                        <tr><td>-12</td><td>-27</td></tr>
+                    </table>
+                    <span class="operator">= (-12 &times; -27) - (9 &times; -12) = 324 - (-108) = 432</span>
+                </div>
+                <p><strong>Reemplazamos la columna de I<sub>2</sub>:</strong></p>
+                <div class="matrix-layout">
+                    <span class="operator">&Delta;<sub>2</sub> =</span>
+                    <table class="determinant">
+                        <tr><td>-14</td><td>-12</td></tr>
+                        <tr><td>9</td><td>-12</td></tr>
+                    </table>
+                    <span class="operator">= (-14 &times; -12) - (-12 &times; 9) = 168 - (-108) = 276</span>
+                </div>
+            </div>
+
+            <div class="step-title">Paso 5: Aplicar Cramer y obtener I<sub>1</sub> e I<sub>2</sub></div>
+            <div class="formula"><code>I<sub>1</sub> = &Delta;<sub>1</sub> / &Delta; = 432 / 297 = 16/11 = 1,4545 A</code></div>
+            <div class="formula"><code>I<sub>2</sub> = &Delta;<sub>2</sub> / &Delta; = 276 / 297 = 92/99 = 0,9293 A</code></div>
+
+            <div class="step-title">Paso 6: Obtener las corrientes de rama</div>
+            <p>Con las corrientes de malla calculadas, se obtienen las corrientes de rama como en los apuntes:</p>
+            <div class="equation-list">
+                <p>I<sub>izquierda</sub> = I<sub>1</sub> = 1,4545 A hacia arriba</p>
+                <p>I<sub>central</sub> = I<sub>1</sub> - I<sub>2</sub> = 0,5253 A hacia abajo</p>
+                <p>I<sub>derecha</sub> = I<sub>2</sub> = 0,9293 A hacia abajo</p>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-card">Corriente de malla I<sub>1</sub><strong>1,4545 A</strong></div>
+                <div class="result-card">Corriente de malla I<sub>2</sub><strong>0,9293 A</strong></div>
+                <div class="result-card">Rama central, hacia abajo<strong>0,5253 A</strong></div>
+            </div>
+
+            <div class="step-title">Paso 7: Verificaci&oacute;n</div>
+            <div class="note">
+                <p>Reemplazando las corrientes aproximadas en el sistema:</p>
+                <div class="equation-list">
+                    <p>-14(1,4545) + 9(0,9293) = -12,0000</p>
+                    <p>9(1,4545) - 27(0,9293) = -12,0000</p>
+                </div>
+                <p>Las dos igualdades se cumplen, por lo que la soluci&oacute;n queda verificada.</p>
+            </div>
+
+            <h3>3.2 Resoluci&oacute;n por superposici&oacute;n</h3>
+            <p>Ahora se repite el procedimiento de los apuntes para cada fuente por separado. La matriz de resistencias no cambia; solamente cambia el vector de tensiones.</p>
+
+            <div class="source-case">
+                <h4>Caso A: solo act&uacute;a la fuente de 24 V</h4>
+                <div class="step-title">Paso 1: Desactivar la fuente de 12 V</div>
+                <p>Una fuente ideal de tensi&oacute;n desactivada se reemplaza por un cortocircuito. Las ecuaciones de malla quedan:</p>
+                <div class="equation-list">
+                    <p>Malla 1: -(24) V = -14 I<sub>1,24</sub> + 9 I<sub>2,24</sub></p>
+                    <p>Malla 2: 0 V = 9 I<sub>1,24</sub> - 27 I<sub>2,24</sub></p>
+                </div>
+                <div class="matrix-layout">
+                    <table class="matrix">
+                        <tr><td>-14</td><td>9</td></tr>
+                        <tr><td>9</td><td>-27</td></tr>
+                    </table>
+                    <table class="matrix vector">
+                        <tr><td>I<sub>1,24</sub></td></tr>
+                        <tr><td>I<sub>2,24</sub></td></tr>
+                    </table>
+                    <span class="operator">=</span>
+                    <table class="matrix vector">
+                        <tr><td>-24</td></tr>
+                        <tr><td>0</td></tr>
+                    </table>
+                </div>
+                <div class="step-title">Paso 2: Determinantes auxiliares</div>
+                <div class="calculation">
+                    <p><code>&Delta; = 297</code></p>
+                    <p><code>&Delta;<sub>1,24</sub> = (-24 &times; -27) - (9 &times; 0) = 648</code></p>
+                    <p><code>&Delta;<sub>2,24</sub> = (-14 &times; 0) - (-24 &times; 9) = 216</code></p>
+                </div>
+                <div class="step-title">Paso 3: Cramer y corrientes de rama</div>
+                <div class="formula"><code>I<sub>1,24</sub> = 648 / 297 = 24/11 = 2,1818 A</code></div>
+                <div class="formula"><code>I<sub>2,24</sub> = 216 / 297 = 8/11 = 0,7273 A</code></div>
+                <div class="equation-list">
+                    <p>I<sub>central,24</sub> = I<sub>1,24</sub> - I<sub>2,24</sub> = 1,4545 A hacia abajo</p>
+                </div>
+            </div>
+
+            <div class="source-case">
+                <h4>Caso B: solo act&uacute;a la fuente de 12 V</h4>
+                <div class="step-title">Paso 1: Desactivar la fuente de 24 V</div>
+                <p>Se reemplaza la fuente de 24 V por un cortocircuito. Al recorrer la fuente de 12 V, la primera malla la atraviesa de positivo a negativo y la segunda de negativo a positivo. Por eso los t&eacute;rminos independientes tienen signos opuestos:</p>
+                <div class="equation-list">
+                    <p>Malla 1: -(-12) V = -14 I<sub>1,12</sub> + 9 I<sub>2,12</sub></p>
+                    <p>Malla 2: -(12) V = 9 I<sub>1,12</sub> - 27 I<sub>2,12</sub></p>
+                </div>
+                <div class="matrix-layout">
+                    <table class="matrix">
+                        <tr><td>-14</td><td>9</td></tr>
+                        <tr><td>9</td><td>-27</td></tr>
+                    </table>
+                    <table class="matrix vector">
+                        <tr><td>I<sub>1,12</sub></td></tr>
+                        <tr><td>I<sub>2,12</sub></td></tr>
+                    </table>
+                    <span class="operator">=</span>
+                    <table class="matrix vector">
+                        <tr><td>12</td></tr>
+                        <tr><td>-12</td></tr>
+                    </table>
+                </div>
+                <div class="step-title">Paso 2: Determinantes auxiliares</div>
+                <div class="calculation">
+                    <p><code>&Delta; = 297</code></p>
+                    <p><code>&Delta;<sub>1,12</sub> = (12 &times; -27) - (9 &times; -12) = -324 - (-108) = -216</code></p>
+                    <p><code>&Delta;<sub>2,12</sub> = (-14 &times; -12) - (12 &times; 9) = 168 - 108 = 60</code></p>
+                </div>
+                <div class="step-title">Paso 3: Cramer y corrientes de rama</div>
+                <div class="formula"><code>I<sub>1,12</sub> = -216 / 297 = -8/11 = -0,7273 A</code></div>
+                <div class="formula"><code>I<sub>2,12</sub> = 60 / 297 = 20/99 = 0,2020 A</code></div>
+                <div class="equation-list">
+                    <p>I<sub>central,12</sub> = I<sub>1,12</sub> - I<sub>2,12</sub> = -0,9293 A</p>
+                    <p>El signo negativo indica 0,9293 A hacia arriba.</p>
+                </div>
+            </div>
+
+            <h3>3.3 Suma de las respuestas parciales</h3>
+            <div class="step-title">Paso final: sumar algebraicamente las contribuciones</div>
+            <p>La verificaci&oacute;n del teorema se realiza sumando cada contribuci&oacute;n con su signo, tal como se hace en los apuntes cuando se cambia el sentido de una corriente negativa:</p>
+
+            <div class="results-table-wrapper">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Magnitud</th>
+                            <th>Solo 24 V</th>
+                            <th>Solo 12 V</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>I<sub>1</sub></td>
+                            <td>2,1818 A</td>
+                            <td>-0,7273 A</td>
+                            <td class="total">1,4545 A</td>
+                        </tr>
+                        <tr>
+                            <td>I<sub>2</sub></td>
+                            <td>0,7273 A</td>
+                            <td>0,2020 A</td>
+                            <td class="total">0,9293 A</td>
+                        </tr>
+                        <tr>
+                            <td>I<sub>central</sub> = I<sub>1</sub> - I<sub>2</sub></td>
+                            <td>1,4545 A</td>
+                            <td>-0,9293 A</td>
+                            <td class="total">0,5253 A</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="formula"><code>I<sub>1</sub> = I<sub>1,24</sub> + I<sub>1,12</sub> = 2,1818 - 0,7273 = 1,4545 A</code></div>
+            <div class="formula"><code>I<sub>2</sub> = I<sub>2,24</sub> + I<sub>2,12</sub> = 0,7273 + 0,2020 = 0,9293 A</code></div>
+
+            <div class="step-title">Verificaci&oacute;n final</div>
+            <div class="note">
+                <p>Las corrientes totales obtenidas por superposici&oacute;n son las mismas que las obtenidas resolviendo directamente las dos mallas:</p>
+                <div class="equation-list">
+                    <p>I<sub>1</sub> = 1,4545 A</p>
+                    <p>I<sub>2</sub> = 0,9293 A</p>
+                    <p>I<sub>central</sub> = 0,5253 A hacia abajo</p>
+                </div>
+            </div>
+
+            <div class="statement">
+                La soluci&oacute;n obtenida por superposici&oacute;n coincide con la soluci&oacute;n directa de las mallas de Maxwell. La diferencia entre ambos caminos es el modo de organizar el an&aacute;lisis, no el resultado el&eacute;ctrico.
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+    </footer>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.innerHTML = '&#x2600;&#xFE0F;';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.innerHTML = '&#x1F319;';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+    </script>
+</body>
+
+</html>

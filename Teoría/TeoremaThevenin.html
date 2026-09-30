@@ -1,0 +1,3164 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teorema de Thévenin en Corriente Continua - Informe Técnico y Guía Teórica</title>
+    <meta name="description" content="Fundamentos teóricos, procedimiento analítico, ensayos experimentales de laboratorio y banco interactivo de cálculo para el Teorema de Thévenin en corriente continua.">
+
+    <style>
+        :root {
+            /* Modo Claro (Paleta Cuackdernos / Lab Hub) */
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --shadow-hover: 0 8px 25px rgba(229, 107, 115, 0.25);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+            --code-color: #a83f49;
+            --success-color: #2e7d32;
+            --success-bg: #e8f5e9;
+            --warning-color: #e65100;
+            --warning-bg: #fff3e0;
+            --info-color: #0277bd;
+            --info-bg: #e1f5fe;
+            --accent-purple: #7b1fa2;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.5);
+            --dot-color: #2a2a3a;
+            --code-color: #e0b7ff;
+            --success-color: #81c784;
+            --success-bg: #1b3320;
+            --warning-color: #ffb74d;
+            --warning-bg: #382414;
+            --info-color: #4fc3f7;
+            --info-bg: #132838;
+            --accent-purple: #ce93d8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.65;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.35rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+        }
+
+        .back-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .badge-tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        /* --- Quick Nav Menu (Pills) --- */
+        .nav-pills-container {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.6rem 1rem;
+            position: sticky;
+            top: 65px;
+            z-index: 90;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .nav-pills {
+            max-width: 1050px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.1rem;
+        }
+
+        .nav-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .nav-pill:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            padding: 2rem 1.5rem;
+            max-width: 1050px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        /* Typography */
+        h2 {
+            color: var(--primary-color);
+            margin: 2.5rem 0 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin: 1.8rem 0 0.8rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        h4 {
+            color: var(--text-color);
+            margin: 1.3rem 0 0.5rem;
+            font-size: 1.08rem;
+        }
+
+        p {
+            margin-bottom: 1.15rem;
+            color: var(--text-color);
+            font-size: 1.03rem;
+            opacity: 0.95;
+        }
+
+        ul, ol {
+            margin: 0 0 1.4rem 1.6rem;
+        }
+
+        li {
+            margin-bottom: 0.55rem;
+            color: var(--text-color);
+            opacity: 0.95;
+        }
+
+        strong {
+            color: var(--text-color);
+        }
+
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background-color: var(--secondary-color);
+            color: var(--code-color);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        /* --- Enunciado / Statement Callout --- */
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 5px solid var(--primary-color);
+            padding: 1.4rem 1.6rem;
+            margin: 1.6rem 0;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+            font-size: 1.12rem;
+            color: var(--text-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .statement strong {
+            color: var(--primary-color);
+            font-style: normal;
+        }
+
+        /* --- Boxes: Note, Tip, Warning, Info --- */
+        .box-callout {
+            border-radius: 12px;
+            padding: 1.2rem 1.4rem;
+            margin: 1.4rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            border: 1px solid transparent;
+        }
+
+        .box-callout .box-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .box-callout .box-content {
+            flex: 1;
+        }
+
+        .box-callout .box-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        .box-warning {
+            background-color: var(--warning-bg);
+            border-color: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        .box-warning .box-title {
+            color: var(--warning-color);
+        }
+
+        .box-tip {
+            background-color: var(--success-bg);
+            border-color: var(--success-color);
+            color: var(--text-color);
+        }
+
+        .box-tip .box-title {
+            color: var(--success-color);
+        }
+
+        .box-info {
+            background-color: var(--info-bg);
+            border-color: var(--info-color);
+            color: var(--text-color);
+        }
+
+        .box-info .box-title {
+            color: var(--info-color);
+        }
+
+        /* --- Mathematical Formulas --- */
+        .formula-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.3rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .formula-main {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--code-color);
+            margin-bottom: 0.35rem;
+        }
+
+        .formula-desc {
+            font-size: 0.88rem;
+            color: var(--text-light);
+        }
+
+        .formula-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        /* --- Steps Sequence --- */
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 800;
+            font-size: 0.9rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        .step-block {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.4rem 1.6rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.9rem;
+        }
+
+        .step-title-text {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* --- Circuit SVG Styles --- */
+        .circuit-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin: 1.6rem 0;
+            padding: 1.4rem 1rem;
+            overflow-x: auto;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .circuit-caption {
+            font-size: 0.92rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .circuit-svg {
+            display: block;
+            width: 100%;
+            max-width: 740px;
+            height: auto;
+            margin: 0 auto;
+            overflow: visible;
+        }
+
+        .wire {
+            stroke: var(--text-color);
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .wire-highlight {
+            stroke: var(--primary-color);
+            stroke-width: 3.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .wire-open {
+            stroke: var(--text-light);
+            stroke-width: 2.5;
+            stroke-dasharray: 6 4;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .wire-short {
+            stroke: var(--success-color);
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .resistor-box {
+            stroke: var(--primary-color);
+            stroke-width: 2.5;
+            fill: var(--card-bg);
+            rx: 4;
+        }
+
+        .load-resistor {
+            stroke: var(--info-color);
+            stroke-width: 3;
+            fill: var(--card-bg);
+            stroke-dasharray: 6 3;
+            rx: 4;
+        }
+
+        .component-label {
+            fill: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .terminal-dot {
+            fill: var(--primary-color);
+            stroke: var(--card-bg);
+            stroke-width: 2;
+        }
+
+        .terminal-label {
+            fill: var(--primary-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .source-circle {
+            stroke: var(--primary-color);
+            stroke-width: 2.5;
+            fill: var(--card-bg);
+        }
+
+        .meter-circle {
+            stroke: var(--success-color);
+            stroke-width: 2.5;
+            fill: var(--card-bg);
+        }
+
+        .source-symbol {
+            fill: var(--primary-color);
+            font-size: 16px;
+            font-weight: bold;
+            font-family: sans-serif;
+        }
+
+        .current-arrow {
+            stroke: var(--success-color);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .probe-red {
+            stroke: #ef5350;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .probe-black {
+            stroke: #78909c;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .dim-arrow {
+            stroke: var(--text-light);
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        /* --- Tabbed Interface for Examples / Simulator --- */
+        .tabs-header {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.2rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.65rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: var(--transition);
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Calculation Steps / Accordions --- */
+        .calc-step {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.1rem 1.3rem;
+            margin: 1.2rem 0;
+        }
+
+        .calc-step-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calc-math {
+            font-family: "Courier New", Courier, monospace;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+            margin: 0.6rem 0;
+            font-size: 1.05rem;
+            color: var(--code-color);
+            overflow-x: auto;
+        }
+
+        /* --- Results Grid & Table --- */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .result-box {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.1rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .result-box:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .result-label {
+            font-size: 0.88rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .result-value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--success-color);
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        .data-table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+            text-align: center;
+        }
+
+        .data-table th, .data-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.98rem;
+        }
+
+        .data-table th {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover {
+            background-color: var(--bg-color);
+        }
+
+        /* --- Interactive Simulator Styles --- */
+        .simulator-card {
+            background-color: var(--secondary-color);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin: 2rem 0;
+        }
+
+        .sim-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .sim-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sim-control-group {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+        }
+
+        .sim-control-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            gap: 0.75rem;
+        }
+
+        .control-row label {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-color);
+            flex: 1;
+        }
+
+        .control-row input[type="number"] {
+            width: 90px;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .control-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .btn-action-small {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.45rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-action-small:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .sim-results {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sim-meter {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.65rem 0.9rem;
+            margin-bottom: 0.55rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sim-meter-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .sim-meter-val {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--success-color);
+        }
+
+        .power-graph-container {
+            margin-top: 1.25rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .power-canvas {
+            width: 100%;
+            height: 200px;
+            display: block;
+            border-radius: 8px;
+        }
+
+        /* --- Self-Assessment Quiz --- */
+        .quiz-container {
+            margin: 2rem 0;
+        }
+
+        .quiz-card {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.35rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-question {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.85rem;
+            color: var(--text-color);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .quiz-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+
+        .quiz-btn.correct {
+            background-color: var(--success-bg) !important;
+            border-color: var(--success-color) !important;
+            color: var(--success-color) !important;
+            font-weight: bold;
+        }
+
+        .quiz-btn.incorrect {
+            background-color: var(--warning-bg) !important;
+            border-color: var(--warning-color) !important;
+            color: var(--warning-color) !important;
+        }
+
+        .quiz-feedback {
+            margin-top: 0.75rem;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .quiz-score-banner {
+            background-color: var(--secondary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        /* --- Collapsible Accordion / Solution Reveal --- */
+        .accordion-btn {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
+            width: 100%;
+            padding: 0.85rem 1.2rem;
+            border-radius: 10px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            margin-top: 0.75rem;
+        }
+
+        .accordion-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 1.2rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            margin-top: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            header {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 1.1rem;
+            }
+
+            .badge-tag {
+                display: none;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .content-card {
+                padding: 1.35rem;
+            }
+
+            .formula-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .formula-card {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+
+    <!-- Header Principal -->
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al menú principal">← Volver al Hub</a>
+            <span>⚡ Teorema de Thévenin</span>
+            <span class="badge-tag">Informe Técnico / Teoría de Circuitos CC</span>
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <!-- Navegación Rápida -->
+    <nav class="nav-pills-container" aria-label="Secciones de la página">
+        <div class="nav-pills">
+            <a href="#intro" class="nav-pill">💡 Concepto</a>
+            <a href="#equivalente" class="nav-pill">🔌 Circuito Equivalente</a>
+            <a href="#pasos" class="nav-pill">📋 Método Paso a Paso</a>
+            <a href="#laboratorio" class="nav-pill">🛠️ Ensayos de Laboratorio</a>
+            <a href="#aplicaciones" class="nav-pill">🏭 Aplicaciones Reales</a>
+            <a href="#ejemplos" class="nav-pill">📐 Ejemplos Resueltos</a>
+            <a href="#simulador" class="nav-pill">🧪 Banco Interactivo</a>
+            <a href="#errores" class="nav-pill">⚠️ Criterios Críticos</a>
+            <a href="#propuestos" class="nav-pill">📝 Ejercicios Prácticos</a>
+            <a href="#quiz" class="nav-pill">🎯 Autoevaluación</a>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main>
+        <div class="content-card">
+
+            <!-- INTRODUCCIÓN -->
+            <section id="intro">
+                <h2>💡 1. ¿Qué es el Teorema de Thévenin y por qué es una herramienta clave?</h2>
+                <p>
+                    En electrotecnia y análisis de circuitos, surge con frecuencia la necesidad de evaluar el comportamiento de una red eléctrica frente a diferentes condiciones de carga acopladas entre dos terminales accesibles <strong>A</strong> y <strong>B</strong> (por ejemplo: etapas de potencia, transductores o receptores resistivos de diferentes valores nominales).
+                </p>
+                <p>
+                    Si se intentara resolver la red aplicando directamente las <strong>Leyes de Kirchhoff</strong> o el <strong>Método de Mallas de Maxwell</strong> para cada estado de carga, sería imperativo formular y resolver un nuevo sistema de ecuaciones lineales cada vez que varía la resistencia receptora. Este procedimiento resulta analíticamente ineficiente y propenso a errores de cálculo en etapas de diseño e ingeniería.
+                </p>
+
+                <div class="statement">
+                    <strong>Enunciado formal del Teorema de Léon Thévenin (1883):</strong><br>
+                    Cualquier red lineal activa de corriente continua (CC), por más componentes y mallas que posea, vista desde dos terminales accesibles <strong>A</strong> y <strong>B</strong>, se comporta exactamente igual a un circuito equivalente muy simple formado por <strong>una única fuente de tensión independiente (V<sub>th</sub>) en serie con una única resistencia (R<sub>th</sub>)</strong>.
+                </div>
+
+                <div class="box-callout box-tip">
+                    <span class="box-icon">💡</span>
+                    <div class="box-content">
+                        <span class="box-title">Alcance del Análisis (Circuitos de Corriente Continua):</span>
+                        El presente informe se enfoca en redes lineales alimentadas exclusivamente por <strong>fuentes de tensión de CC independientes</strong> (baterías, fuentes reguladas de laboratorio) y resistores óhmicos. <strong>No se emplean fuentes independientes de corriente</strong>, respondiendo a la configuración física habitual de sistemas de CC y bancos de prueba de laboratorio.
+                    </div>
+                </div>
+
+                <!-- SVG: Concepto de Caja Negra -->
+                <div class="circuit-container">
+                    <svg class="circuit-svg" viewBox="0 0 760 250" role="img" aria-label="Concepto de equivalencia de Thévenin: de red compleja a circuito simple">
+                        <defs>
+                            <marker id="arrowRed1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--primary-color)" />
+                            </marker>
+                        </defs>
+
+                        <!-- Caja Negra Compleja (Izquierda) -->
+                        <rect x="25" y="25" width="280" height="190" rx="14" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2.5" stroke-dasharray="6 4" />
+                        <text x="165" y="55" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="15">RED COMPLEJA EN CC</text>
+                        <text x="165" y="80" text-anchor="middle" font-size="12" fill="var(--text-light)">Fuentes de CC independientes</text>
+                        <text x="165" y="100" text-anchor="middle" font-size="12" fill="var(--text-light)">Redes resistivas serie-paralelo</text>
+                        <text x="165" y="120" text-anchor="middle" font-size="12" fill="var(--text-light)">Mallas y puentes de resistencias</text>
+
+                        <!-- Esquema interno insinuado dentro de la caja -->
+                        <rect x="65" y="145" width="40" height="18" rx="3" class="resistor-box" opacity="0.6" />
+                        <circle cx="150" cy="154" r="14" class="source-circle" opacity="0.6" />
+                        <rect x="205" y="145" width="40" height="18" rx="3" class="resistor-box" opacity="0.6" />
+                        <line class="wire" x1="105" y1="154" x2="136" y2="154" opacity="0.4" />
+                        <line class="wire" x1="164" y1="154" x2="205" y2="154" opacity="0.4" />
+
+                        <!-- Bornes de salida A y B izquierda -->
+                        <line class="wire" x1="305" y1="90" x2="365" y2="90" />
+                        <line class="wire" x1="305" y1="180" x2="365" y2="180" />
+                        <circle cx="365" cy="90" r="6" class="terminal-dot" />
+                        <circle cx="365" cy="180" r="6" class="terminal-dot" />
+                        <text x="365" y="72" text-anchor="middle" class="terminal-label">A</text>
+                        <text x="365" y="204" text-anchor="middle" class="terminal-label">B</text>
+
+                        <!-- Flecha de Equivalencia Central -->
+                        <path class="wire-highlight" d="M 390 135 L 450 135" marker-end="url(#arrowRed1)" />
+                        <rect x="385" y="105" width="70" height="22" rx="6" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="1.5" />
+                        <text x="420" y="120" text-anchor="middle" font-weight="bold" fill="var(--primary-color)" font-size="11">EQUIVALE</text>
+
+                        <!-- Circuito Equivalente Thévenin (Derecha) -->
+                        <rect x="475" y="25" width="260" height="190" rx="14" fill="var(--secondary-color)" stroke="var(--border-color)" stroke-width="2" />
+                        <text x="605" y="48" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="13">EQUIVALENTE THÉVENIN</text>
+
+                        <!-- Fuente Vth -->
+                        <circle cx="530" cy="135" r="22" class="source-circle" />
+                        <text x="530" y="127" text-anchor="middle" class="source-symbol">+</text>
+                        <text x="530" y="147" text-anchor="middle" class="source-symbol">−</text>
+                        <text x="495" y="140" text-anchor="middle" class="component-label">Vₜₕ</text>
+
+                        <!-- Conexión hacia Rth -->
+                        <line class="wire" x1="530" y1="113" x2="530" y2="90" />
+                        <line class="wire" x1="530" y1="90" x2="575" y2="90" />
+
+                        <!-- Resistencia Rth -->
+                        <rect x="575" y="78" width="55" height="24" class="resistor-box" />
+                        <text x="602" y="72" text-anchor="middle" class="component-label">Rₜₕ</text>
+
+                        <!-- Conexión a Borne A -->
+                        <line class="wire" x1="630" y1="90" x2="690" y2="90" />
+                        <circle cx="690" cy="90" r="6" class="terminal-dot" />
+                        <text x="690" y="72" text-anchor="middle" class="terminal-label">A</text>
+
+                        <!-- Retorno Borne B -->
+                        <line class="wire" x1="530" y1="157" x2="530" y2="180" />
+                        <line class="wire" x1="530" y1="180" x2="690" y2="180" />
+                        <circle cx="690" cy="180" r="6" class="terminal-dot" />
+                        <text x="690" y="204" text-anchor="middle" class="terminal-label">B</text>
+                    </svg>
+                    <div class="circuit-caption">Figura 1: El principio de la "Caja Negra". Toda la complejidad interna queda reducida a Vₜₕ y Rₜₕ entre los bornes A y B.</div>
+                </div>
+            </section>
+
+            <!-- CIRCUITO EQUIVALENTE Y FÓRMULAS -->
+            <section id="equivalente">
+                <h2>🔌 2. El Circuito Equivalente de Thévenin y sus Variables</h2>
+                <p>
+                    El circuito resultante consta de solo tres elementos en una única malla serie cuando se le conecta la carga <strong>R<sub>L</sub></strong>:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Tensión de Thévenin (V<sub>th</sub>):</strong> Es la tensión a <em>circuito abierto</em> que aparece entre los terminales <strong>A</strong> y <strong>B</strong> cuando la carga está desconectada (tensión de vacío, <code>V<sub>th</sub> = V<sub>AB (abierto)</sub></code>).
+                    </li>
+                    <li>
+                        <strong>Resistencia de Thévenin (R<sub>th</sub>):</strong> Es la resistencia que se mide entre los terminales <strong>A</strong> y <strong>B</strong> mirando hacia el interior de la red, habiendo <em>apagado (pasivado)</em> todas las fuentes de tensión independientes.
+                    </li>
+                    <li>
+                        <strong>Resistencia de Carga (R<sub>L</sub>):</strong> El componente receptor (la carga que nosotros conectamos entre los bornes A y B).
+                    </li>
+                </ul>
+
+                <!-- SVG: Circuito Equivalente con Carga Conectada -->
+                <div class="circuit-container">
+                    <svg class="circuit-svg" viewBox="0 0 720 260" role="img" aria-label="Circuito equivalente de Thévenin con carga RL conectada">
+                        <defs>
+                            <marker id="arrowGreen2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--success-color)" />
+                            </marker>
+                            <marker id="dimArrowTop" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                <path d="M 5 0 L 0 8 L 10 8 z" fill="var(--info-color)" />
+                            </marker>
+                            <marker id="dimArrowBottom" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                <path d="M 0 2 L 10 2 L 5 10 z" fill="var(--info-color)" />
+                            </marker>
+                        </defs>
+
+                        <!-- Fuente Vth -->
+                        <circle cx="150" cy="130" r="26" class="source-circle" />
+                        <text x="150" y="121" text-anchor="middle" class="source-symbol" font-size="20">+</text>
+                        <text x="150" y="144" text-anchor="middle" class="source-symbol" font-size="20">−</text>
+                        <text x="95" y="136" text-anchor="middle" class="component-label" font-size="18">Vₜₕ</text>
+
+                        <!-- Cable superior hacia Rth -->
+                        <line class="wire" x1="150" y1="104" x2="150" y2="70" />
+                        <line class="wire" x1="150" y1="70" x2="245" y2="70" />
+
+                        <!-- Resistencia Rth -->
+                        <rect x="245" y="56" width="70" height="28" class="resistor-box" />
+                        <text x="280" y="46" text-anchor="middle" class="component-label" font-size="16">Rₜₕ</text>
+
+                        <!-- Cable hacia Terminal A -->
+                        <line class="wire" x1="315" y1="70" x2="440" y2="70" />
+                        
+                        <!-- Flecha de Corriente IL -->
+                        <path class="current-arrow" d="M 350 86 L 405 86" marker-end="url(#arrowGreen2)" />
+                        <text x="378" y="106" text-anchor="middle" fill="var(--success-color)" font-weight="bold" font-size="14">Iₗ</text>
+
+                        <!-- Terminal A (+) -->
+                        <circle cx="440" cy="70" r="7" class="terminal-dot" />
+                        <text x="440" y="50" text-anchor="middle" class="terminal-label">A (+)</text>
+
+                        <!-- Carga RL -->
+                        <line class="wire" x1="440" y1="70" x2="530" y2="70" />
+                        <line class="wire" x1="530" y1="70" x2="530" y2="95" />
+                        <rect x="516" y="95" width="28" height="70" class="load-resistor" />
+                        <text x="575" y="136" text-anchor="start" class="component-label" fill="var(--info-color)" font-size="17">Rₗ (Carga)</text>
+                        <line class="wire" x1="530" y1="165" x2="530" y2="190" />
+                        <line class="wire" x1="530" y1="190" x2="440" y2="190" />
+
+                        <!-- Terminal B (-) -->
+                        <circle cx="440" cy="190" r="7" class="terminal-dot" />
+                        <text x="440" y="218" text-anchor="middle" class="terminal-label">B (−)</text>
+
+                        <!-- Retorno inferior hacia Vth -->
+                        <line class="wire" x1="440" y1="190" x2="150" y2="190" />
+                        <line class="wire" x1="150" y1="190" x2="150" y2="156" />
+
+                        <!-- Indicador de Tensión de Carga VL (Cota elegante) -->
+                        <line class="dim-arrow" x1="480" y1="78" x2="480" y2="98" marker-start="url(#dimArrowTop)" />
+                        <line class="dim-arrow" x1="480" y1="162" x2="480" y2="182" marker-end="url(#dimArrowBottom)" />
+                        <rect x="465" y="118" width="30" height="24" rx="4" fill="var(--card-bg)" stroke="var(--info-color)" stroke-width="1.5" />
+                        <text x="480" y="135" text-anchor="middle" font-weight="bold" fill="var(--info-color)" font-size="13">Vₗ</text>
+                    </svg>
+                    <div class="circuit-caption">Figura 2: Circuito equivalente de Thévenin cerrado con la resistencia de carga Rₗ.</div>
+                </div>
+
+                <h3>Fórmulas Inmediatas del Circuito Serie</h3>
+                <p>Una vez determinados los parámetros fundamentales <code>V<sub>th</sub></code> y <code>R<sub>th</sub></code>, las variables eléctricas en bornes del receptor se obtienen de manera directa mediante el análisis de un circuito serie simple:</p>
+
+                <div class="formula-grid">
+                    <div class="formula-card">
+                        <div class="formula-main">I<sub>L</sub> = V<sub>th</sub> / (R<sub>th</sub> + R<sub>L</sub>)</div>
+                        <div class="formula-desc">Corriente que circula por la carga (Ley de Ohm)</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-main">V<sub>L</sub> = I<sub>L</sub> · R<sub>L</sub> = V<sub>th</sub> · [R<sub>L</sub> / (R<sub>th</sub> + R<sub>L</sub>)]</div>
+                        <div class="formula-desc">Tensión en los bornes de la carga (Divisor de tensión)</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-main">P<sub>L</sub> = I<sub>L</sub><sup>2</sup> · R<sub>L</sub> = V<sub>L</sub><sup>2</sup> / R<sub>L</sub></div>
+                        <div class="formula-desc">Potencia activa disipada en la carga (en Watts)</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MÉTODO PASO A PASO CON ESQUEMAS VISUALES -->
+            <section id="pasos">
+                <h2>📋 3. Procedimiento y Algoritmo Metódico de 4 Pasos</h2>
+                <p>
+                    Para la resolución sistemática de redes lineales de corriente continua, se aplica el siguiente <strong>algoritmo estructurado de cuatro pasos</strong>:
+                </p>
+
+                <!-- PASO 0 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">0</span>
+                        <span class="step-title-text">Paso 0: Identificar y Desconectar la Resistencia de Carga (R<sub>L</sub>)</span>
+                    </div>
+                    <p>
+                        Se identifica el elemento resistivo sobre el cual se desea calcular corriente, tensión o disipación de potencia. Se retira dicho elemento de la red, dejando los dos terminales de acoplamiento en circuito abierto y designándolos formalmente como nodos <strong>A</strong> y <strong>B</strong>.
+                    </p>
+                    <div class="circuit-container" style="max-width: 620px; margin: 1rem auto;">
+                        <svg class="circuit-svg" viewBox="0 0 600 160" role="img" aria-label="Paso 0: Desconexión de la carga RL">
+                            <rect x="25" y="25" width="220" height="110" rx="12" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2" />
+                            <text x="135" y="75" text-anchor="middle" font-weight="bold" fill="var(--primary-color)" font-size="14">Red Activa de CC</text>
+                            <text x="135" y="98" text-anchor="middle" font-size="12" fill="var(--text-light)">(Fuentes + Resistencias)</text>
+                            
+                            <line class="wire" x1="245" y1="55" x2="330" y2="55" />
+                            <circle cx="330" cy="55" r="6" class="terminal-dot" />
+                            <text x="330" y="40" text-anchor="middle" class="terminal-label">A</text>
+
+                            <line class="wire" x1="245" y1="105" x2="330" y2="105" />
+                            <circle cx="330" cy="105" r="6" class="terminal-dot" />
+                            <text x="330" y="130" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Carga Desconectada con brecha visible -->
+                            <line class="wire-open" x1="370" y1="55" x2="430" y2="55" />
+                            <line class="wire-open" x1="430" y1="55" x2="430" y2="65" />
+                            <rect x="416" y="65" width="28" height="35" class="load-resistor" />
+                            <text x="460" y="87" text-anchor="start" font-weight="bold" fill="var(--info-color)" font-size="13">Rₗ (Separada)</text>
+                            <line class="wire-open" x1="430" y1="100" x2="430" y2="105" />
+                            <line class="wire-open" x1="430" y1="105" x2="370" y2="105" />
+                            <text x="350" y="85" text-anchor="middle" font-size="16" fill="var(--warning-color)">✂️</text>
+                        </svg>
+                        <div class="circuit-caption">Paso 0: La carga Rₗ se retira completamente. Todo el cálculo de Thévenin se realiza en vacío entre A y B.</div>
+                    </div>
+                    <div class="box-callout box-warning">
+                        <span class="box-icon">⚠️</span>
+                        <div class="box-content">
+                            <span class="box-title">¡Regla de Oro N° 1 de Taller!</span>
+                            <strong>NUNCA</strong> calcules R<sub>th</sub> ni V<sub>th</sub> con R<sub>L</sub> conectada. La carga solo se vuelve a conectar en el paso final sobre el circuito equivalente simple.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 1 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">1</span>
+                        <span class="step-title-text">Paso 1: Calcular la Resistencia de Thévenin (R<sub>th</sub>)</span>
+                    </div>
+                    <p>
+                        Para calcular la resistencia interna equivalente que presenta la red activa vista desde los terminales A y B, se deben <strong>desactivar (pasivar) todas las fuentes de tensión independientes</strong> del circuito:
+                    </p>
+                    <ul>
+                        <li>
+                            <strong>Fuente de Tensión Independiente:</strong> Se reemplaza por un <strong>CORTOCIRCUITO</strong> (un cable de resistencia cero, <code>0 V</code>).
+                        </li>
+                    </ul>
+
+                    <div class="circuit-container" style="max-width: 640px; margin: 1rem auto;">
+                        <svg class="circuit-svg" viewBox="0 0 620 170" role="img" aria-label="Paso 1: Fuentes de tensión pasivadas en cortocircuito">
+                            <rect x="25" y="25" width="230" height="120" rx="12" fill="var(--secondary-color)" stroke="var(--border-color)" stroke-width="2" />
+                            <text x="140" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--text-light)">RED PASIVADA</text>
+                            
+                            <!-- Indicador de cortocircuito -->
+                            <line class="wire-short" x1="60" y1="65" x2="60" y2="115" />
+                            <text x="60" y="135" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--success-color)">Corto (0 V)</text>
+                            
+                            <rect x="115" y="75" width="50" height="24" class="resistor-box" />
+                            <text x="140" y="68" text-anchor="middle" font-size="12" class="component-label">R</text>
+
+                            <line class="wire" x1="255" y1="60" x2="340" y2="60" />
+                            <circle cx="340" cy="60" r="6" class="terminal-dot" />
+                            <text x="340" y="45" text-anchor="middle" class="terminal-label">A</text>
+
+                            <line class="wire" x1="255" y1="110" x2="340" y2="110" />
+                            <circle cx="340" cy="110" r="6" class="terminal-dot" />
+                            <text x="340" y="132" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Puntas de prueba del Óhmetro -->
+                            <line class="probe-red" x1="340" y1="60" x2="420" y2="60" />
+                            <line class="probe-red" x1="420" y1="60" x2="420" y2="85" />
+                            <line class="probe-black" x1="340" y1="110" x2="420" y2="110" />
+                            <line class="probe-black" x1="420" y1="110" x2="420" y2="85" />
+
+                            <!-- Óhmetro en bornes -->
+                            <rect x="420" y="45" width="170" height="80" rx="10" fill="var(--card-bg)" stroke="var(--success-color)" stroke-width="2.5" />
+                            <circle cx="445" cy="85" r="18" fill="var(--secondary-color)" stroke="var(--success-color)" stroke-width="2" />
+                            <text x="445" y="92" text-anchor="middle" font-weight="bold" font-size="18" fill="var(--success-color)">Ω</text>
+                            <text x="525" y="75" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--text-color)">ÓHMETRO</text>
+                            <text x="525" y="100" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--success-color)">Rₜₕ = R_AB</text>
+                        </svg>
+                        <div class="circuit-caption">Paso 1: Fuentes de tensión pasivadas mediante cortocircuito ideal. Se evalúa la resistencia equivalente vista desde los bornes A-B hacia la red interna.</div>
+                    </div>
+
+                    <div class="box-callout box-info">
+                        <span class="box-icon">❓</span>
+                        <div class="box-content">
+                            <span class="box-title">¿Por qué la fuente de tensión se hace un cortocircuito?</span>
+                            Una fuente ideal de tensión mantiene una diferencia de potencial fija entre sus bornes sin importar la corriente. Si la "apagamos", su diferencia de potencial pasa a ser <strong>cero voltios (0 V)</strong>. Por definición, dos puntos que tienen entre sí una diferencia de potencial de 0 V están al mismo potencial, exactamente igual que si estuvieran unidos por un cable conductor ideal.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 2 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">2</span>
+                        <span class="step-title-text">Paso 2: Calcular la Tensión de Thévenin (V<sub>th</sub>)</span>
+                    </div>
+                    <p>
+                        Se restablecen todas las fuentes de tensión a sus valores nominales originales, <strong>manteniendo los bornes A y B en condición de circuito abierto (sin la carga R<sub>L</sub>)</strong>.
+                    </p>
+                    <p>
+                        Se determina analíticamente la diferencia de potencial a circuito abierto entre los terminales: <code>V<sub>th</sub> = V<sub>AB0</sub> = V<sub>A</sub> - V<sub>B</sub></code>.
+                    </p>
+
+                    <div class="circuit-container" style="max-width: 640px; margin: 1rem auto;">
+                        <svg class="circuit-svg" viewBox="0 0 620 170" role="img" aria-label="Paso 2: Medición de tensión a circuito abierto Vth">
+                            <rect x="25" y="25" width="230" height="120" rx="12" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2" />
+                            <text x="140" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="var(--primary-color)">RED ENERGIZADA EN VACÍO</text>
+                            
+                            <!-- Fuente activa -->
+                            <circle cx="65" cy="85" r="18" class="source-circle" />
+                            <text x="65" y="80" text-anchor="middle" class="source-symbol" font-size="14">+</text>
+                            <text x="65" y="95" text-anchor="middle" class="source-symbol" font-size="14">−</text>
+                            <text x="65" y="125" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--primary-color)">E (Activa)</text>
+                            
+                            <rect x="130" y="73" width="50" height="24" class="resistor-box" />
+
+                            <line class="wire" x1="255" y1="60" x2="340" y2="60" />
+                            <circle cx="340" cy="60" r="6" class="terminal-dot" />
+                            <text x="340" y="45" text-anchor="middle" class="terminal-label">A (+)</text>
+
+                            <line class="wire" x1="255" y1="110" x2="340" y2="110" />
+                            <circle cx="340" cy="110" r="6" class="terminal-dot" />
+                            <text x="340" y="132" text-anchor="middle" class="terminal-label">B (−)</text>
+
+                            <!-- Puntas de prueba del Voltímetro -->
+                            <line class="probe-red" x1="340" y1="60" x2="420" y2="60" />
+                            <line class="probe-red" x1="420" y1="60" x2="420" y2="85" />
+                            <line class="probe-black" x1="340" y1="110" x2="420" y2="110" />
+                            <line class="probe-black" x1="420" y1="110" x2="420" y2="85" />
+
+                            <!-- Voltímetro en bornes abiertos -->
+                            <rect x="420" y="45" width="170" height="80" rx="10" fill="var(--card-bg)" stroke="var(--info-color)" stroke-width="2.5" />
+                            <circle cx="445" cy="85" r="18" fill="var(--secondary-color)" stroke="var(--info-color)" stroke-width="2" />
+                            <text x="445" y="92" text-anchor="middle" font-weight="bold" font-size="18" fill="var(--info-color)">V</text>
+                            <text x="525" y="75" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--text-color)">VOLTÍMETRO</text>
+                            <text x="525" y="100" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--info-color)">Vₜₕ = V_AB0</text>
+                        </svg>
+                        <div class="circuit-caption">Paso 2: Con fuentes activas pero carga retirada (circuito abierto), hallamos la tensión entre A y B con voltímetro ideal (I=0 A).</div>
+                    </div>
+
+                    <div class="box-callout box-tip">
+                        <span class="box-icon">⚡</span>
+                        <div class="box-content">
+                            <span class="box-title">Propiedad Fundamental del Circuito Abierto:</span>
+                            Al encontrarse los terminales A y B abiertos, <strong>la intensidad de corriente hacia el exterior es estrictamente nula (I = 0 A)</strong>. Por consiguiente:
+                            <br>• Todo resistor conectado en serie directa con un borne abierto no conduce corriente (<code>I = 0 A</code>).
+                            <br>• En virtud de la Ley de Ohm, su caída de tensión es nula: <code>V = I · R = 0 · R = 0 V</code>.
+                            <br>• El potencial eléctrico del terminal coincide exactamente con el potencial del nodo interno al cual está vinculado.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 3 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">3</span>
+                        <span class="step-title-text">Paso 3: Armar el Circuito Equivalente y Reconectar R<sub>L</sub></span>
+                    </div>
+                    <p>
+                        Se sintetiza el circuito equivalente compuesto por la fuente de tensión <code>V<sub>th</sub></code> en serie con la resistencia interna <code>R<sub>th</sub></code>, acoplando entre los terminales A y B la resistencia de carga <code>R<sub>L</sub></code> desacoplada en el Paso 0.
+                    </p>
+                    <p>
+                        Las magnitudes eléctricas de operación (I<sub>L</sub>, V<sub>L</sub>, P<sub>L</sub>) se calculan mediante las ecuaciones elementales del circuito serie analizadas en la Sección 2.
+                    </p>
+                </div>
+            </section>
+
+            <!-- MEDICIÓN EXPERIMENTAL EN EL TALLER / LABORATORIO -->
+            <section id="laboratorio">
+                <h2>🛠️ 4. Metodología Experimental y Ensayos de Laboratorio</h2>
+                <p>
+                    En el ámbito de ensayos experimentales y control de calidad, la caracterización empírica de una red activa o circuito encapsulado (caja negra) para obtener sus parámetros equivalentes <code>V<sub>th</sub></code> y <code>R<sub>th</sub></code> se efectúa mediante instrumental estándar de banco (voltímetro, amperímetro y cargas patrón calibradas).
+                </p>
+
+                <div class="box-callout box-warning">
+                    <span class="box-icon">🛑</span>
+                    <div class="box-content">
+                        <span class="box-title">Norma Crítica de Seguridad Instrumental:</span>
+                        <strong>Nunca debe conectarse un multímetro en función óhmetro sobre una red energizada.</strong> El óhmetro inyecta una corriente de prueba desde su batería interna; la presencia de potenciales externos destruye los circuitos de muestreo del instrumento o funde su fusible de protección.
+                    </div>
+                </div>
+
+                <h3>Los 2 Métodos Experimentales de Banco</h3>
+                <div class="sim-grid">
+                    <div class="step-block" style="margin: 0;">
+                        <h4 style="color: var(--primary-color); margin-top: 0;">Método A: Ensayo por Semi-Tensión (Método del Medio Voltaje)</h4>
+                        <ol>
+                            <li><strong>Medición de V<sub>th</sub> a circuito abierto:</strong> Se conecta el voltímetro de CC entre los terminales A y B en ausencia de carga. La lectura registrada corresponde a la tensión equivalente: <code>V<sub>vacío</sub> = V<sub>th</sub></code>.</li>
+                            <li><strong>Acoplamiento de carga resistiva variable:</strong> Se conecta una década de resistencias calibrada o reóstato entre los bornes A y B con el voltímetro monitoreando en paralelo.</li>
+                            <li><strong>Ajuste de tensión al 50%:</strong> Se varía el valor óhmico de la carga hasta que la tensión registrada descienda con exactitud a la mitad del valor en vacío: <code>V<sub>L</sub> = V<sub>th</sub> / 2</code>.</li>
+                            <li><strong>Determinación de R<sub>th</sub>:</strong> Se desacopla el reóstato sin alterar su reglaje y se mide su resistencia óhmica mediante un puente u óhmetro de precisión. Dicho valor resulta idéntico a <code>R<sub>th</sub></code>: <code>R<sub>ajuste</sub> = R<sub>th</sub></code>.</li>
+                        </ol>
+
+                        <!-- SVG Método del Medio Voltaje -->
+                        <div class="circuit-container" style="margin: 0.8rem 0; padding: 1rem 0.5rem;">
+                            <svg class="circuit-svg" viewBox="0 0 540 180" role="img" aria-label="Método del Medio Voltaje en el banco de ensayo">
+                                <!-- Caja bajo ensayo -->
+                                <rect x="20" y="30" width="150" height="120" rx="10" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2" />
+                                <text x="95" y="80" text-anchor="middle" font-weight="bold" fill="var(--primary-color)" font-size="13">Circuito Real</text>
+                                <text x="95" y="102" text-anchor="middle" font-size="11" fill="var(--text-light)">(Vₜₕ , Rₜₕ)</text>
+
+                                <!-- Bornes A y B -->
+                                <line class="wire" x1="170" y1="55" x2="230" y2="55" />
+                                <circle cx="230" cy="55" r="6" class="terminal-dot" />
+                                <text x="230" y="40" text-anchor="middle" class="terminal-label">A</text>
+
+                                <line class="wire" x1="170" y1="125" x2="230" y2="125" />
+                                <circle cx="230" cy="125" r="6" class="terminal-dot" />
+                                <text x="230" y="148" text-anchor="middle" class="terminal-label">B</text>
+
+                                <!-- Voltímetro en paralelo -->
+                                <line class="probe-red" x1="230" y1="55" x2="310" y2="55" />
+                                <circle cx="310" cy="55" r="4" fill="#ef5350" />
+                                <line class="probe-red" x1="310" y1="55" x2="350" y2="55" />
+                                
+                                <line class="probe-black" x1="230" y1="125" x2="310" y2="125" />
+                                <circle cx="310" cy="125" r="4" fill="#78909c" />
+                                <line class="probe-black" x1="310" y1="125" x2="350" y2="125" />
+
+                                <rect x="350" y="35" width="165" height="42" rx="8" fill="var(--card-bg)" stroke="var(--info-color)" stroke-width="2" />
+                                <text x="432" y="62" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--info-color)">Vₗ = Vₜₕ / 2</text>
+
+                                <!-- Reóstato / Década Variable RL -->
+                                <line class="wire" x1="310" y1="55" x2="310" y2="78" />
+                                <rect x="296" y="78" width="28" height="50" class="load-resistor" />
+                                <line class="wire-highlight" x1="280" y1="122" x2="340" y2="84" stroke-width="2" />
+                                <polygon points="340,82 334,89 342,91" fill="var(--primary-color)" />
+                                <line class="wire" x1="310" y1="128" x2="310" y2="125" />
+
+                                <rect x="350" y="100" width="165" height="42" rx="8" fill="var(--card-bg)" stroke="var(--success-color)" stroke-width="2" />
+                                <text x="432" y="127" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--success-color)">Rₗ_ajuste = Rₜₕ</text>
+                            </svg>
+                            <div class="circuit-caption">Ensayo de semi-tensión: cuando Vₗ = Vₜₕ / 2, la condición de divisor serie impone Rₗ = Rₜₕ.</div>
+                        </div>
+
+                        <div class="calc-math" style="font-size: 0.95rem;">
+                            Justificación: V<sub>L</sub> = V<sub>th</sub> · [R<sub>L</sub> / (R<sub>th</sub> + R<sub>L</sub>)] = V<sub>th</sub> / 2  ⟹  R<sub>L</sub> = R<sub>th</sub>
+                        </div>
+                    </div>
+
+                    <div class="step-block" style="margin: 0;">
+                        <h4 style="color: var(--primary-color); margin-top: 0;">Método B: Ensayo de Circuito Abierto y Cortocircuito</h4>
+                        <ol>
+                            <li><strong>Medición de tensión a circuito abierto (V<sub>th</sub>):</strong> Se registra el potencial en bornes A y B mediante voltímetro de alta impedancia (<code>V<sub>abierto</sub> = V<sub>th</sub></code>).</li>
+                            <li><strong>Medición de corriente de cortocircuito (I<sub>cc</sub>):</strong> Se acopla de manera controlada un amperímetro de CC entre A y B (verificando previamente que la corriente prevista no exceda la potencia nominal de los resistores ni el límite del instrumento).</li>
+                            <li><strong>Cálculo de R<sub>th</sub>:</strong>
+                                <div class="calc-math" style="font-size: 0.95rem;">
+                                    R<sub>th</sub> = V<sub>th</sub> / I<sub>cc</sub>
+                                </div>
+                            </li>
+                        </ol>
+
+                        <!-- SVG Ensayo Vacío y Corto -->
+                        <div class="circuit-container" style="margin: 0.8rem 0; padding: 1rem 0.5rem;">
+                            <svg class="circuit-svg" viewBox="0 0 540 160" role="img" aria-label="Ensayo de vacío y cortocircuito en laboratorio">
+                                <!-- Ensayo 1: Vacío -->
+                                <g transform="translate(10, 10)">
+                                    <rect x="0" y="15" width="95" height="95" rx="8" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="1.8" />
+                                    <text x="47" y="65" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--primary-color)">Circuito</text>
+                                    <line class="wire" x1="95" y1="40" x2="135" y2="40" />
+                                    <circle cx="135" cy="40" r="5" class="terminal-dot" />
+                                    <text x="135" y="28" text-anchor="middle" class="terminal-label" font-size="13">A</text>
+                                    <line class="wire" x1="95" y1="85" x2="135" y2="85" />
+                                    <circle cx="135" cy="85" r="5" class="terminal-dot" />
+                                    <text x="135" y="105" text-anchor="middle" class="terminal-label" font-size="13">B</text>
+                                    <!-- Voltímetro -->
+                                    <line class="probe-red" x1="135" y1="40" x2="180" y2="40" />
+                                    <line class="probe-red" x1="180" y1="40" x2="180" y2="48" />
+                                    <circle cx="180" cy="62" r="15" class="meter-circle" />
+                                    <text x="180" y="68" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--success-color)">V</text>
+                                    <line class="probe-black" x1="135" y1="85" x2="180" y2="85" />
+                                    <line class="probe-black" x1="180" y1="85" x2="180" y2="77" />
+                                    <text x="180" y="115" text-anchor="middle" font-weight="bold" font-size="11" fill="var(--success-color)">1. V_vacío = Vₜₕ</text>
+                                </g>
+
+                                <!-- Separador -->
+                                <line x1="265" y1="15" x2="265" y2="135" stroke="var(--border-color)" stroke-width="1.5" stroke-dasharray="4 4" />
+
+                                <!-- Ensayo 2: Cortocircuito con Amperímetro -->
+                                <g transform="translate(285, 10)">
+                                    <rect x="0" y="15" width="95" height="95" rx="8" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="1.8" />
+                                    <text x="47" y="65" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--primary-color)">Circuito</text>
+                                    <line class="wire" x1="95" y1="40" x2="135" y2="40" />
+                                    <circle cx="135" cy="40" r="5" class="terminal-dot" />
+                                    <text x="135" y="28" text-anchor="middle" class="terminal-label" font-size="13">A</text>
+                                    <line class="wire" x1="95" y1="85" x2="135" y2="85" />
+                                    <circle cx="135" cy="85" r="5" class="terminal-dot" />
+                                    <text x="135" y="105" text-anchor="middle" class="terminal-label" font-size="13">B</text>
+                                    <!-- Amperímetro -->
+                                    <line class="wire-short" x1="135" y1="40" x2="180" y2="40" />
+                                    <line class="wire-short" x1="180" y1="40" x2="180" y2="48" />
+                                    <circle cx="180" cy="62" r="15" class="meter-circle" stroke="var(--warning-color)" />
+                                    <text x="180" y="68" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--warning-color)">A</text>
+                                    <line class="wire-short" x1="135" y1="85" x2="180" y2="85" />
+                                    <line class="wire-short" x1="180" y1="85" x2="180" y2="77" />
+                                    <text x="180" y="115" text-anchor="middle" font-weight="bold" font-size="11" fill="var(--warning-color)">2. Medir I_cc</text>
+                                </g>
+                            </svg>
+                            <div class="circuit-caption">Con Vₜₕ e I_cc medidos, se obtiene Rₜₕ por Ohm: Rₜₕ = Vₜₕ / I_cc.</div>
+                        </div>
+                </div>
+            </section>
+
+            <!-- CASOS DE APLICACIÓN EN LA VIDA REAL -->
+            <section id="aplicaciones">
+                <h2>🏭 5. Casos de Aplicación en la Vida Real y en la Industria</h2>
+                <p>
+                    Thévenin no es solo teoría de pizarrón: es la herramienta conceptual que usan técnicos e ingenieros para modelar sistemas reales:
+                </p>
+
+                <div class="sim-grid">
+                    <div class="box-callout box-info" style="margin: 0;">
+                        <span class="box-icon">🚗</span>
+                        <div class="box-content">
+                            <span class="box-title">1. Modelado de Acumuladores Químicos Reales (Resistencia Interna)</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                ¿Por qué durante la conexión de una carga de alta potencia (como un motor de arranque) la tensión de bornes en un acumulador experimenta una caída notable?
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                Una batería de plomo-ácido o ion de litio se representa con precisión mediante su equivalente Thévenin: una fuerza electromotriz interna <code>V<sub>th</sub> = 12,6 V</code> en serie con su resistencia interna parásita <code>R<sub>th</sub> = 0,04 Ω</code>. Con consumos moderados (<code>I ≈ 4 A</code>), la caída interna es despreciable (<code>0,16 V</code>). Sin embargo, bajo una demanda transitoria elevada de <code>120 A</code>, la caída interna alcanza <code>120 A · 0,04 Ω = 4,8 V</code>, reduciendo la tensión disponible en bornes a <code>7,8 V</code>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="box-callout box-tip" style="margin: 0;">
+                        <span class="box-icon">⚡</span>
+                        <div class="box-content">
+                            <span class="box-title">2. Teorema de Máxima Transferencia de Potencia y Rendimiento</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                ¿Qué valor debe tener la resistencia de carga R<sub>L</sub> para absorber la mayor potencia posible de una fuente o circuito?
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                Derivando matemáticamente la fórmula de potencia respecto a R<sub>L</sub>, se demuestra que la potencia máxima en la carga se alcanza <strong>cuando R<sub>L</sub> es exactamente igual a R<sub>th</sub></strong>:
+                                <br><code>R<sub>L</sub> = R<sub>th</sub>  ⟹  P<sub>L,max</sub> = V<sub>th</sub><sup>2</sup> / (4 · R<sub>th</sub>)</code>.
+                                <br><strong>Rendimiento energético:</strong> En el régimen de máxima transferencia de potencia, el rendimiento de la transmisión es exactamente del <strong>50%</strong> (la mitad de la potencia total generada se disipa en la propia resistencia interna R<sub>th</sub>). Por esta razón, el acoplamiento conjugado se aplica en sistemas de telecomunicaciones e instrumentación, mientras que en sistemas de distribución de potencia se diseña para una R<sub>th</sub> mínima que maximice el rendimiento.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sim-grid" style="margin-top: 1rem;">
+                    <div class="box-callout box-warning" style="margin: 0;">
+                        <span class="box-icon">⚖️</span>
+                        <div class="box-content">
+                            <span class="box-title">3. Sensores Industriales en Puente de Wheatstone</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                Las celdas de carga en balanzas electrónicas de camiones y tolvas, así como los sensores de temperatura industriales (PT100) y galgas extensométricas, utilizan puentes de Wheatstone.
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                Para determinar la tensión diferencial entregada al amplificador de instrumentación o PLC ante variaciones resistivas infinitesimales, el modelo analítico estándar empleado es el equivalente Thévenin del puente desbalanceado.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="box-callout box-info" style="margin: 0;">
+                        <span class="box-icon">📟</span>
+                        <div class="box-content">
+                            <span class="box-title">4. Efecto de Carga en Instrumentación de Medida</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                ¿Por qué la inserción de un voltímetro analógico o de resistencia interna finita modifica la diferencia de potencial real existente en un circuito?
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                Porque el instrumento de medición actúa como un resistor de carga <code>R<sub>L</sub> = R<sub>V</sub></code> acoplado a los terminales del equivalente Thévenin de la red. Si <code>R<sub>th</sub></code> es de magnitud comparable a la impedancia del instrumento, se produce un divisor de tensión que atenúa el valor de tensión medido respecto a la tensión en vacío real.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EJEMPLOS RESUELTOS PASO A PASO CON ESQUEMAS VISUALES COMPLETOS -->
+            <section id="ejemplos">
+                <h2>📐 6. Ejemplos Prácticos Resueltos Paso a Paso</h2>
+                <p>
+                    Analicemos tres casos clásicos de dificultad gradual. Cada ejemplo cuenta con esquemas gráficos detallados para cada paso del procedimiento.
+                </p>
+
+                <!-- Pestañas de Ejemplos -->
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="switchExample('ej1', this)">Ejemplo 1: Divisor con Rama Serie</button>
+                    <button class="tab-btn" onclick="switchExample('ej2', this)">Ejemplo 2: Dos Fuentes de Tensión</button>
+                    <button class="tab-btn" onclick="switchExample('ej3', this)">Ejemplo 3: Puente de Wheatstone</button>
+                </div>
+
+                <!-- EJEMPLO 1 -->
+                <div id="ej1" class="tab-panel active">
+                    <h3>Ejemplo 1: Circuito con Fuente de CC, Divisor y Rama Serie</h3>
+                    <p>
+                        <strong>Enunciado:</strong> Dado el circuito alimentado por una fuente de continua de <code>E = 24 V</code>, con resistencias <code>R<sub>1</sub> = 6 Ω</code>, <code>R<sub>2</sub> = 12 Ω</code> y <code>R<sub>3</sub> = 4 Ω</code>, calcular la corriente, tensión y potencia en una carga <code>R<sub>L</sub> = 8 Ω</code> conectada entre los terminales A y B.
+                    </p>
+
+                    <!-- SVG Ejemplo 1: Circuito Original -->
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 700 240" role="img" aria-label="Circuito original del Ejemplo 1">
+                            <!-- Fuente E = 24V -->
+                            <circle cx="90" cy="120" r="26" class="source-circle" />
+                            <text x="90" y="111" text-anchor="middle" class="source-symbol" font-size="20">+</text>
+                            <text x="90" y="135" text-anchor="middle" class="source-symbol" font-size="20">−</text>
+                            <text x="35" y="125" text-anchor="middle" class="component-label" font-size="16">24 V</text>
+
+                            <!-- Cable superior hacia R1 -->
+                            <line class="wire" x1="90" y1="94" x2="90" y2="60" />
+                            <line class="wire" x1="90" y1="60" x2="160" y2="60" />
+
+                            <!-- R1 = 6 ohm -->
+                            <rect x="160" y="46" width="60" height="28" class="resistor-box" />
+                            <text x="190" y="36" text-anchor="middle" class="component-label">R₁ = 6 Ω</text>
+
+                            <!-- Cable hacia Nodo Central C -->
+                            <line class="wire" x1="220" y1="60" x2="310" y2="60" />
+                            <circle cx="310" cy="60" r="5" fill="var(--text-color)" />
+                            <text x="310" y="42" text-anchor="middle" font-weight="bold" font-size="15" fill="var(--primary-color)">C</text>
+
+                            <!-- Rama R2 = 12 ohm (vertical) -->
+                            <line class="wire" x1="310" y1="60" x2="310" y2="85" />
+                            <rect x="296" y="85" width="28" height="60" class="resistor-box" />
+                            <text x="245" y="120" text-anchor="middle" class="component-label">R₂ = 12 Ω</text>
+                            <line class="wire" x1="310" y1="145" x2="310" y2="180" />
+
+                            <!-- Rama R3 = 4 ohm hacia terminal A -->
+                            <line class="wire" x1="310" y1="60" x2="385" y2="60" />
+                            <rect x="385" y="46" width="60" height="28" class="resistor-box" />
+                            <text x="415" y="36" text-anchor="middle" class="component-label">R₃ = 4 Ω</text>
+                            <line class="wire" x1="445" y1="60" x2="530" y2="60" />
+                            <circle cx="530" cy="60" r="7" class="terminal-dot" />
+                            <text x="530" y="40" text-anchor="middle" class="terminal-label">A</text>
+
+                            <!-- Carga RL = 8 ohm -->
+                            <line class="wire" x1="530" y1="60" x2="610" y2="60" />
+                            <line class="wire" x1="610" y1="60" x2="610" y2="85" />
+                            <rect x="596" y="85" width="28" height="60" class="load-resistor" />
+                            <text x="655" y="120" text-anchor="start" class="component-label" fill="var(--info-color)">Rₗ = 8 Ω</text>
+                            <line class="wire" x1="610" y1="145" x2="610" y2="180" />
+                            <line class="wire" x1="610" y1="180" x2="530" y2="180" />
+
+                            <!-- Terminal B -->
+                            <circle cx="530" cy="180" r="7" class="terminal-dot" />
+                            <text x="530" y="208" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Retorno de masa inferior -->
+                            <line class="wire" x1="530" y1="180" x2="90" y2="180" />
+                            <circle cx="310" cy="180" r="5" fill="var(--text-color)" />
+                            <line class="wire" x1="90" y1="180" x2="90" y2="146" />
+                        </svg>
+                        <div class="circuit-caption">Figura 3: Circuito del Ejemplo 1 antes de aplicar Thévenin.</div>
+                    </div>
+
+                    <!-- PASO 1: CÁLCULO DE RTH -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">1</span>
+                            Paso 1: Cálculo de R<sub>th</sub> (Pasivando la fuente de 24 V)
+                        </div>
+                        <p>
+                            1. Desconectamos la carga <code>R<sub>L</sub> = 8 Ω</code> (bornes A y B al aire).<br>
+                            2. Reemplazamos la fuente de <code>24 V</code> por un <strong>cortocircuito</strong> (cable cerrado sin resistencia).<br>
+                            3. Miramos desde los bornes A y B hacia adentro:
+                        </p>
+                        
+                        <!-- SVG Paso 1 Ejemplo 1 -->
+                        <div class="circuit-container" style="max-width: 660px; margin: 1rem auto;">
+                            <svg class="circuit-svg" viewBox="0 0 660 210" role="img" aria-label="Ejemplo 1 Paso 1: Cálculo de Rth">
+                                <!-- Cortocircuito en lugar de fuente -->
+                                <line class="wire-short" x1="75" y1="55" x2="75" y2="155" />
+                                <text x="75" y="180" text-anchor="middle" font-weight="bold" fill="var(--success-color)" font-size="12">Corto (0 V)</text>
+
+                                <line class="wire" x1="75" y1="55" x2="145" y2="55" />
+                                <rect x="145" y="41" width="55" height="28" class="resistor-box" />
+                                <text x="172" y="32" text-anchor="middle" class="component-label">R₁=6Ω</text>
+                                <line class="wire" x1="200" y1="55" x2="275" y2="55" />
+
+                                <!-- Nodo C -->
+                                <circle cx="275" cy="55" r="5" fill="var(--text-color)" />
+                                <text x="275" y="38" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--primary-color)">C</text>
+
+                                <!-- R2 vertical -->
+                                <line class="wire" x1="275" y1="55" x2="275" y2="75" />
+                                <rect x="261" y="75" width="28" height="50" class="resistor-box" />
+                                <text x="225" y="105" text-anchor="middle" class="component-label">R₂=12Ω</text>
+                                <line class="wire" x1="275" y1="125" x2="275" y2="155" />
+
+                                <!-- R3 hacia terminal A -->
+                                <line class="wire" x1="275" y1="55" x2="340" y2="55" />
+                                <rect x="340" y="41" width="55" height="28" class="resistor-box" />
+                                <text x="367" y="32" text-anchor="middle" class="component-label">R₃=4Ω</text>
+                                <line class="wire" x1="395" y1="55" x2="465" y2="55" />
+                                <circle cx="465" cy="55" r="7" class="terminal-dot" />
+                                <text x="465" y="38" text-anchor="middle" class="terminal-label">A</text>
+
+                                <!-- Retorno inferior a masa -->
+                                <line class="wire" x1="75" y1="155" x2="465" y2="155" />
+                                <circle cx="275" cy="155" r="5" fill="var(--text-color)" />
+                                <circle cx="465" cy="155" r="7" class="terminal-dot" />
+                                <text x="465" y="180" text-anchor="middle" class="terminal-label">B</text>
+
+                                <!-- Puntas y Óhmetro -->
+                                <line class="probe-red" x1="465" y1="55" x2="520" y2="55" />
+                                <line class="probe-red" x1="520" y1="55" x2="520" y2="80" />
+                                <line class="probe-black" x1="465" y1="155" x2="520" y2="155" />
+                                <line class="probe-black" x1="520" y1="155" x2="520" y2="130" />
+
+                                <rect x="495" y="80" width="145" height="50" rx="8" fill="var(--card-bg)" stroke="var(--success-color)" stroke-width="2.5" />
+                                <circle cx="525" cy="105" r="16" fill="var(--secondary-color)" stroke="var(--success-color)" stroke-width="2" />
+                                <text x="525" y="111" text-anchor="middle" font-weight="bold" font-size="16" fill="var(--success-color)">Ω</text>
+                                <text x="585" y="111" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--success-color)">Rₜₕ = 8 Ω</text>
+                            </svg>
+                            <div class="circuit-caption">Figura 3b: Fuente de 24 V en cortocircuito. R₁ y R₂ en paralelo (4 Ω), en serie con R₃ (4 Ω) ⟹ Rₜₕ = 8 Ω.</div>
+                        </div>
+
+                        <ul>
+                            <li>
+                                Las resistencias <code>R<sub>1</sub> = 6 Ω</code> y <code>R<sub>2</sub> = 12 Ω</code> quedan en <strong>paralelo</strong> entre sí, unidas por la masa y el nodo central C:
+                                <div class="calc-math">R<sub>12</sub> = (R<sub>1</sub> · R<sub>2</sub>) / (R<sub>1</sub> + R<sub>2</sub>) = (6 · 12) / (6 + 12) = 72 / 18 = 4,0 Ω</div>
+                            </li>
+                            <li>
+                                La resistencia <code>R<sub>3</sub> = 4 Ω</code> queda en <strong>serie</strong> con el paralelo anterior:
+                                <div class="calc-math">R<sub>th</sub> = R<sub>3</sub> + R<sub>12</sub> = 4 Ω + 4 Ω = <strong>8,0 Ω</strong></div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- PASO 2: CÁLCULO DE VTH -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">2</span>
+                            Paso 2: Cálculo de V<sub>th</sub> (Tensión a circuito abierto V<sub>AB</sub>)
+                        </div>
+                        <p>
+                            1. Reconectamos la fuente de <code>24 V</code>.<br>
+                            2. Como los terminales A y B están abiertos, la corriente que sale por el borne A es <strong>cero</strong> (<code>I<sub>R3</sub> = 0 A</code>).<br>
+                            3. Por lo tanto, la caída de tensión en R<sub>3</sub> es nula: <code>V<sub>R3</sub> = 0 A · 4 Ω = 0 V</code>.<br>
+                            4. Esto significa que el potencial del terminal A es idéntico al del nodo central C (<code>V<sub>A</sub> = V<sub>C</sub></code>). Como el terminal B está conectado a la masa (referencia 0 V), <code>V<sub>th</sub> = V<sub>C</sub></code>.<br>
+                            5. En la malla izquierda, <code>R<sub>1</sub></code> y <code>R<sub>2</sub></code> forman un <strong>divisor de tensión</strong> con la fuente de 24 V:
+                        </p>
+
+                        <!-- SVG Paso 2 Ejemplo 1 -->
+                        <div class="circuit-container" style="max-width: 680px; margin: 1rem auto;">
+                            <svg class="circuit-svg" viewBox="0 0 680 220" role="img" aria-label="Ejemplo 1 Paso 2: Cálculo de Vth">
+                                <!-- Fuente E = 24V -->
+                                <circle cx="75" cy="105" r="24" class="source-circle" />
+                                <text x="75" y="98" text-anchor="middle" class="source-symbol">+</text>
+                                <text x="75" y="118" text-anchor="middle" class="source-symbol">−</text>
+                                <text x="30" y="110" text-anchor="middle" class="component-label">24 V</text>
+
+                                <line class="wire" x1="75" y1="81" x2="75" y2="55" />
+                                <line class="wire" x1="75" y1="55" x2="145" y2="55" />
+                                <rect x="145" y="41" width="55" height="28" class="resistor-box" />
+                                <text x="172" y="32" text-anchor="middle" class="component-label">R₁=6Ω</text>
+                                <line class="wire" x1="200" y1="55" x2="275" y2="55" />
+
+                                <!-- Nodo C con indicación de 16V -->
+                                <circle cx="275" cy="55" r="5" fill="var(--text-color)" />
+                                <rect x="250" y="24" width="70" height="20" rx="4" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="1.2" />
+                                <text x="285" y="38" text-anchor="middle" font-weight="bold" fill="var(--primary-color)" font-size="12">V_C = 16 V</text>
+
+                                <!-- R2 = 12 ohm divisor -->
+                                <line class="wire" x1="275" y1="55" x2="275" y2="75" />
+                                <rect x="261" y="75" width="28" height="50" class="resistor-box" />
+                                <text x="225" y="105" text-anchor="middle" class="component-label">R₂=12Ω</text>
+                                <line class="wire" x1="275" y1="125" x2="275" y2="155" />
+
+                                <!-- Rama R3 abierta (I = 0) -->
+                                <line class="wire-open" x1="275" y1="55" x2="345" y2="55" />
+                                <rect x="345" y="41" width="55" height="28" class="resistor-box" stroke-dasharray="4 2" />
+                                <text x="372" y="32" text-anchor="middle" class="component-label" fill="var(--text-light)">R₃=4Ω</text>
+                                <text x="372" y="90" text-anchor="middle" font-weight="bold" fill="var(--warning-color)" font-size="11">I = 0 A  ⟹  ΔV = 0 V</text>
+                                <line class="wire-open" x1="400" y1="55" x2="470" y2="55" />
+                                <circle cx="470" cy="55" r="7" class="terminal-dot" />
+                                <text x="470" y="38" text-anchor="middle" class="terminal-label">A (+)</text>
+
+                                <!-- Masa inferior -->
+                                <line class="wire" x1="75" y1="129" x2="75" y2="155" />
+                                <line class="wire" x1="75" y1="155" x2="470" y2="155" />
+                                <circle cx="275" cy="155" r="5" fill="var(--text-color)" />
+                                <circle cx="470" cy="155" r="7" class="terminal-dot" />
+                                <text x="470" y="180" text-anchor="middle" class="terminal-label">B (−)</text>
+
+                                <!-- Puntas y Voltímetro -->
+                                <line class="probe-red" x1="470" y1="55" x2="525" y2="55" />
+                                <line class="probe-red" x1="525" y1="55" x2="525" y2="80" />
+                                <line class="probe-black" x1="470" y1="155" x2="525" y2="155" />
+                                <line class="probe-black" x1="525" y1="155" x2="525" y2="130" />
+
+                                <rect x="500" y="80" width="150" height="50" rx="8" fill="var(--card-bg)" stroke="var(--info-color)" stroke-width="2.5" />
+                                <circle cx="530" cy="105" r="16" fill="var(--secondary-color)" stroke="var(--info-color)" stroke-width="2" />
+                                <text x="530" y="111" text-anchor="middle" font-weight="bold" font-size="16" fill="var(--info-color)">V</text>
+                                <text x="595" y="111" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--info-color)">Vₜₕ = 16 V</text>
+                            </svg>
+                            <div class="circuit-caption">Figura 3c: Bornes A y B abiertos. Por R₃ no circula corriente (caída nula), por lo que Vₜₕ = V_C = 16 V.</div>
+                        </div>
+
+                        <div class="calc-math">
+                            V<sub>th</sub> = V<sub>R2</sub> = E · [R<sub>2</sub> / (R<sub>1</sub> + R<sub>2</sub>)] = 24 V · [12 Ω / (6 Ω + 12 Ω)] = 24 · (12 / 18) = <strong>16,0 V</strong>
+                        </div>
+                    </div>
+
+                    <!-- PASO 3: CIRCUITO EQUIVALENTE Y RESULTADOS -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">3</span>
+                            Paso 3: Conexión de R<sub>L</sub> = 8 Ω al Equivalente de Thévenin
+                        </div>
+                        <p>
+                            El circuito equivalente es una fuente <code>V<sub>th</sub> = 16 V</code> en serie con <code>R<sub>th</sub> = 8 Ω</code>. Conectamos ahora la carga <code>R<sub>L</sub> = 8 Ω</code>:
+                        </p>
+                        <div class="calc-math">
+                            I<sub>L</sub> = V<sub>th</sub> / (R<sub>th</sub> + R<sub>L</sub>) = 16 V / (8 Ω + 8 Ω) = 16 / 16 = <strong>1,00 A</strong>
+                        </div>
+                        <div class="calc-math">
+                            V<sub>L</sub> = I<sub>L</sub> · R<sub>L</sub> = 1,00 A · 8 Ω = <strong>8,00 V</strong>
+                        </div>
+                        <div class="calc-math">
+                            P<sub>L</sub> = I<sub>L</sub><sup>2</sup> · R<sub>L</sub> = (1,00 A)<sup>2</sup> · 8 Ω = <strong>8,00 W</strong>
+                        </div>
+                    </div>
+
+                    <div class="results-grid">
+                        <div class="result-box">
+                            <div class="result-label">Tensión Thévenin</div>
+                            <div class="result-value">16,0 V</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">Resistencia Thévenin</div>
+                            <div class="result-value">8,0 Ω</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">Corriente en Carga</div>
+                            <div class="result-value">1,00 A</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">Potencia en Carga</div>
+                            <div class="result-value">8,00 W</div>
+                        </div>
+                    </div>
+
+                    <!-- DEMOSTRACIÓN DE LA VENTAJA DE THÉVENIN -->
+                    <div class="box-callout box-tip">
+                        <span class="box-icon">🚀</span>
+                        <div class="box-content">
+                            <span class="box-title">Ventaja Operativa y Análisis Multicarga:</span>
+                            Si se requiere evaluar el desempeño del circuito ante diferentes receptores (por ejemplo, variando <code>R<sub>L</sub></code> a <code>2 Ω</code> y posteriormente a <code>24 Ω</code>), el equivalente de Thévenin evita tener que reformular las ecuaciones de la red completa:
+                            <br>• Con <code>R<sub>L</sub> = 2 Ω</code>: <code>I<sub>L</sub> = 16 / (8 + 2) = 1,60 A</code> | <code>V<sub>L</sub> = 3,2 V</code> | <code>P<sub>L</sub> = 5,12 W</code>
+                            <br>• Con <code>R<sub>L</sub> = 24 Ω</code>: <code>I<sub>L</sub> = 16 / (8 + 24) = 0,50 A</code> | <code>V<sub>L</sub> = 12,0 V</code> | <code>P<sub>L</sub> = 6,00 W</code>
+                            <br><em>Se observa que cuando <code>R<sub>L</sub> = R<sub>th</sub> = 8 Ω</code> la potencia disipada alcanza su valor de cresta (8,00 W), ratificando analíticamente el Teorema de Máxima Transferencia de Potencia.</em>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EJEMPLO 2 -->
+                <div id="ej2" class="tab-panel">
+                    <h3>Ejemplo 2: Circuito con Dos Fuentes Independientes de CC</h3>
+                    <p>
+                        <strong>Enunciado:</strong> En una red con dos ramas de alimentación de continua:
+                        <br>• Rama 1: Fuente <code>E<sub>1</sub> = 60 V</code> con positivo hacia arriba y resistencia <code>R<sub>1</sub> = 30 Ω</code>.
+                        <br>• Rama 2: Fuente <code>E<sub>2</sub> = 15 V</code> con positivo hacia arriba y resistencia <code>R<sub>2</sub> = 60 Ω</code>.
+                        <br>Ambas alimentan un punto común (terminal A) y la masa de retorno (terminal B). Entre A y B se conecta una carga <code>R<sub>L</sub> = 40 Ω</code>. Hallar el circuito equivalente de Thévenin y la potencia en la carga.
+                    </p>
+
+                    <!-- SVG Ejemplo 2: Circuito Original -->
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 700 240" role="img" aria-label="Circuito con dos fuentes independientes">
+                            <!-- Rama 1: E1 = 60V, R1 = 30 ohm -->
+                            <circle cx="100" cy="115" r="24" class="source-circle" />
+                            <text x="100" y="107" text-anchor="middle" class="source-symbol" font-size="18">+</text>
+                            <text x="100" y="127" text-anchor="middle" class="source-symbol" font-size="18">−</text>
+                            <text x="45" y="120" text-anchor="middle" class="component-label">E₁=60V</text>
+
+                            <line class="wire" x1="100" y1="91" x2="100" y2="60" />
+                            <line class="wire" x1="100" y1="60" x2="165" y2="60" />
+                            <rect x="165" y="46" width="60" height="28" class="resistor-box" />
+                            <text x="195" y="36" text-anchor="middle" class="component-label">R₁ = 30 Ω</text>
+                            <line class="wire" x1="225" y1="60" x2="350" y2="60" />
+
+                            <!-- Terminal A Central -->
+                            <circle cx="350" cy="60" r="7" class="terminal-dot" />
+                            <text x="350" y="40" text-anchor="middle" class="terminal-label">A</text>
+
+                            <!-- Carga Central RL = 40 ohm -->
+                            <line class="wire" x1="350" y1="60" x2="350" y2="85" />
+                            <rect x="336" y="85" width="28" height="60" class="load-resistor" />
+                            <text x="395" y="120" text-anchor="start" class="component-label" fill="var(--info-color)">Rₗ = 40 Ω</text>
+                            <line class="wire" x1="350" y1="145" x2="350" y2="175" />
+
+                            <!-- Terminal B Central -->
+                            <circle cx="350" cy="175" r="7" class="terminal-dot" />
+                            <text x="350" y="202" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Rama 2: R2 = 60 ohm, E2 = 15V -->
+                            <line class="wire" x1="350" y1="60" x2="475" y2="60" />
+                            <rect x="475" y="46" width="60" height="28" class="resistor-box" />
+                            <text x="505" y="36" text-anchor="middle" class="component-label">R₂ = 60 Ω</text>
+                            <line class="wire" x1="535" y1="60" x2="600" y2="60" />
+                            <line class="wire" x1="600" y1="60" x2="600" y2="91" />
+
+                            <circle cx="600" cy="115" r="24" class="source-circle" />
+                            <text x="600" y="107" text-anchor="middle" class="source-symbol" font-size="18">+</text>
+                            <text x="600" y="127" text-anchor="middle" class="source-symbol" font-size="18">−</text>
+                            <text x="655" y="120" text-anchor="middle" class="component-label">E₂=15V</text>
+                            <line class="wire" x1="600" y1="139" x2="600" y2="175" />
+
+                            <!-- Masa común inferior -->
+                            <line class="wire" x1="100" y1="139" x2="100" y2="175" />
+                            <line class="wire" x1="100" y1="175" x2="600" y2="175" />
+                        </svg>
+                        <div class="circuit-caption">Figura 4: Red con dos ramas de continua en paralelo alimentando la carga Rₗ.</div>
+                    </div>
+
+                    <!-- PASO 1: RTH -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">1</span>
+                            Paso 1: Cálculo de R<sub>th</sub> (Pasivando ambas fuentes de tensión)
+                        </div>
+                        <p>
+                            1. Desconectamos la carga <code>R<sub>L</sub> = 40 Ω</code>.<br>
+                            2. Reemplazamos la fuente E<sub>1</sub> por un cortocircuito (cable a masa).<br>
+                            3. Reemplazamos la fuente E<sub>2</sub> por un cortocircuito (cable a masa).<br>
+                            4. Mirando desde los terminales A y B, <code>R<sub>1</sub></code> y <code>R<sub>2</sub></code> están directamente en <strong>paralelo</strong> entre el borne A y la masa común B:
+                        </p>
+
+                        <!-- SVG Paso 1 Ejemplo 2 -->
+                        <div class="circuit-container" style="max-width: 600px; margin: 1rem auto;">
+                            <svg class="circuit-svg" viewBox="0 0 580 190" role="img" aria-label="Ejemplo 2 Paso 1: Cálculo de Rth">
+                                <!-- Cortocircuito rama 1 -->
+                                <line class="wire-short" x1="75" y1="50" x2="75" y2="140" />
+                                <text x="45" y="98" text-anchor="middle" font-weight="bold" fill="var(--success-color)" font-size="11">Corto</text>
+
+                                <line class="wire" x1="75" y1="50" x2="155" y2="50" />
+                                <rect x="155" y="36" width="60" height="28" class="resistor-box" />
+                                <text x="185" y="27" text-anchor="middle" class="component-label">R₁=30Ω</text>
+                                <line class="wire" x1="215" y1="50" x2="290" y2="50" />
+
+                                <!-- Terminal A -->
+                                <circle cx="290" cy="50" r="7" class="terminal-dot" />
+                                <text x="290" y="32" text-anchor="middle" class="terminal-label">A</text>
+
+                                <line class="wire" x1="290" y1="50" x2="365" y2="50" />
+                                <rect x="365" y="36" width="60" height="28" class="resistor-box" />
+                                <text x="395" y="27" text-anchor="middle" class="component-label">R₂=60Ω</text>
+                                <line class="wire" x1="425" y1="50" x2="505" y2="50" />
+
+                                <!-- Cortocircuito rama 2 -->
+                                <line class="wire-short" x1="505" y1="50" x2="505" y2="140" />
+                                <text x="535" y="98" text-anchor="middle" font-weight="bold" fill="var(--success-color)" font-size="11">Corto</text>
+
+                                <!-- Masa común y Terminal B -->
+                                <line class="wire" x1="75" y1="140" x2="505" y2="140" />
+                                <circle cx="290" cy="140" r="7" class="terminal-dot" />
+                                <text x="290" y="165" text-anchor="middle" class="terminal-label">B</text>
+
+                                <!-- Caja de cálculo central -->
+                                <rect x="175" y="80" width="230" height="34" rx="8" fill="var(--card-bg)" stroke="var(--success-color)" stroke-width="2" />
+                                <text x="290" y="102" text-anchor="middle" font-weight="bold" fill="var(--success-color)" font-size="13">Rₜₕ = 30 Ω || 60 Ω = 20 Ω</text>
+                            </svg>
+                            <div class="circuit-caption">Figura 4b: Con fuentes en cortocircuito, R₁ y R₂ se unen en paralelo directo entre A y B.</div>
+                        </div>
+
+                        <div class="calc-math">
+                            R<sub>th</sub> = R<sub>1</sub> || R<sub>2</sub> = (30 · 60) / (30 + 60) = 1800 / 90 = <strong>20,0 Ω</strong>
+                        </div>
+                    </div>
+
+                    <!-- PASO 2: VTH -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">2</span>
+                            Paso 2: Cálculo de V<sub>th</sub> (Tensión a circuito abierto V<sub>AB</sub>)
+                        </div>
+                        <p>
+                            Con <code>R<sub>L</sub></code> quitada, la corriente entre A y B es cero. El circuito queda formado por una <strong>única malla exterior cerrada</strong> que conecta E<sub>1</sub>, R<sub>1</sub>, R<sub>2</sub> y E<sub>2</sub>:
+                        </p>
+                        <p>
+                            Calculamos la corriente de esa malla exterior (asumiendo sentido horario):
+                        </p>
+                        <div class="calc-math">
+                            I<sub>malla</sub> = (E<sub>1</sub> - E<sub>2</sub>) / (R<sub>1</sub> + R<sub>2</sub>) = (60 V - 15 V) / (30 Ω + 60 Ω) = 45 V / 90 Ω = <strong>0,50 A</strong>
+                        </div>
+                        <p>
+                            Ahora calculamos el potencial del borne A respecto a masa (terminal B) recorriendo cualquiera de las dos ramas:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>Por la rama izquierda:</strong> 
+                                <div class="calc-math">V<sub>th</sub> = E<sub>1</sub> - (I<sub>malla</sub> · R<sub>1</sub>) = 60 V - (0,50 A · 30 Ω) = 60 V - 15 V = <strong>45,0 V</strong></div>
+                            </li>
+                            <li>
+                                <strong>Verificación por la rama derecha:</strong> 
+                                <div class="calc-math">V<sub>th</sub> = E<sub>2</sub> + (I<sub>malla</sub> · R<sub>2</sub>) = 15 V + (0,50 A · 60 Ω) = 15 V + 30 V = <strong>45,0 V</strong></div>
+                            </li>
+                        </ul>
+                        <p>¡Ambos caminos arrojan exactamente 45 V! La polaridad es terminal A positivo respecto a B.</p>
+                    </div>
+
+                    <!-- PASO 3: CÁLCULOS CON CARGA -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">3</span>
+                            Paso 3: Conexión de la Carga R<sub>L</sub> = 40 Ω
+                        </div>
+                        <div class="calc-math">
+                            I<sub>L</sub> = V<sub>th</sub> / (R<sub>th</sub> + R<sub>L</sub>) = 45 V / (20 Ω + 40 Ω) = 45 / 60 = <strong>0,75 A</strong>
+                        </div>
+                        <div class="calc-math">
+                            V<sub>L</sub> = I<sub>L</sub> · R<sub>L</sub> = 0,75 A · 40 Ω = <strong>30,0 V</strong>
+                        </div>
+                        <div class="calc-math">
+                            P<sub>L</sub> = I<sub>L</sub><sup>2</sup> · R<sub>L</sub> = (0,75 A)<sup>2</sup> · 40 Ω = 0,5625 · 40 = <strong>22,5 W</strong>
+                        </div>
+                    </div>
+
+                    <div class="results-grid">
+                        <div class="result-box">
+                            <div class="result-label">Tensión Thévenin</div>
+                            <div class="result-value">45,0 V</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">Resistencia Thévenin</div>
+                            <div class="result-value">20,0 Ω</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">Corriente I<sub>L</sub></div>
+                            <div class="result-value">0,75 A</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">Potencia P<sub>L</sub></div>
+                            <div class="result-value">22,5 W</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EJEMPLO 3 -->
+                <div id="ej3" class="tab-panel">
+                    <h3>Ejemplo 3: El Puente de Wheatstone Desequilibrado</h3>
+                    <p>
+                        <strong>Enunciado:</strong> Se tiene un puente de Wheatstone alimentado por una fuente de continua de <code>E = 20 V</code>.
+                        <br>• Rama izquierda: <code>R<sub>1</sub> = 10 Ω</code> (superior) y <code>R<sub>3</sub> = 40 Ω</code> (inferior). Nodo intermedio: <strong>A</strong>.
+                        <br>• Rama derecha: <code>R<sub>2</sub> = 30 Ω</code> (superior) y <code>R<sub>4</sub> = 20 Ω</code> (inferior). Nodo intermedio: <strong>B</strong>.
+                        <br>Entre los nodos A y B se conecta una resistencia de carga (o galvanómetro) <code>R<sub>L</sub> = 20 Ω</code>. Determinar el circuito Thévenin visto desde A-B y la corriente que atravesará la carga.
+                    </p>
+
+                    <div class="box-callout box-tip">
+                        <span class="box-icon">⭐</span>
+                        <div class="box-content">
+                            <span class="box-title">Eficiencia Analítica en Puentes de Medición:</span>
+                            Resolver un puente de Wheatstone con carga transversal mediante el método convencional de corrientes de malla implica formular un sistema acoplado de 3 mallas simultáneas (matrices 3×3). Mediante el Teorema de Thévenin, al desacoplar temporalmente la carga R<sub>L</sub>, la red se simplifica de inmediato en <strong>dos divisores de tensión elementales e independientes en paralelo con la fuente</strong>, permitiendo una resolución directa y exacta.
+                        </div>
+                    </div>
+
+                    <!-- SVG Puente de Wheatstone Original -->
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 700 290" role="img" aria-label="Puente de Wheatstone con carga RL">
+                            <!-- Fuente E = 20V a la izquierda -->
+                            <line class="wire" x1="160" y1="30" x2="80" y2="30" />
+                            <line class="wire" x1="80" y1="30" x2="80" y2="120" />
+                            <circle cx="80" cy="145" r="24" class="source-circle" />
+                            <text x="80" y="137" text-anchor="middle" class="source-symbol" font-size="18">+</text>
+                            <text x="80" y="157" text-anchor="middle" class="source-symbol" font-size="18">−</text>
+                            <text x="35" y="150" text-anchor="middle" class="component-label">E=20V</text>
+                            <line class="wire" x1="80" y1="169" x2="80" y2="260" />
+                            <line class="wire" x1="80" y1="260" x2="160" y2="260" />
+
+                            <!-- Riel Superior (+20V) e Inferior (0V) -->
+                            <line class="wire" x1="160" y1="30" x2="490" y2="30" />
+                            <line class="wire" x1="160" y1="260" x2="490" y2="260" />
+
+                            <!-- Rama 1 (Izquierda): R1 y R3 -->
+                            <circle cx="260" cy="30" r="5" fill="var(--text-color)" />
+                            <line class="wire" x1="260" y1="30" x2="260" y2="60" />
+                            <rect x="246" y="60" width="28" height="50" class="resistor-box" />
+                            <text x="210" y="90" text-anchor="middle" class="component-label">R₁=10Ω</text>
+                            <line class="wire" x1="260" y1="110" x2="260" y2="145" />
+
+                            <!-- Nodo A -->
+                            <circle cx="260" cy="145" r="7" class="terminal-dot" />
+                            <text x="235" y="150" text-anchor="middle" class="terminal-label">A</text>
+
+                            <line class="wire" x1="260" y1="145" x2="260" y2="180" />
+                            <rect x="246" y="180" width="28" height="50" class="resistor-box" />
+                            <text x="210" y="210" text-anchor="middle" class="component-label">R₃=40Ω</text>
+                            <line class="wire" x1="260" y1="230" x2="260" y2="260" />
+                            <circle cx="260" cy="260" r="5" fill="var(--text-color)" />
+
+                            <!-- Carga Puente RL = 20 ohm entre A y B -->
+                            <line class="wire" x1="260" y1="145" x2="320" y2="145" />
+                            <rect x="320" y="131" width="60" height="28" class="load-resistor" />
+                            <text x="350" y="120" text-anchor="middle" class="component-label" fill="var(--info-color)">Rₗ = 20 Ω</text>
+                            <line class="wire" x1="380" y1="145" x2="440" y2="145" />
+
+                            <!-- Rama 2 (Derecha): R2 y R4 -->
+                            <circle cx="440" cy="30" r="5" fill="var(--text-color)" />
+                            <line class="wire" x1="440" y1="30" x2="440" y2="60" />
+                            <rect x="426" y="60" width="28" height="50" class="resistor-box" />
+                            <text x="485" y="90" text-anchor="middle" class="component-label">R₂=30Ω</text>
+                            <line class="wire" x1="440" y1="110" x2="440" y2="145" />
+
+                            <!-- Nodo B -->
+                            <circle cx="440" cy="145" r="7" class="terminal-dot" />
+                            <text x="465" y="150" text-anchor="middle" class="terminal-label">B</text>
+
+                            <line class="wire" x1="440" y1="145" x2="440" y2="180" />
+                            <rect x="426" y="180" width="28" height="50" class="resistor-box" />
+                            <text x="485" y="210" text-anchor="middle" class="component-label">R₄=20Ω</text>
+                            <line class="wire" x1="440" y1="230" x2="440" y2="260" />
+                            <circle cx="440" cy="260" r="5" fill="var(--text-color)" />
+                        </svg>
+                        <div class="circuit-caption">Figura 5: Puente de Wheatstone desbalanceado con carga transversal Rₗ conectada entre los nodos A y B.</div>
+                    </div>
+
+                    <!-- PASO 1: VTH -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">1</span>
+                            Paso 1: Cálculo de V<sub>th</sub> = V<sub>A</sub> - V<sub>B</sub> (Con R<sub>L</sub> desconectada)
+                        </div>
+                        <p>
+                            Al desconectar la resistencia central R<sub>L</sub>, las ramas izquierda y derecha quedan en <strong>paralelo directo e independiente</strong> con la fuente de 20 V:
+                        </p>
+                        <ul>
+                            <li>
+                                Tensión en el nodo A (divisor formado por R<sub>1</sub> y R<sub>3</sub>):
+                                <div class="calc-math">V<sub>A</sub> = E · [R<sub>3</sub> / (R<sub>1</sub> + R<sub>3</sub>)] = 20 V · [40 / (10 + 40)] = 20 · (40 / 50) = <strong>16,0 V</strong></div>
+                            </li>
+                            <li>
+                                Tensión en el nodo B (divisor formado por R<sub>2</sub> y R<sub>4</sub>):
+                                <div class="calc-math">V<sub>B</sub> = E · [R<sub>4</sub> / (R<sub>2</sub> + R<sub>4</sub>)] = 20 V · [20 / (30 + 20)] = 20 · (20 / 50) = <strong>8,0 V</strong></div>
+                            </li>
+                        </ul>
+                        <p>La tensión de Thévenin es la diferencia de potencial entre ambos nodos:</p>
+                        <div class="calc-math">
+                            V<sub>th</sub> = V<sub>AB</sub> = V<sub>A</sub> - V<sub>B</sub> = 16,0 V - 8,0 V = <strong>8,0 V</strong> (terminal A positivo respecto a B)
+                        </div>
+                    </div>
+
+                    <!-- PASO 2: RTH -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">2</span>
+                            Paso 2: Cálculo de R<sub>th</sub> (Pasivando la fuente de 20 V)
+                        </div>
+                        <p>
+                            Reemplazamos la fuente E por un cortocircuito. Esto hace que el riel superior y el riel inferior queden unidos en un solo nodo común.
+                        </p>
+
+                        <!-- SVG Paso 2 Ejemplo 3 -->
+                        <div class="circuit-container" style="max-width: 620px; margin: 1rem auto;">
+                            <svg class="circuit-svg" viewBox="0 0 600 200" role="img" aria-label="Ejemplo 3 Paso 2: Rth del Puente">
+                                <!-- Riel común superior e inferior unidos -->
+                                <line class="wire-short" x1="60" y1="35" x2="60" y2="165" />
+                                <line class="wire-short" x1="60" y1="35" x2="520" y2="35" />
+                                <line class="wire-short" x1="60" y1="165" x2="520" y2="165" />
+                                <text x="35" y="103" text-anchor="middle" font-weight="bold" fill="var(--success-color)" font-size="11">Corto (E)</text>
+
+                                <!-- Nodo A con R1 y R3 en paralelo -->
+                                <line class="wire" x1="180" y1="35" x2="180" y2="58" />
+                                <rect x="166" y="58" width="28" height="32" class="resistor-box" />
+                                <text x="145" y="78" text-anchor="end" font-size="11" class="component-label">R₁=10Ω</text>
+                                
+                                <circle cx="180" cy="100" r="7" class="terminal-dot" />
+                                <text x="155" y="105" text-anchor="end" class="terminal-label">A</text>
+
+                                <rect x="166" y="110" width="28" height="32" class="resistor-box" />
+                                <text x="145" y="130" text-anchor="end" font-size="11" class="component-label">R₃=40Ω</text>
+                                <line class="wire" x1="180" y1="142" x2="180" y2="165" />
+                                <text x="180" y="185" text-anchor="middle" font-weight="bold" fill="var(--primary-color)" font-size="12">R_A = 8 Ω</text>
+
+                                <!-- Enlace y Medición entre A y B -->
+                                <line class="probe-red" x1="180" y1="100" x2="245" y2="100" />
+                                <line class="probe-black" x1="355" y1="100" x2="420" y2="100" />
+
+                                <rect x="245" y="78" width="110" height="44" rx="8" fill="var(--card-bg)" stroke="var(--success-color)" stroke-width="2.5" />
+                                <circle cx="270" cy="100" r="14" fill="var(--secondary-color)" stroke="var(--success-color)" stroke-width="1.8" />
+                                <text x="270" y="105" text-anchor="middle" font-weight="bold" font-size="14" fill="var(--success-color)">Ω</text>
+                                <text x="315" y="105" text-anchor="middle" font-weight="bold" font-size="13" fill="var(--success-color)">Rₜₕ = 20Ω</text>
+
+                                <!-- Nodo B con R2 y R4 en paralelo -->
+                                <line class="wire" x1="420" y1="35" x2="420" y2="58" />
+                                <rect x="406" y="58" width="28" height="32" class="resistor-box" />
+                                <text x="445" y="78" text-anchor="start" font-size="11" class="component-label">R₂=30Ω</text>
+                                
+                                <circle cx="420" cy="100" r="7" class="terminal-dot" />
+                                <text x="445" y="105" text-anchor="start" class="terminal-label">B</text>
+
+                                <rect x="406" y="110" width="28" height="32" class="resistor-box" />
+                                <text x="445" y="130" text-anchor="start" font-size="11" class="component-label">R₄=20Ω</text>
+                                <line class="wire" x1="420" y1="142" x2="420" y2="165" />
+                                <text x="420" y="185" text-anchor="middle" font-weight="bold" fill="var(--primary-color)" font-size="12">R_B = 12 Ω</text>
+                            </svg>
+                            <div class="circuit-caption">Figura 5b: Fuente pasivada. Se observa que Rₜₕ = (R₁ || R₃) + (R₂ || R₄) = 8 Ω + 12 Ω = 20 Ω.</div>
+                        </div>
+
+                        <p>
+                            Mirando desde los terminales A y B:
+                            <br>• En el borne A: <code>R<sub>1</sub></code> y <code>R<sub>3</sub></code> quedan en paralelo: 
+                            <code>R<sub>A</sub> = (10 · 40) / (10 + 40) = 400 / 50 = 8,0 Ω</code>.
+                            <br>• En el borne B: <code>R<sub>2</sub></code> y <code>R<sub>4</sub></code> quedan en paralelo: 
+                            <code>R<sub>B</sub> = (30 · 20) / (30 + 20) = 600 / 50 = 12,0 Ω</code>.
+                            <br>• Entre A y B, ambas asociaciones quedan conectadas en <strong>serie</strong>:
+                        </p>
+                        <div class="calc-math">
+                            R<sub>th</sub> = (R<sub>1</sub> || R<sub>3</sub>) + (R<sub>2</sub> || R<sub>4</sub>) = 8,0 Ω + 12,0 Ω = <strong>20,0 Ω</strong>
+                        </div>
+                    </div>
+
+                    <!-- PASO 3: CÁLCULO FINAL -->
+                    <div class="calc-step">
+                        <div class="calc-step-title">
+                            <span class="step-badge">3</span>
+                            Paso 3: Conexión de R<sub>L</sub> = 20 Ω al Equivalente de Thévenin
+                        </div>
+                        <div class="calc-math">
+                            I<sub>L</sub> = V<sub>th</sub> / (R<sub>th</sub> + R<sub>L</sub>) = 8 V / (20 Ω + 20 Ω) = 8 / 40 = <strong>0,20 A = 200 mA</strong>
+                        </div>
+                        <div class="calc-math">
+                            V<sub>L</sub> = I<sub>L</sub> · R<sub>L</sub> = 0,20 A · 20 Ω = <strong>4,00 V</strong>
+                        </div>
+                        <div class="calc-math">
+                            P<sub>L</sub> = I<sub>L</sub><sup>2</sup> · R<sub>L</sub> = (0,20 A)<sup>2</sup> · 20 Ω = <strong>0,80 W = 800 mW</strong>
+                        </div>
+                    </div>
+
+                    <div class="results-grid">
+                        <div class="result-box">
+                            <div class="result-label">V<sub>th</sub> del Puente</div>
+                            <div class="result-value">8,0 V</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">R<sub>th</sub> del Puente</div>
+                            <div class="result-value">20,0 Ω</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">Corriente en Puente (I<sub>L</sub>)</div>
+                            <div class="result-value">200 mA</div>
+                        </div>
+                        <div class="result-box">
+                            <div class="result-label">Potencia en Carga</div>
+                            <div class="result-value">0,80 W</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SIMULADOR INTERACTIVO / LABORATORIO VIRTUAL -->
+            <section id="simulador">
+                <h2>🧪 7. Banco de Ensayo Interactivo: Simulador de Thévenin</h2>
+                <p>
+                    ¡Experimentá vos mismo! Seleccioná la topología del circuito, modificá los valores de las fuentes de continua y resistencias, y variá la carga <strong>R<sub>L</sub></strong> con el deslizador.
+                    El simulador recalcula en tiempo real el circuito equivalente de Thévenin y grafica la <strong>curva de máxima transferencia de potencia</strong> sin distorsiones.
+                </p>
+
+                <div class="simulator-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">🎛️ Banco de Trabajo Virtual</h3>
+                        <div>
+                            <label for="simTopologySelect" style="font-weight: 600; font-size: 0.9rem; margin-right: 0.4rem;">Topología:</label>
+                            <select id="simTopologySelect" onchange="changeTopology()" style="padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-weight: 600;">
+                                <option value="1">1. Divisor + Rama Serie</option>
+                                <option value="2">2. Dos Fuentes de CC</option>
+                                <option value="3">3. Puente de Wheatstone</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="sim-grid">
+                        <!-- Controles de Entrada -->
+                        <div class="sim-control-group">
+                            <div class="sim-control-title" id="simTitleControls">Parámetros del Circuito</div>
+                            
+                            <!-- Inputs Dinámicos para Topología 1 -->
+                            <div id="controlsTop1">
+                                <div class="control-row">
+                                    <label for="simE1">Fuente E:</label>
+                                    <div><input type="number" id="simE1" value="24" min="0" max="250" step="1" oninput="updateSim()"> <span style="font-weight: 600;">V</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR1_1">Resistor R₁:</label>
+                                    <div><input type="number" id="simR1_1" value="6" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR2_1">Resistor R₂:</label>
+                                    <div><input type="number" id="simR2_1" value="12" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR3_1">Resistor Serie R₃:</label>
+                                    <div><input type="number" id="simR3_1" value="4" min="0" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Inputs Dinámicos para Topología 2 -->
+                            <div id="controlsTop2" style="display: none;">
+                                <div class="control-row">
+                                    <label for="simE1_2">Fuente E₁:</label>
+                                    <div><input type="number" id="simE1_2" value="60" min="0" max="250" step="1" oninput="updateSim()"> <span style="font-weight: 600;">V</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR1_2">Resistor R₁:</label>
+                                    <div><input type="number" id="simR1_2" value="30" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simE2_2">Fuente E₂:</label>
+                                    <div><input type="number" id="simE2_2" value="15" min="0" max="250" step="1" oninput="updateSim()"> <span style="font-weight: 600;">V</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR2_2">Resistor R₂:</label>
+                                    <div><input type="number" id="simR2_2" value="60" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Inputs Dinámicos para Topología 3 -->
+                            <div id="controlsTop3" style="display: none;">
+                                <div class="control-row">
+                                    <label for="simE_3">Fuente E:</label>
+                                    <div><input type="number" id="simE_3" value="20" min="0" max="250" step="1" oninput="updateSim()"> <span style="font-weight: 600;">V</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR1_3">R₁ (Rama Izq Arriba):</label>
+                                    <div><input type="number" id="simR1_3" value="10" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR3_3">R₃ (Rama Izq Abajo):</label>
+                                    <div><input type="number" id="simR3_3" value="40" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR2_3">R₂ (Rama Der Arriba):</label>
+                                    <div><input type="number" id="simR2_3" value="30" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR4_3">R₄ (Rama Der Abajo):</label>
+                                    <div><input type="number" id="simR4_3" value="20" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1.25rem; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <span class="sim-control-title" style="color: var(--info-color); margin: 0;">Carga R<sub>L</sub></span>
+                                    <button class="btn-action-small" onclick="autoMatchRL()" title="Fijar RL exactamente igual a Rth">⚡ Ajustar R<sub>L</sub> = R<sub>th</sub></button>
+                                </div>
+                                <div class="control-row">
+                                    <input type="range" id="simRLSlider" min="0.5" max="40" step="0.5" value="8" oninput="syncRLFromSlider()">
+                                    <input type="number" id="simRL" value="8" min="0.1" max="500" step="0.5" oninput="syncRLFromInput()">
+                                    <span style="font-weight: 600;">Ω</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resultados en Tiempo Real -->
+                        <div class="sim-results">
+                            <div>
+                                <div class="sim-control-title" style="color: var(--success-color);">Equivalente de Thévenin Calculado</div>
+                                <div class="sim-meter">
+                                    <span class="sim-meter-name">Tensión V<sub>th</sub>:</span>
+                                    <span class="sim-meter-val" id="outVth">16.00 V</span>
+                                </div>
+                                <div class="sim-meter">
+                                    <span class="sim-meter-name">Polaridad Bornes:</span>
+                                    <span id="outPolarity" style="font-size: 0.9rem; font-weight: 700; color: var(--text-color);">Borne A (+)</span>
+                                </div>
+                                <div class="sim-meter">
+                                    <span class="sim-meter-name">Resistencia R<sub>th</sub>:</span>
+                                    <span class="sim-meter-val" id="outRth">8.00 Ω</span>
+                                </div>
+                                
+                                <div class="sim-control-title" style="margin-top: 0.8rem; color: var(--primary-color);">Respuesta en la Carga R<sub>L</sub></div>
+                                <div class="sim-meter">
+                                    <span class="sim-meter-name">Corriente I<sub>L</sub>:</span>
+                                    <span class="sim-meter-val" id="outIL">1.000 A</span>
+                                </div>
+                                <div class="sim-meter">
+                                    <span class="sim-meter-name">Tensión V<sub>L</sub>:</span>
+                                    <span class="sim-meter-val" id="outVL">8.00 V</span>
+                                </div>
+                                <div class="sim-meter">
+                                    <span class="sim-meter-name">Potencia P<sub>L</sub>:</span>
+                                    <span class="sim-meter-val" id="outPL" style="color: var(--warning-color);">8.000 W</span>
+                                </div>
+                                <div class="sim-meter">
+                                    <span class="sim-meter-name">Rendimiento (η):</span>
+                                    <span class="sim-meter-val" id="outEta" style="color: var(--info-color);">50.0 %</span>
+                                </div>
+                            </div>
+
+                            <div id="simMatchNotice" style="font-size: 0.88rem; font-weight: 600; text-align: center; padding: 0.45rem; border-radius: 6px; background-color: var(--success-bg); color: var(--success-color); margin-top: 0.5rem;">
+                                🎯 ¡Condición de Máxima Potencia (R<sub>L</sub> = R<sub>th</sub>)!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico Canvas de Máxima Transferencia de Potencia -->
+                    <div class="power-graph-container">
+                        <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-color); margin-bottom: 0.4rem;">
+                            Curva de Transferencia de Potencia P<sub>L</sub> vs R<sub>L</sub> (El pico de potencia siempre ocurre en R<sub>L</sub> = R<sub>th</sub>)
+                        </div>
+                        <canvas id="powerCanvas" class="power-canvas"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ERRORES TÍPICOS EN EXÁMENES -->
+            <section id="errores">
+                <h2>⚠️ 8. Criterios Críticos y Errores Metodológicos Frecuentes</h2>
+                <p>
+                    En el cálculo y modelado de redes eléctricas mediante el Teorema de Thévenin, se presentan frecuentemente confusiones de concepto que comprometen la exactitud de los resultados. La siguiente tabla resume las precauciones analíticas y experimentales indispensables:
+                </p>
+
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Error Frecuente</th>
+                                <th>Consecuencia</th>
+                                <th>La Forma Correcta de Proceder</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">1. Dejar la fuente de tensión abierta para R<sub>th</sub></td>
+                                <td>Se interrumpe la continuidad del circuito, alterando la topología de la red y conduciendo a un cálculo erróneo de la resistencia equivalente.</td>
+                                <td style="text-align: left;">La fuente de tensión ideal se apaga haciéndola un <strong>cortocircuito</strong> (un cable conductor directo, <code>V = 0 V</code>).</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">2. Dejar la carga R<sub>L</sub> conectada al hallar V<sub>th</sub> o R<sub>th</sub></td>
+                                <td>El equivalente queda viciado por la propia carga y ya no sirve para predecir otras cargas.</td>
+                                <td style="text-align: left;"><strong>Regla de Aislamiento:</strong> Se debe desacoplar R<sub>L</sub> con carácter previo para evaluar la red en condición estricta de circuito abierto.</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">3. Asumir que por ramas abiertas circula corriente</td>
+                                <td>Atribuir caída de tensión óhmica a elementos conectados en serie directa con un terminal abierto.</td>
+                                <td style="text-align: left;">A través de un terminal en circuito abierto <strong>la intensidad es nula (0 A)</strong>; cualquier resistor en serie mantiene caída nula (<code>V = 0 V</code>).</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">4. Mirar desde la fuente en vez de mirar desde A y B</td>
+                                <td>Determinar la impedancia vista por el generador en lugar de la impedancia de salida hacia el receptor.</td>
+                                <td style="text-align: left;">La resistencia equivalente debe determinarse orientando la simplificación serie-paralelo <strong>exclusivamente desde los terminales A y B hacia la red</strong>.</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">5. Querer aplicar superposición a la potencia</td>
+                                <td>Superponer potencias individuales de fuentes (<code>P ≠ P₁ + P₂</code>).</td>
+                                <td style="text-align: left;">La potencia eléctrica es una magnitud no lineal cuadrática (<code>P = I² · R</code>). No admite superposición y debe evaluarse al final sobre el circuito resultante.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- EJERCICIOS PROPUESTOS CON SOLUCIÓN DESPLEGABLE -->
+            <section id="propuestos">
+                <h2>📝 9. Casos de Estudio y Ejercicios Prácticos de Aplicación</h2>
+                <p>A continuación se proponen tres problemas de aplicación con memoria de cálculo analítica desplegable para su verificación:</p>
+
+                <!-- Ejercicio 1 -->
+                <div class="quiz-card">
+                    <div class="quiz-question">
+                        <strong>Ejercicio 1:</strong> Una fuente de continua de <code>E = 36 V</code> alimenta un divisor de tensión formado por <code>R₁ = 18 Ω</code> y <code>R₂ = 36 Ω</code>. Desde el nodo intermedio entre ambas resistencias, una tercera resistencia <code>R₃ = 8 Ω</code> se conecta en serie hasta el terminal A. El terminal B va a masa común. Entre A y B se conecta una carga <code>R<sub>L</sub> = 10 Ω</code>.
+                        <br>Calcular: <code>V<sub>th</sub></code>, <code>R<sub>th</sub></code> e <code>I<sub>L</sub></code>.
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAccordion('sol1')">
+                        <span>👁️ Ver Solución Paso a Paso</span>
+                        <span id="sol1-icon">▼</span>
+                    </button>
+                    <div id="sol1" class="accordion-content">
+                        <p><strong>Paso 1 (Desconexión de R<sub>L</sub>):</strong> Al quedar el borne A abierto, por R<sub>3</sub> no circula corriente (<code>I<sub>R3</sub> = 0 A ⟹ V<sub>R3</sub> = 0 V</code>).</p>
+                        <p><strong>Paso 2 (V<sub>th</sub>):</strong> Por divisor de tensión con R<sub>1</sub> y R<sub>2</sub>:
+                            <br><code>V<sub>th</sub> = 36 V · [36 / (18 + 36)] = 36 · (36 / 54) = <strong>24,0 V</strong></code>.
+                        </p>
+                        <p><strong>Paso 3 (R<sub>th</sub>):</strong> Cortocircuitando la fuente de 36 V:
+                            <br><code>R<sub>12</sub> = (18 · 36) / (18 + 36) = 648 / 54 = 12,0 Ω</code>.
+                            <br>Sumando R<sub>3</sub> en serie: <code>R<sub>th</sub> = 12,0 Ω + 8,0 Ω = <strong>20,0 Ω</strong></code>.
+                        </p>
+                        <p><strong>Paso 4 (I<sub>L</sub>):</strong> 
+                            <code>I<sub>L</sub> = 24 V / (20 Ω + 10 Ω) = 24 / 30 = <strong>0,80 A (800 mA)</strong></code>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 2 -->
+                <div class="quiz-card">
+                    <div class="quiz-question">
+                        <strong>Ejercicio 2 (Máxima Potencia):</strong> Disponemos de una fuente regulada que posee un equivalente de Thévenin de <code>V<sub>th</sub> = 12 V</code> y <code>R<sub>th</sub> = 15 Ω</code>.
+                        <br>a) ¿Qué valor de resistencia de carga R<sub>L</sub> debemos conectar para que absorba la máxima potencia posible?
+                        <br>b) ¿Cuánto vale esa potencia máxima?
+                        <br>c) ¿Cuál es el rendimiento de la transmisión en esa condición?
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAccordion('sol2')">
+                        <span>👁️ Ver Solución Paso a Paso</span>
+                        <span id="sol2-icon">▼</span>
+                    </button>
+                    <div id="sol2" class="accordion-content">
+                        <p><strong>Respuesta a:</strong> Por el Teorema de Máxima Transferencia de Potencia, la carga debe ser idéntica a la resistencia interna de Thévenin:
+                            <br><code>R<sub>L</sub> = R<sub>th</sub> = <strong>15,0 Ω</strong></code>.
+                        </p>
+                        <p><strong>Respuesta b:</strong> 
+                            <br>La corriente es <code>I<sub>L</sub> = 12 V / (15 + 15) = 12 / 30 = 0,40 A</code>.
+                            <br>La potencia máxima es:
+                            <br><code>P<sub>max</sub> = I<sub>L</sub><sup>2</sup> · R<sub>L</sub> = (0,4 A)<sup>2</sup> · 15 Ω = 0,16 · 15 = <strong>2,40 W</strong></code>.
+                            <br><em>O con la fórmula directa: <code>P<sub>max</sub> = V<sub>th</sub><sup>2</sup> / (4 · R<sub>th</sub>) = 144 / (4 · 15) = 144 / 60 = 2,40 W</code>.</em>
+                        </p>
+                        <p><strong>Respuesta c:</strong> El rendimiento es siempre del <strong>50%</strong> (η = 0,5) en condición de máxima transferencia de potencia, ya que R<sub>th</sub> y R<sub>L</sub> disipan exactamente la misma potencia (2,40 W cada una; la fuente entrega 4,80 W en total).</p>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 3 -->
+                <div class="quiz-card">
+                    <div class="quiz-question">
+                        <strong>Ejercicio 3 (Dos Fuentes en Paralelo):</strong> Una fuente de alimentación de laboratorio de <code>E₁ = 24 V</code> con resistencia interna <code>R₁ = 6 Ω</code> se conecta en paralelo con una batería auxiliar de <code>E₂ = 12 V</code> con resistencia <code>R₂ = 12 Ω</code> para alimentar un borne de salida A respecto a masa B.
+                        <br>Calcular el equivalente Thévenin (V<sub>th</sub> y R<sub>th</sub>) y la corriente que circulará si se conecta una carga <code>R<sub>L</sub> = 8 Ω</code>.
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAccordion('sol3')">
+                        <span>👁️ Ver Solución Paso a Paso</span>
+                        <span id="sol3-icon">▼</span>
+                    </button>
+                    <div id="sol3" class="accordion-content">
+                        <p><strong>Paso 1 (R<sub>th</sub>):</strong> Cortocircuitando ambas fuentes:
+                            <br><code>R<sub>th</sub> = R₁ || R₂ = (6 · 12) / (6 + 12) = 72 / 18 = <strong>4,0 Ω</strong></code>.
+                        </p>
+                        <p><strong>Paso 2 (V<sub>th</sub>):</strong> Malla en circuito abierto:
+                            <br><code>I<sub>malla</sub> = (24 V - 12 V) / (6 Ω + 12 Ω) = 12 / 18 = 0,667 A</code>.
+                            <br><code>V<sub>th</sub> = E₁ - (I<sub>malla</sub> · R₁) = 24 V - (0,667 A · 6 Ω) = 24 - 4 = <strong>20,0 V</strong></code>.
+                        </p>
+                        <p><strong>Paso 3 (I<sub>L</sub> con R<sub>L</sub> = 8 Ω):</strong>
+                            <br><code>I<sub>L</sub> = V<sub>th</sub> / (R<sub>th</sub> + R<sub>L</sub>) = 20 V / (4 Ω + 8 Ω) = 20 / 12 = <strong>1,67 A</strong></code>.
+                            <br><code>P<sub>L</sub> = (1,67 A)<sup>2</sup> · 8 Ω = <strong>22,2 W</strong></code>.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CUESTIONARIO INTERACTIVO (QUIZ) -->
+            <section id="quiz">
+                <h2>🎯 10. Cuestionario de Validación y Autoevaluación Conceptual</h2>
+                <p>Seleccione la opción correcta para cada una de las proposiciones técnicas planteadas:</p>
+
+                <div class="quiz-container">
+                    <!-- Pregunta 1 -->
+                    <div class="quiz-card" id="q1">
+                        <div class="quiz-question">1. Al momento de calcular la resistencia de Thévenin (R<sub>th</sub>), ¿qué se debe hacer con las fuentes de tensión independientes de CC?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(1, 0)">A) Dejarlas desconectadas en circuito abierto (borrando sus cables).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(1, 1)">B) Reemplazarlas por un cortocircuito (un cable conductor de 0 V).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(1, 2)">C) Dejarlas conectadas con su voltaje nominal.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(1, 3)">D) Multiplicar su tensión por la resistencia de carga.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q1-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 2 -->
+                    <div class="quiz-card" id="q2">
+                        <div class="quiz-question">2. La tensión de Thévenin (V<sub>th</sub>) se define rigurosamente como:</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(2, 0)">A) La tensión entre los bornes A y B con la carga R<sub>L</sub> conectada.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(2, 1)">B) La corriente de cortocircuito multiplicada por la fuente principal.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(2, 2)">C) La tensión entre los terminales A y B a circuito abierto (en vacío, sin R<sub>L</sub>).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(2, 3)">D) La suma algebraica de todas las fuentes del circuito.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q2-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 3 -->
+                    <div class="quiz-card" id="q3">
+                        <div class="quiz-question">3. Si un circuito equivalente de Thévenin tiene R<sub>th</sub> = 50 Ω y V<sub>th</sub> = 100 V, ¿para qué valor de R<sub>L</sub> se obtiene la máxima disipación de potencia en la carga?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(3, 0)">A) Para R<sub>L</sub> = 0 Ω (cortocircuito).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(3, 1)">B) Para R<sub>L</sub> = 50 Ω (igual a R<sub>th</sub>).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(3, 2)">C) Para R<sub>L</sub> = 100 Ω (el doble de R<sub>th</sub>).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(3, 3)">D) Para R<sub>L</sub> tendiendo a infinito (circuito abierto).</button>
+                        </div>
+                        <div class="quiz-feedback" id="q3-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 4 -->
+                    <div class="quiz-card" id="q4">
+                        <div class="quiz-question">4. En un circuito abierto (bornes A y B sin carga conectada), una resistencia R conectada directamente en serie con el terminal A:</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(4, 0)">A) Provoca una caída de tensión proporcional a su resistencia según Ohm.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(4, 1)">B) Duplica el voltaje de la fuente principal.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(4, 2)">C) Tiene corriente cero (I = 0 A) y por lo tanto su caída de tensión es 0 V.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(4, 3)">D) Provoca un cortocircuito que quema el fusible de protección.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q4-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 5 -->
+                    <div class="quiz-card" id="q5">
+                        <div class="quiz-question">5. En ensayos de laboratorio, ¿por qué está terminantemente contraindicado medir R<sub>th</sub> conectando un óhmetro a un circuito bajo tensión?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(5, 0)">A) Porque el óhmetro inyecta corriente desde su batería interna y la tensión del circuito puede destruirlo o quemar su fusible.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(5, 1)">B) Porque la resistencia de Thévenin aumenta al triple cuando hay tensión.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(5, 2)">C) Porque los cables del tester absorben toda la potencia del circuito.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(5, 3)">D) Porque el óhmetro solo funciona con corriente alterna.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q5-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 6 -->
+                    <div class="quiz-card" id="q6">
+                        <div class="quiz-question">6. Si en un banco de prueba se conecta una carga variable y la diferencia de potencial entre bornes se reduce al 50% del valor de circuito abierto (V<sub>L</sub> = V<sub>th</sub> / 2):</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(6, 0)">A) El circuito se ha dañado por sobrecalentamiento.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(6, 1)">B) La resistencia de la carga es exactamente igual a R<sub>th</sub> (Método del medio voltaje).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(6, 2)">C) La corriente por la carga es nula.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(6, 3)">D) El rendimiento de la transmisión es del 100%.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q6-fb"></div>
+                    </div>
+
+                    <div id="quizScoreBanner" class="quiz-score-banner" style="display: none;">
+                        <span id="quizScoreText"></span>
+                        <div style="margin-top: 0.8rem;">
+                            <button class="btn-action-small" onclick="resetQuiz()">🔄 Reiniciar Autoevaluación</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas | Plataforma de Teoría y Simulación de Circuitos Eléctricos</p>
+    </footer>
+
+    <!-- Scripts de Interactividad, Simulador y Modo Oscuro -->
+    <script>
+        // --- 1. Dark Mode Toggle (Compatible con todo el sitio) ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.innerHTML = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.innerHTML = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+            if (typeof updateSim === 'function') {
+                updateSim();
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+
+        // --- 2. Pestañas de Ejemplos ---
+        function switchExample(tabId, btn) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            panels.forEach(p => p.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+
+            const targetPanel = document.getElementById(tabId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+
+            if (btn) {
+                btn.classList.add('active');
+            }
+        }
+
+        // --- 3. Acordeones / Desplegables de Soluciones ---
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(id + '-icon');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                icon.textContent = '▼';
+            } else {
+                content.style.display = 'block';
+                icon.textContent = '▲';
+            }
+        }
+
+        // --- 4. Simulador Interactivo Multitopología ---
+        function changeTopology() {
+            const sel = document.getElementById('simTopologySelect').value;
+            document.getElementById('controlsTop1').style.display = sel === '1' ? 'block' : 'none';
+            document.getElementById('controlsTop2').style.display = sel === '2' ? 'block' : 'none';
+            document.getElementById('controlsTop3').style.display = sel === '3' ? 'block' : 'none';
+
+            const slider = document.getElementById('simRLSlider');
+            if (sel === '1') {
+                slider.max = '40';
+                slider.value = '8';
+                document.getElementById('simRL').value = '8';
+            } else if (sel === '2') {
+                slider.max = '80';
+                slider.value = '40';
+                document.getElementById('simRL').value = '40';
+            } else if (sel === '3') {
+                slider.max = '60';
+                slider.value = '20';
+                document.getElementById('simRL').value = '20';
+            }
+
+            updateSim();
+        }
+
+        function syncRLFromSlider() {
+            const slider = document.getElementById('simRLSlider');
+            document.getElementById('simRL').value = slider.value;
+            updateSim();
+        }
+
+        function syncRLFromInput() {
+            const input = document.getElementById('simRL');
+            const val = Math.max(0.1, parseFloat(input.value) || 1);
+            const slider = document.getElementById('simRLSlider');
+            if (val > parseFloat(slider.max)) {
+                slider.max = Math.ceil(val * 1.5);
+            }
+            slider.value = val;
+            updateSim();
+        }
+
+        function autoMatchRL() {
+            const currentRth = window._lastRth || 8;
+            const targetVal = parseFloat(currentRth.toFixed(2));
+            const slider = document.getElementById('simRLSlider');
+            if (targetVal > parseFloat(slider.max)) {
+                slider.max = Math.ceil(targetVal * 1.5);
+            }
+            slider.value = targetVal;
+            document.getElementById('simRL').value = targetVal;
+            updateSim();
+        }
+
+        function updateSim() {
+            const topo = document.getElementById('simTopologySelect').value;
+            const RL = Math.max(0.01, parseFloat(document.getElementById('simRL').value) || 0.1);
+
+            let Vth = 0;
+            let Rth = 0;
+            let polarityDesc = "Borne A (+) respecto a B (-)";
+
+            if (topo === '1') {
+                const E = parseFloat(document.getElementById('simE1').value) || 0;
+                const R1 = Math.max(0.01, parseFloat(document.getElementById('simR1_1').value) || 0.1);
+                const R2 = Math.max(0.01, parseFloat(document.getElementById('simR2_1').value) || 0.1);
+                const R3 = Math.max(0, parseFloat(document.getElementById('simR3_1').value) || 0);
+
+                const R12 = (R1 * R2) / (R1 + R2);
+                Rth = R3 + R12;
+                Vth = E * (R2 / (R1 + R2));
+                polarityDesc = "Borne A (+) respecto a B (-)";
+            } else if (topo === '2') {
+                const E1 = parseFloat(document.getElementById('simE1_2').value) || 0;
+                const R1 = Math.max(0.01, parseFloat(document.getElementById('simR1_2').value) || 0.1);
+                const E2 = parseFloat(document.getElementById('simE2_2').value) || 0;
+                const R2 = Math.max(0.01, parseFloat(document.getElementById('simR2_2').value) || 0.1);
+
+                Rth = (R1 * R2) / (R1 + R2);
+                const Imalla = (E1 - E2) / (R1 + R2);
+                Vth = E1 - (Imalla * R1);
+                if (Vth >= 0) {
+                    polarityDesc = "Borne A (+) respecto a B (-)";
+                } else {
+                    polarityDesc = "Borne B (+) respecto a A (-)";
+                }
+            } else if (topo === '3') {
+                const E = parseFloat(document.getElementById('simE_3').value) || 0;
+                const R1 = Math.max(0.01, parseFloat(document.getElementById('simR1_3').value) || 0.1);
+                const R3 = Math.max(0.01, parseFloat(document.getElementById('simR3_3').value) || 0.1);
+                const R2 = Math.max(0.01, parseFloat(document.getElementById('simR2_3').value) || 0.1);
+                const R4 = Math.max(0.01, parseFloat(document.getElementById('simR4_3').value) || 0.1);
+
+                const VA = E * (R3 / (R1 + R3));
+                const VB = E * (R4 / (R2 + R4));
+                Vth = VA - VB;
+                Rth = ((R1 * R3) / (R1 + R3)) + ((R2 * R4) / (R2 + R4));
+                
+                if (Math.abs(Vth) < 1e-4) {
+                    polarityDesc = "Puente en equilibrio (Vth = 0 V)";
+                } else if (Vth > 0) {
+                    polarityDesc = "Borne A (+) respecto a B (-)";
+                } else {
+                    polarityDesc = "Borne B (+) respecto a A (-)";
+                }
+            }
+
+            Rth = Math.max(0.001, Rth);
+            window._lastRth = Rth;
+
+            // Ajuste dinámico del slider si Rth creció mucho
+            const slider = document.getElementById('simRLSlider');
+            const recommendedMax = Math.max(40, Math.ceil(Rth * 2.5 / 10) * 10);
+            if (parseFloat(slider.max) < recommendedMax) {
+                slider.max = recommendedMax;
+            }
+
+            // Circuito con carga
+            const totalR = Rth + RL;
+            const IL = Vth / totalR;
+            const VL = IL * RL;
+            const PL = IL * IL * RL;
+            const Ptotal = Math.abs(Vth * IL);
+            const eta = Ptotal > 0 ? (PL / Ptotal) * 100 : 0;
+
+            // Mostrar valores
+            document.getElementById('outVth').textContent = Math.abs(Vth).toFixed(2) + ' V';
+            document.getElementById('outPolarity').textContent = polarityDesc;
+            document.getElementById('outRth').textContent = Rth.toFixed(2) + ' Ω';
+            
+            const absIL = Math.abs(IL);
+            document.getElementById('outIL').textContent = (absIL < 0.001 ? (absIL * 1000).toFixed(1) + ' mA' : absIL.toFixed(3) + ' A');
+            document.getElementById('outVL').textContent = Math.abs(VL).toFixed(2) + ' V';
+            document.getElementById('outPL').textContent = (PL < 0.001 ? (PL * 1000).toFixed(2) + ' mW' : PL.toFixed(3) + ' W');
+            document.getElementById('outEta').textContent = eta.toFixed(1) + ' %';
+
+            // Aviso de condición de máxima potencia
+            const notice = document.getElementById('simMatchNotice');
+            if (Math.abs(Vth) < 1e-4) {
+                notice.style.display = 'block';
+                notice.style.backgroundColor = 'var(--info-bg)';
+                notice.style.color = 'var(--info-color)';
+                notice.innerHTML = '⚖️ ¡Puente Equilibrado! La tensión entre A y B es 0 V (no circula corriente).';
+            } else if (Math.abs(RL - Rth) < (Rth * 0.06 + 0.15)) {
+                notice.style.display = 'block';
+                notice.style.backgroundColor = 'var(--success-bg)';
+                notice.style.color = 'var(--success-color)';
+                notice.innerHTML = '🎯 ¡Condición de Máxima Potencia (R<sub>L</sub> ≈ R<sub>th</sub> = ' + Rth.toFixed(1) + ' Ω)! Rendimiento: 50%.';
+            } else {
+                notice.style.display = 'none';
+            }
+
+            drawPowerCurve(Vth, Rth, RL);
+        }
+
+        function drawPowerCurve(Vth, Rth, RL) {
+            const canvas = document.getElementById('powerCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            // Responsive resolution scaling
+            const rect = canvas.getBoundingClientRect();
+            const displayW = Math.round(rect.width || canvas.parentElement.clientWidth || 700);
+            const displayH = 200;
+            const dpr = window.devicePixelRatio || 1;
+
+            if (canvas.width !== displayW * dpr || canvas.height !== displayH * dpr) {
+                canvas.width = displayW * dpr;
+                canvas.height = displayH * dpr;
+            }
+
+            ctx.save();
+            ctx.scale(dpr, dpr);
+
+            const w = displayW;
+            const h = displayH;
+
+            const isDark = body.classList.contains('dark-mode');
+            const textColor = isDark ? '#e2e2ec' : '#2b2124';
+            const axisColor = isDark ? '#444455' : '#e0c0c5';
+            const curveColor = isDark ? '#bfaee3' : '#e56b73';
+            const highlightColor = isDark ? '#ffb74d' : '#e65100';
+
+            ctx.clearRect(0, 0, w, h);
+
+            const padLeft = 55;
+            const padRight = 35;
+            const padBottom = 32;
+            const padTop = 22;
+            const graphW = w - padLeft - padRight;
+            const graphH = h - padTop - padBottom;
+
+            const isZeroPower = Math.abs(Vth) < 1e-4;
+            const theoreticalPmax = isZeroPower ? 0 : (Vth * Vth) / (4 * Math.max(Rth, 0.001));
+
+            // Rango de RL: desde 0 hasta 3.5 * Rth
+            const maxRL = Math.max(Rth * 3.2, RL * 1.25, 20);
+            const scaleP = isZeroPower ? 1.0 : (theoreticalPmax * 1.25);
+
+            // Ejes
+            ctx.strokeStyle = axisColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, padTop);
+            ctx.lineTo(padLeft, h - padBottom);
+            ctx.lineTo(w - padRight, h - padBottom);
+            ctx.stroke();
+
+            // Etiquetas de Ejes
+            ctx.fillStyle = textColor;
+            ctx.font = '11px sans-serif';
+            ctx.fillText('0', padLeft - 15, h - padBottom + 4);
+            ctx.fillText('P (W)', 10, padTop + 12);
+            ctx.fillText('RL (Ω)', w - padRight - 35, h - padBottom + 22);
+
+            if (isZeroPower) {
+                // Caso Vth = 0
+                ctx.fillStyle = textColor;
+                ctx.font = 'bold 13px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Puente en equilibrio: Vth = 0 V (Potencia nula en toda la curva)', padLeft + graphW / 2, padTop + graphH / 2);
+                ctx.restore();
+                return;
+            }
+
+            // Dibujar Curva P vs RL
+            ctx.strokeStyle = curveColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            const steps = 140;
+            for (let i = 0; i <= steps; i++) {
+                const r = (i / steps) * maxRL;
+                const p = r > 0 ? (Vth * Vth * r) / Math.pow(Rth + r, 2) : 0;
+                const x = padLeft + (r / maxRL) * graphW;
+                const y = (h - padBottom) - (p / scaleP) * graphH;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+
+            // Marcar Punto Pico Teórico (RL = Rth)
+            const peakX = padLeft + (Rth / maxRL) * graphW;
+            const peakY = (h - padBottom) - (theoreticalPmax / scaleP) * graphH;
+
+            ctx.strokeStyle = isDark ? '#7dd3ad' : '#2e7d32';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(peakX, h - padBottom);
+            ctx.lineTo(peakX, peakY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = isDark ? '#7dd3ad' : '#2e7d32';
+            ctx.beginPath();
+            ctx.arc(peakX, peakY, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            const pUnit = theoreticalPmax < 0.01 ? (theoreticalPmax * 1000).toFixed(1) + ' mW' : theoreticalPmax.toFixed(2) + ' W';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Pmax = ' + pUnit + ' (RL = ' + Rth.toFixed(1) + ' Ω)', Math.min(w - padRight - 50, Math.max(padLeft + 60, peakX)), peakY - 10);
+
+            // Marcar Punto Actual (RL seleccionado)
+            const curP = (Vth * Vth * RL) / Math.pow(Rth + RL, 2);
+            const curX = padLeft + (RL / maxRL) * graphW;
+            const curY = (h - padBottom) - (curP / scaleP) * graphH;
+
+            if (curX <= w - padRight) {
+                // Línea vertical punteada al punto actual
+                ctx.strokeStyle = highlightColor;
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash([2, 2]);
+                ctx.beginPath();
+                ctx.moveTo(curX, h - padBottom);
+                ctx.lineTo(curX, curY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = highlightColor;
+                ctx.beginPath();
+                ctx.arc(curX, curY, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Valor actual en canvas
+                const curPUnit = curP < 0.01 ? (curP * 1000).toFixed(1) + ' mW' : curP.toFixed(2) + ' W';
+                ctx.fillStyle = textColor;
+                ctx.font = '10px sans-serif';
+                ctx.fillText(RL.toFixed(1) + ' Ω; ' + curPUnit, curX, Math.max(padTop + 15, curY + 18));
+            }
+
+            ctx.restore();
+        }
+
+        // --- 5. Cuestionario / Quiz de Autoevaluación ---
+        const quizAnswers = {
+            1: {
+                correct: 1,
+                feedback: '¡Correcto! Una fuente ideal de tensión se pasiva reemplazándola por un cortocircuito (un cable de resistencia cero, 0 V).'
+            },
+            2: {
+                correct: 2,
+                feedback: '¡Exacto! Vth es la diferencia de potencial medida a circuito abierto entre los bornes A y B, sin ninguna carga conectada.'
+            },
+            3: {
+                correct: 1,
+                feedback: '¡Excelente! El Teorema de Máxima Transferencia de Potencia demuestra que PL es máxima cuando RL = Rth (en este caso 50 Ω).'
+            },
+            4: {
+                correct: 2,
+                feedback: '¡Muy bien! Si el borne está abierto, la corriente es 0 A y por lo tanto su caída de potencial V = I · R es exactamente 0 V.'
+            },
+            5: {
+                correct: 0,
+                feedback: '¡Correcto! El óhmetro genera su propia corriente interna de medición; acoplarlo sobre una red con tensión externa avería los componentes internos o funde su fusible de protección.'
+            },
+            6: {
+                correct: 1,
+                feedback: '¡Perfecto! Este es el Método del Medio Voltaje: al caer la tensión a la mitad por divisor de tensión, necesariamente RL es igual a Rth.'
+            }
+        };
+
+        let userAnswersCount = 0;
+        let correctAnswersCount = 0;
+
+        function checkAnswer(questionNum, optionIndex) {
+            const card = document.getElementById('q' + questionNum);
+            const buttons = card.querySelectorAll('.quiz-btn');
+            const feedback = document.getElementById('q' + questionNum + '-fb');
+            const data = quizAnswers[questionNum];
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === data.correct) {
+                    btn.classList.add('correct');
+                } else if (idx === optionIndex) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            feedback.style.display = 'block';
+            if (optionIndex === data.correct) {
+                feedback.style.backgroundColor = 'var(--success-bg)';
+                feedback.style.color = 'var(--success-color)';
+                feedback.textContent = data.feedback;
+                correctAnswersCount++;
+            } else {
+                feedback.style.backgroundColor = 'var(--warning-bg)';
+                feedback.style.color = 'var(--warning-color)';
+                feedback.textContent = 'Incorrecto. ' + data.feedback;
+            }
+
+            userAnswersCount++;
+            if (userAnswersCount === Object.keys(quizAnswers).length) {
+                const banner = document.getElementById('quizScoreBanner');
+                const text = document.getElementById('quizScoreText');
+                banner.style.display = 'block';
+                text.textContent = 'Autoevaluación completada: ' + correctAnswersCount + ' de ' + Object.keys(quizAnswers).length + ' respuestas correctas.';
+            }
+        }
+
+        function resetQuiz() {
+            userAnswersCount = 0;
+            correctAnswersCount = 0;
+            document.getElementById('quizScoreBanner').style.display = 'none';
+
+            for (let q = 1; q <= Object.keys(quizAnswers).length; q++) {
+                const card = document.getElementById('q' + q);
+                if (card) {
+                    const buttons = card.querySelectorAll('.quiz-btn');
+                    const feedback = document.getElementById('q' + q + '-fb');
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.classList.remove('correct', 'incorrect');
+                    });
+                    if (feedback) {
+                        feedback.style.display = 'none';
+                        feedback.textContent = '';
+                    }
+                }
+            }
+        }
+
+        // Inicializar Simulador
+        window.addEventListener('DOMContentLoaded', () => {
+            updateSim();
+        });
+        window.addEventListener('resize', () => {
+            updateSim();
+        });
+    </script>
+</body>
+
+</html>
