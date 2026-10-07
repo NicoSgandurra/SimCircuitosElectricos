@@ -1,0 +1,3275 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teorema de Norton en Corriente Continua - Informe Técnico y Guía Teórica</title>
+    <meta name="description" content="Fundamentos teóricos, procedimiento analítico, dualidad con Thévenin, ensayos experimentales de laboratorio y simulador interactivo para el Teorema de Norton en corriente continua.">
+
+    <style>
+
+        :root {
+            /* Modo Claro (Paleta Cuackdernos / Lab Hub) */
+            --bg-color: #FFF5F7;
+            --card-bg: #ffffff;
+            --text-color: #2b2124;
+            --text-light: #6e5e63;
+            --border-color: #F8D0D4;
+            --primary-color: #e56b73;
+            --primary-hover: #d4565e;
+            --secondary-color: #fff0f2;
+            --shadow: 0 4px 15px rgba(229, 107, 115, 0.15);
+            --shadow-hover: 0 8px 25px rgba(229, 107, 115, 0.25);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --dot-color: #F5D3D7;
+            --code-color: #a83f49;
+            --success-color: #2e7d32;
+            --success-bg: #e8f5e9;
+            --warning-color: #e65100;
+            --warning-bg: #fff3e0;
+            --info-color: #0277bd;
+            --info-bg: #e1f5fe;
+            --accent-purple: #7b1fa2;
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #1a1a24;
+            --card-bg: #232332;
+            --text-color: #e2e2ec;
+            --text-light: #9a9ab0;
+            --border-color: #333344;
+            --primary-color: #bfaee3;
+            --primary-hover: #a58fd1;
+            --secondary-color: #2a2a3a;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.5);
+            --dot-color: #2a2a3a;
+            --code-color: #e0b7ff;
+            --success-color: #81c784;
+            --success-bg: #1b3320;
+            --warning-color: #ffb74d;
+            --warning-bg: #382414;
+            --info-color: #4fc3f7;
+            --info-bg: #132838;
+            --accent-purple: #ce93d8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: var(--text-color);
+            transition: background-color 0.4s ease, color 0.4s ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.65;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.35rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+        }
+
+        .back-btn:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .badge-tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        /* --- Quick Nav Menu (Pills) --- */
+        .nav-pills-container {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.6rem 1rem;
+            position: sticky;
+            top: 65px;
+            z-index: 90;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .nav-pills {
+            max-width: 1050px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.1rem;
+        }
+
+        .nav-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .nav-pill:hover {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            padding: 2rem 1.5rem;
+            max-width: 1050px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .content-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        /* Typography */
+        h2 {
+            color: var(--primary-color);
+            margin: 2.5rem 0 1rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2:first-child {
+            margin-top: 0;
+        }
+
+        h3 {
+            color: var(--primary-color);
+            margin: 1.8rem 0 0.8rem;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        h4 {
+            color: var(--text-color);
+            margin: 1.3rem 0 0.5rem;
+            font-size: 1.08rem;
+        }
+
+        p {
+            margin-bottom: 1.15rem;
+            color: var(--text-color);
+            font-size: 1.03rem;
+            opacity: 0.95;
+        }
+
+        ul, ol {
+            margin: 0 0 1.4rem 1.6rem;
+        }
+
+        li {
+            margin-bottom: 0.55rem;
+            color: var(--text-color);
+            opacity: 0.95;
+        }
+
+        strong {
+            color: var(--text-color);
+        }
+
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background-color: var(--secondary-color);
+            color: var(--code-color);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        /* --- Enunciado / Statement Callout --- */
+        .statement {
+            background-color: var(--secondary-color);
+            border-left: 5px solid var(--primary-color);
+            padding: 1.4rem 1.6rem;
+            margin: 1.6rem 0;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+            font-size: 1.12rem;
+            color: var(--text-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .statement strong {
+            color: var(--primary-color);
+            font-style: normal;
+        }
+
+        /* --- Boxes: Note, Tip, Warning, Info --- */
+        .box-callout {
+            border-radius: 12px;
+            padding: 1.2rem 1.4rem;
+            margin: 1.4rem 0;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            border: 1px solid transparent;
+        }
+
+        .box-callout .box-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+
+        .box-callout .box-content {
+            flex: 1;
+        }
+
+        .box-callout .box-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.4rem;
+            display: block;
+        }
+
+        .box-warning {
+            background-color: var(--warning-bg);
+            border-color: var(--warning-color);
+            color: var(--text-color);
+        }
+
+        .box-warning .box-title {
+            color: var(--warning-color);
+        }
+
+        .box-tip {
+            background-color: var(--success-bg);
+            border-color: var(--success-color);
+            color: var(--text-color);
+        }
+
+        .box-tip .box-title {
+            color: var(--success-color);
+        }
+
+        .box-info {
+            background-color: var(--info-bg);
+            border-color: var(--info-color);
+            color: var(--text-color);
+        }
+
+        .box-info .box-title {
+            color: var(--info-color);
+        }
+
+        /* --- Mathematical Formulas --- */
+        .formula-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 1.3rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+
+        .formula-main {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--code-color);
+            margin-bottom: 0.35rem;
+        }
+
+        .formula-desc {
+            font-size: 0.88rem;
+            color: var(--text-light);
+        }
+
+        .formula-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        /* --- Steps Sequence --- */
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 800;
+            font-size: 0.9rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        .step-block {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.4rem 1.6rem;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.9rem;
+        }
+
+        .step-title-text {
+            font-size: 1.18rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        /* --- Circuit SVG Styles --- */
+        .circuit-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin: 1.6rem 0;
+            padding: 1.4rem 1rem;
+            overflow-x: auto;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .circuit-caption {
+            font-size: 0.92rem;
+            color: var(--text-light);
+            font-style: italic;
+            margin-top: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .circuit-svg {
+            display: block;
+            width: 100%;
+            max-width: 740px;
+            height: auto;
+            margin: 0 auto;
+            overflow: visible;
+        }
+
+        .wire {
+            stroke: var(--text-color);
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .wire-highlight {
+            stroke: var(--primary-color);
+            stroke-width: 3.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .wire-open {
+            stroke: var(--text-light);
+            stroke-width: 2.5;
+            stroke-dasharray: 6 4;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .wire-short {
+            stroke: var(--success-color);
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+        }
+
+        .resistor-box {
+            stroke: var(--primary-color);
+            stroke-width: 2.5;
+            fill: var(--card-bg);
+            rx: 4;
+        }
+
+        .load-resistor {
+            stroke: var(--info-color);
+            stroke-width: 3;
+            fill: var(--card-bg);
+            stroke-dasharray: 6 3;
+            rx: 4;
+        }
+
+        .component-label {
+            fill: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .terminal-dot {
+            fill: var(--primary-color);
+            stroke: var(--card-bg);
+            stroke-width: 2;
+        }
+
+        .terminal-label {
+            fill: var(--primary-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .source-circle {
+            stroke: var(--primary-color);
+            stroke-width: 2.5;
+            fill: var(--card-bg);
+        }
+
+        .meter-circle {
+            stroke: var(--success-color);
+            stroke-width: 2.5;
+            fill: var(--card-bg);
+        }
+
+        .source-symbol {
+            fill: var(--primary-color);
+            font-size: 16px;
+            font-weight: bold;
+            font-family: sans-serif;
+        }
+
+        .current-arrow {
+            stroke: var(--success-color);
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .probe-red {
+            stroke: #ef5350;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .probe-black {
+            stroke: #78909c;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .dim-arrow {
+            stroke: var(--text-light);
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        /* --- Tabbed Interface for Examples / Simulator --- */
+        .tabs-header {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.2rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.65rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: var(--transition);
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Calculation Steps / Accordions --- */
+        .calc-step {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.1rem 1.3rem;
+            margin: 1.2rem 0;
+        }
+
+        .calc-step-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calc-math {
+            font-family: "Courier New", Courier, monospace;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.6rem 0.9rem;
+            margin: 0.6rem 0;
+            font-size: 1.05rem;
+            color: var(--code-color);
+            overflow-x: auto;
+        }
+
+        /* --- Results Grid & Table --- */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .result-box {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.1rem;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .result-box:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .result-label {
+            font-size: 0.88rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .result-value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--success-color);
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        .data-table-wrapper {
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+            text-align: center;
+        }
+
+        .data-table th, .data-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.98rem;
+        }
+
+        .data-table th {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover {
+            background-color: var(--bg-color);
+        }
+
+        /* --- Interactive Simulator Styles --- */
+        .simulator-card {
+            background-color: var(--secondary-color);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin: 2rem 0;
+        }
+
+        .sim-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.25rem;
+        }
+
+        @media (max-width: 768px) {
+            .sim-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sim-control-group {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+        }
+
+        .sim-control-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            margin-bottom: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            gap: 0.75rem;
+        }
+
+        .control-row label {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-color);
+            flex: 1;
+        }
+
+        .control-row input[type="number"] {
+            width: 90px;
+            padding: 0.4rem 0.6rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .control-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .btn-action-small {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.45rem 0.9rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .btn-action-small:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .sim-results {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sim-meter {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.65rem 0.9rem;
+            margin-bottom: 0.55rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sim-meter-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        .sim-meter-val {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--success-color);
+        }
+
+        .power-graph-container {
+            margin-top: 1.25rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .power-canvas {
+            width: 100%;
+            height: 200px;
+            display: block;
+            border-radius: 8px;
+        }
+
+        /* --- Self-Assessment Quiz --- */
+        .quiz-container {
+            margin: 2rem 0;
+        }
+
+        .quiz-card {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.35rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-question {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.85rem;
+            color: var(--text-color);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+
+        .quiz-btn:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            background-color: var(--secondary-color);
+        }
+
+        .quiz-btn.correct {
+            background-color: var(--success-bg) !important;
+            border-color: var(--success-color) !important;
+            color: var(--success-color) !important;
+            font-weight: bold;
+        }
+
+        .quiz-btn.incorrect {
+            background-color: var(--warning-bg) !important;
+            border-color: var(--warning-color) !important;
+            color: var(--warning-color) !important;
+        }
+
+        .quiz-feedback {
+            margin-top: 0.75rem;
+            padding: 0.65rem 1rem;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            display: none;
+            line-height: 1.5;
+        }
+
+        .quiz-score-banner {
+            background-color: var(--secondary-color);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        /* --- Collapsible Accordion / Solution Reveal --- */
+        .accordion-btn {
+            background-color: var(--secondary-color);
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
+            width: 100%;
+            padding: 0.85rem 1.2rem;
+            border-radius: 10px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            margin-top: 0.75rem;
+        }
+
+        .accordion-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .accordion-content {
+            display: none;
+            padding: 1.2rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            margin-top: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            header {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 1.1rem;
+            }
+
+            .badge-tag {
+                display: none;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .content-card {
+                padding: 1.35rem;
+            }
+
+            .formula-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .formula-card {
+                font-size: 0.95rem;
+            }
+        }
+    
+    </style>
+</head>
+
+<body>
+    <!-- Encabezado Principal Sticky -->
+    <header>
+        <h1>
+            <a href="../index.html" class="back-btn" title="Volver al menú principal">← Volver al Hub</a>
+            <span>🔄 Teorema de Norton</span>
+            <span class="badge-tag">Informe Técnico / Teoría de Circuitos CC</span>
+        </h1>
+        <button id="themeToggle" class="theme-toggle" aria-label="Cambiar Tema">🌙</button>
+    </header>
+
+    <!-- Barra de Navegación Rápida (Pills Flotantes) -->
+    <nav class="nav-pills-container">
+        <div class="nav-pills">
+            <a href="#fundamentos" class="nav-pill">💡 Fundamentos</a>
+            <a href="#equivalente" class="nav-pill">🔌 Circuito Dual/Eq.</a>
+            <a href="#procedimiento" class="nav-pill">📋 Algoritmo 4 Pasos</a>
+            <a href="#experimental" class="nav-pill">🛠️ Ensayos Banco</a>
+            <a href="#aplicaciones" class="nav-pill">🏭 Aplicación Real</a>
+            <a href="#ejemplos" class="nav-pill">📐 Ejemplos Paso a Paso</a>
+            <a href="#simulador" class="nav-pill">🧪 Simulador Virtual</a>
+            <a href="#errores" class="nav-pill">⚠️ Errores Típicos</a>
+            <a href="#propuestos" class="nav-pill">📝 Ejercicios</a>
+            <a href="#quiz" class="nav-pill">🎯 Autoevaluación</a>
+        </div>
+    </nav>
+
+    <!-- Contenido Principal -->
+    <main>
+        <div class="content-card">
+
+            <!-- SECCIÓN 1: FUNDAMENTOS Y DUALIDAD -->
+            <section id="fundamentos">
+                <h2>💡 1. ¿Qué es el Teorema de Norton y por qué es una herramienta clave?</h2>
+                <p>
+                    En el diseño y diagnóstico de sistemas eléctricos y electrónicos, nos enfrentamos continuamente al desafío de alimentar cargas variables (receptores, etapas de potencia, actuadores o transductores) conectadas entre dos terminales accesibles <strong>A</strong> y <strong>B</strong> de una red compleja.
+                </p>
+                <p>
+                    Si para cada posible valor de la resistencia de carga tuviéramos que resolver el circuito completo desde cero mediante <strong>Leyes de Kirchhoff</strong> o <strong>Mallas de Maxwell</strong>, el proceso de cálculo sería sumamente engorroso, ineficiente y susceptible a errores de signo o redondeo.
+                </p>
+
+                <div class="statement">
+                    <strong>Enunciado formal del Teorema de Edward Lawry Norton (1926):</strong><br>
+                    Cualquier red lineal activa de corriente continua (CC), independientemente de la cantidad de fuentes de tensión independientes, fuentes de corriente independientes y resistencias que contenga, vista desde dos terminales accesibles <strong>A</strong> y <strong>B</strong>, es eléctricamente equivalente a un circuito elemental formado por una <strong>única fuente ideal de corriente constante I<sub>N</sub></strong> conectada en <strong>paralelo</strong> con una <strong>única resistencia interna equivalente R<sub>N</sub></strong>.
+                </div>
+
+                <div class="box-callout box-tip">
+                    <span class="box-icon">⚖️</span>
+                    <div class="box-content">
+                        <span class="box-title">El Principio de Dualidad Física y Matemática:</span>
+                        El Teorema de Norton es el <strong>equivalente dual</strong> del Teorema de Léon Thévenin (1883). Mientras que Thévenin modela la red desde la óptica de las <em>tensiones y mallas</em> (fuente de tensión V<sub>th</sub> en serie con R<sub>th</sub>), Norton la modela desde la óptica de las <em>corrientes y nudos</em> (fuente de corriente I<sub>N</sub> en paralelo con R<sub>N</sub>). Ambos teoremas representan exactamente el mismo comportamiento eléctrico externo visto desde los bornes A y B.
+                    </div>
+                </div>
+
+                <p>
+                    El teorema fue publicado en 1926 por el ingeniero estadounidense <strong>Edward Lawry Norton</strong> (Bell Labs) y de manera independiente por el físico alemán <strong>Hans Ferdinand Mayer</strong>. Es una herramienta indispensable en el modelado de transistores bipolares y FETs, diseño de fuentes de alimentación de corriente constante, sensores fotovoltaicos y análisis nodal computarizado.
+                </p>
+
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 760 250" role="img" aria-label="Concepto de equivalencia de Norton: de red compleja a circuito simple">
+                            <defs>
+                                <marker id="arrowRedN1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--primary-color)" />
+                                </marker>
+                                <marker id="arrowGreenN1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--success-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Caja Negra Compleja (Izquierda) -->
+                            <rect x="25" y="25" width="280" height="190" rx="14" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2.5" stroke-dasharray="6 4" />
+                            <text x="165" y="55" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="15">RED COMPLEJA EN CC</text>
+                            <text x="165" y="80" text-anchor="middle" font-size="12" fill="var(--text-light)">Fuentes de CC (Tensión y Corriente)</text>
+                            <text x="165" y="100" text-anchor="middle" font-size="12" fill="var(--text-light)">Resistencias serie-paralelo</text>
+                            <text x="165" y="120" text-anchor="middle" font-size="12" fill="var(--text-light)">Mallas, nudos y puentes</text>
+
+                            <!-- Esquema interno insinuado -->
+                            <rect x="65" y="145" width="40" height="18" rx="3" class="resistor-box" />
+                            <rect x="155" y="145" width="40" height="18" rx="3" class="resistor-box" />
+                            <circle cx="235" cy="154" r="14" class="source-circle" />
+                            <text x="235" y="159" text-anchor="middle" font-size="12" fill="var(--primary-color)" font-weight="bold">E</text>
+                            <line x1="45" y1="154" x2="65" y2="154" class="wire" />
+                            <line x1="105" y1="154" x2="155" y2="154" class="wire" />
+                            <line x1="195" y1="154" x2="221" y2="154" class="wire" />
+                            <line x1="249" y1="154" x2="265" y2="154" class="wire" />
+
+                            <!-- Salidas terminales de la red -->
+                            <line x1="305" y1="75" x2="350" y2="75" class="wire-highlight" />
+                            <line x1="305" y1="165" x2="350" y2="165" class="wire-highlight" />
+                            <circle cx="350" cy="75" r="4.5" class="terminal-dot" />
+                            <text x="350" y="60" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="350" cy="165" r="4.5" class="terminal-dot" />
+                            <text x="350" y="185" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Símbolo de Equivalencia Central -->
+                            <text x="395" y="125" text-anchor="middle" font-size="28" fill="var(--primary-color)" font-weight="bold">⟺</text>
+                            <text x="395" y="145" text-anchor="middle" font-size="11" fill="var(--text-light)" font-weight="600">Equivalencia</text>
+                            <text x="395" y="160" text-anchor="middle" font-size="11" fill="var(--text-light)" font-weight="600">de Norton</text>
+
+                            <!-- Circuito Equivalente Norton (Derecha) -->
+                            <rect x="440" y="25" width="295" height="190" rx="14" fill="var(--card-bg)" stroke="var(--border-color)" stroke-width="1.5" />
+                            <text x="587" y="52" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="14">EQUIVALENTE DE NORTON</text>
+
+                            <!-- Riel Superior e Inferior -->
+                            <line x1="480" y1="75" x2="690" y2="75" class="wire-highlight" />
+                            <line x1="480" y1="165" x2="690" y2="165" class="wire-highlight" />
+
+                            <!-- Rama Fuente de Corriente IN -->
+                            <line x1="480" y1="75" x2="480" y2="94" class="wire" />
+                            <circle cx="480" cy="120" r="24" class="source-circle" />
+                            <line x1="480" y1="135" x2="480" y2="105" stroke="var(--primary-color)" stroke-width="2.5" marker-end="url(#arrowRedN1)" />
+                            <line x1="480" y1="144" x2="480" y2="165" class="wire" />
+                            <text x="440" y="125" text-anchor="middle" class="component-label" font-size="16">I<tspan dy="3" font-size="12">N</tspan></text>
+
+                            <!-- Flecha de corriente saliendo hacia A -->
+                            <path d="M 505 68 L 535 68" class="current-arrow" marker-end="url(#arrowGreenN1)" />
+                            <text x="520" y="60" text-anchor="middle" font-size="11" fill="var(--success-color)" font-weight="bold">I<tspan dy="2" font-size="9">N</tspan></text>
+
+                            <!-- Rama Resistencia Norton RN en Paralelo -->
+                            <line x1="590" y1="75" x2="590" y2="100" class="wire" />
+                            <rect x="581" y="100" width="18" height="40" rx="3" class="resistor-box" />
+                            <line x1="590" y1="140" x2="590" y2="165" class="wire" />
+                            <text x="625" y="125" text-anchor="start" class="component-label" font-size="16">R<tspan dy="3" font-size="12">N</tspan></text>
+
+                            <!-- Terminales de Salida A y B -->
+                            <circle cx="690" cy="75" r="4.5" class="terminal-dot" />
+                            <text x="708" y="79" text-anchor="start" class="terminal-label">A (+)</text>
+                            <circle cx="690" cy="165" r="4.5" class="terminal-dot" />
+                            <text x="708" y="170" text-anchor="start" class="terminal-label">B (−)</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Figura 1:</strong> Principio fundamental del Teorema de Norton. Cualquier red lineal activa de CC se reduce a una fuente ideal de corriente I<sub>N</sub> en paralelo con una resistencia interna R<sub>N</sub>.</p>
+                    </div>
+
+            </section>
+
+            <!-- SECCIÓN 2: EL CIRCUITO EQUIVALENTE Y SUS VARIABLES -->
+            <section id="equivalente">
+                <h2>🔌 2. El Circuito Equivalente de Norton y sus Variables</h2>
+                <p>
+                    El circuito resultante consta de solo tres elementos fundamentales conectados en paralelo cuando se le acopla la carga receptora <strong>R<sub>L</sub></strong>:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Corriente de Norton (I<sub>N</sub> o I<sub>sc</sub>):</strong> Es la corriente de <em>cortocircuito</em> que fluye a través de un conductor de resistencia nula conectado directamente entre los terminales <strong>A</strong> y <strong>B</strong> (<code>I<sub>N</sub> = I<sub>cc</sub> = I<sub>AB(corto)</sub></code>).
+                    </li>
+                    <li>
+                        <strong>Resistencia de Norton (R<sub>N</sub>):</strong> Es la resistencia equivalente medida entre los terminales <strong>A</strong> y <strong>B</strong> hacia el interior de la red habiendo <em>pasivado (apagado)</em> todas las fuentes independientes de tensión y corriente. Es estrictamente idéntica a la resistencia de Thévenin (<code>R<sub>N</sub> ≡ R<sub>th</sub></code>).
+                    </li>
+                    <li>
+                        <strong>Resistencia de Carga (R<sub>L</sub>):</strong> El componente pasivo receptor acoplado entre los terminales A y B, sobre el cual se evalúa la respuesta eléctrica del circuito.
+                    </li>
+                </ul>
+
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 760 260" role="img" aria-label="Circuito equivalente de Norton con carga RL conectada">
+                            <defs>
+                                <marker id="arrowGreenN2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--success-color)" />
+                                </marker>
+                                <marker id="arrowRedN2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--primary-color)" />
+                                </marker>
+                                <marker id="dimArrowTop" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                    <path d="M 5 0 L 0 8 L 10 8 z" fill="var(--info-color)" />
+                                </marker>
+                                <marker id="dimArrowBottom" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                    <path d="M 0 2 L 10 2 L 5 10 z" fill="var(--info-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Riel Superior e Inferior -->
+                            <line x1="120" y1="65" x2="600" y2="65" class="wire-highlight" />
+                            <line x1="120" y1="195" x2="600" y2="195" class="wire-highlight" />
+
+                            <!-- Rama Fuente de Corriente IN -->
+                            <line x1="150" y1="65" x2="150" y2="102" class="wire" />
+                            <circle cx="150" cy="130" r="26" class="source-circle" />
+                            <line x1="150" y1="147" x2="150" y2="113" stroke="var(--primary-color)" stroke-width="3" marker-end="url(#arrowRedN2)" />
+                            <line x1="150" y1="156" x2="150" y2="195" class="wire" />
+                            <text x="95" y="135" text-anchor="middle" class="component-label" font-size="18">I<tspan dy="3" font-size="13">N</tspan></text>
+
+                            <!-- Rama Resistencia Norton RN en Paralelo -->
+                            <line x1="320" y1="65" x2="320" y2="108" class="wire" />
+                            <rect x="311" y="108" width="18" height="44" rx="3" class="resistor-box" />
+                            <line x1="320" y1="152" x2="320" y2="195" class="wire" />
+                            <text x="350" y="135" text-anchor="start" class="component-label" font-size="17">R<tspan dy="3" font-size="13">N</tspan></text>
+
+                            <!-- Flecha corriente por RN -->
+                            <line x1="300" y1="112" x2="300" y2="148" class="current-arrow" marker-end="url(#arrowGreenN2)" />
+                            <text x="290" y="135" text-anchor="end" font-size="12" fill="var(--success-color)" font-weight="bold">I<tspan dy="2" font-size="9">RN</tspan></text>
+
+                            <!-- Bornes A y B -->
+                            <circle cx="460" cy="65" r="5" class="terminal-dot" />
+                            <text x="460" y="48" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="460" cy="195" r="5" class="terminal-dot" />
+                            <text x="460" y="222" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Rama Carga RL -->
+                            <line x1="460" y1="65" x2="570" y2="65" class="wire" />
+                            <line x1="570" y1="65" x2="570" y2="108" class="wire" />
+                            <rect x="561" y="108" width="18" height="44" rx="3" class="load-resistor" />
+                            <line x1="570" y1="152" x2="570" y2="195" class="wire" />
+                            <line x1="570" y1="195" x2="460" y2="195" class="wire" />
+                            <text x="600" y="135" text-anchor="start" class="component-label" fill="var(--info-color)" font-size="17">R<tspan dy="3" font-size="13">L</tspan></text>
+
+                            <!-- Flecha corriente por RL -->
+                            <line x1="548" y1="112" x2="548" y2="148" class="current-arrow" marker-end="url(#arrowGreenN2)" />
+                            <text x="538" y="135" text-anchor="end" font-size="12" fill="var(--success-color)" font-weight="bold">I<tspan dy="2" font-size="9">L</tspan></text>
+
+                            <!-- Cota de Tensión VL -->
+                            <line x1="655" y1="72" x2="655" y2="188" class="dim-arrow" marker-start="url(#dimArrowTop)" marker-end="url(#dimArrowBottom)" stroke="var(--info-color)" />
+                            <text x="670" y="135" text-anchor="start" font-size="15" fill="var(--info-color)" font-weight="bold">V<tspan dy="3" font-size="11">L</tspan></text>
+
+                            <!-- Flechas de división de corriente en riel superior -->
+                            <line x1="210" y1="56" x2="250" y2="56" class="current-arrow" marker-end="url(#arrowGreenN2)" />
+                            <text x="230" y="47" text-anchor="middle" font-size="11" fill="var(--success-color)" font-weight="bold">I<tspan dy="2" font-size="9">N</tspan></text>
+
+                            <line x1="375" y1="56" x2="415" y2="56" class="current-arrow" marker-end="url(#arrowGreenN2)" />
+                            <text x="395" y="47" text-anchor="middle" font-size="11" fill="var(--success-color)" font-weight="bold">I<tspan dy="2" font-size="9">L</tspan></text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Figura 2:</strong> Modelo de Norton acoplado a la carga R<sub>L</sub>. La corriente I<sub>N</sub> se bifurca en un <strong>divisor de corriente</strong> entre la resistencia interna R<sub>N</sub> y la receptora R<sub>L</sub>.</p>
+                    </div>
+
+
+                <h3>Fórmulas Inmediatas del Circuito Paralelo (Divisor de Corriente)</h3>
+                <p>Al estar todos los componentes conectados en paralelo entre los bornes A y B, las variables de salida se calculan de forma instantánea aplicando la regla del divisor de corriente y la ley de Ohm:</p>
+
+                <div class="formula-grid">
+                    <div class="formula-card">
+                        <div class="formula-main">I<sub>L</sub> = I<sub>N</sub> · [R<sub>N</sub> / (R<sub>N</sub> + R<sub>L</sub>)]</div>
+                        <div class="formula-desc">Corriente en la carga (Regla del divisor de corriente)</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-main">V<sub>L</sub> = I<sub>L</sub> · R<sub>L</sub> = I<sub>N</sub> · [ (R<sub>N</sub> · R<sub>L</sub>) / (R<sub>N</sub> + R<sub>L</sub>) ]</div>
+                        <div class="formula-desc">Tensión común entre bornes A y B (en Volts)</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-main">I<sub>RN</sub> = I<sub>N</sub> · [R<sub>L</sub> / (R<sub>N</sub> + R<sub>L</sub>)]</div>
+                        <div class="formula-desc">Corriente disipada por la resistencia interna R<sub>N</sub></div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-main">P<sub>L</sub> = I<sub>L</sub><sup>2</sup> · R<sub>L</sub> = V<sub>L</sub><sup>2</sup> / R<sub>L</sub></div>
+                        <div class="formula-desc">Potencia activa disipada en la carga (en Watts)</div>
+                    </div>
+                </div>
+
+                <h3>Demostración Matemática: Máxima Transferencia de Potencia</h3>
+                <p>
+                    ¿Para qué valor de resistencia receptora <strong>R<sub>L</sub></strong> se transfiere la mayor cantidad de potencia posible desde la red hacia la carga?
+                    Sustituyendo la corriente del divisor en la fórmula de potencia:
+                </p>
+                <div class="formula-card">
+                    <div class="formula-main">P<sub>L</sub>(R<sub>L</sub>) = I<sub>N</sub><sup>2</sup> · R<sub>N</sub><sup>2</sup> · [ R<sub>L</sub> / (R<sub>N</sub> + R<sub>L</sub>)<sup>2</sup> ]</div>
+                    <div class="formula-desc">Expresión analítica de la potencia en función del valor de carga R<sub>L</sub></div>
+                </div>
+                <p>
+                    Para hallar el punto crítico máximo, derivamos <code>P<sub>L</sub></code> respecto de <code>R<sub>L</sub></code> e igualamos la derivada a cero (<code>dP<sub>L</sub> / dR<sub>L</sub> = 0</code>):
+                </p>
+                <div class="formula-card">
+                    <div class="formula-main">d/dR<sub>L</sub> [ R<sub>L</sub> / (R<sub>N</sub> + R<sub>L</sub>)<sup>2</sup> ] = [ (R<sub>N</sub> + R<sub>L</sub>)<sup>2</sup> − 2·R<sub>L</sub>·(R<sub>N</sub> + R<sub>L</sub>) ] / (R<sub>N</sub> + R<sub>L</sub>)<sup>4</sup> = 0</div>
+                    <div class="formula-desc">Simplificando el factor común (R<sub>N</sub> + R<sub>L</sub>) en el numerador:</div>
+                </div>
+                <div class="formula-card">
+                    <div class="formula-main">(R<sub>N</sub> + R<sub>L</sub>) − 2·R<sub>L</sub> = 0 ⟹ R<sub>N</sub> − R<sub>L</sub> = 0 ⟹ <strong>R<sub>L</sub> = R<sub>N</sub></strong></div>
+                    <div class="formula-desc">Condición universal de adaptación de impedancias en corriente continua</div>
+                </div>
+                <p>
+                    Cuando se cumple la condición de adaptación (<code>R<sub>L</sub> = R<sub>N</sub></code>), la corriente por la carga es exactamente la mitad de la corriente de cortocircuito (<code>I<sub>L</sub> = I<sub>N</sub> / 2</code>), y la potencia máxima transferida es:
+                </p>
+                <div class="formula-card">
+                    <div class="formula-main">P<sub>L, máx</sub> = (I<sub>N</sub> / 2)<sup>2</sup> · R<sub>N</sub> = <strong>(I<sub>N</sub><sup>2</sup> · R<sub>N</sub>) / 4</strong></div>
+                    <div class="formula-desc">Potencia máxima admisible en la carga. El rendimiento de transmisión es exactamente del 50%.</div>
+                </div>
+
+                <h3>Tabla Comparativa Técnica: Dualidad Thévenin vs. Norton</h3>
+                <p>Ambos teoremas son matemáticamente intercambiables. La siguiente tabla sintetiza la correspondencia uno a uno entre magnitudes:</p>
+
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Parámetro o Criterio</th>
+                                <th>Teorema de Thévenin</th>
+                                <th>Teorema de Norton</th>
+                                <th>Relación de Transformación Dual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Elemento Activo</strong></td>
+                                <td>Fuente ideal de tensión <code>V<sub>th</sub></code></td>
+                                <td>Fuente ideal de corriente <code>I<sub>N</sub></code></td>
+                                <td><code>V<sub>th</sub> = I<sub>N</sub> · R<sub>N</sub></code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Topología Interna</strong></td>
+                                <td>Resistencia <code>R<sub>th</sub></code> en <strong>SERIE</strong></td>
+                                <td>Resistencia <code>R<sub>N</sub></code> en <strong>PARALELO</strong></td>
+                                <td><code>R<sub>N</sub> ≡ R<sub>th</sub></code> (idéntica en ambos)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Magnitud Característica</strong></td>
+                                <td>Tensión de circuito abierto (vacío): <code>V<sub>oc</sub> = V<sub>th</sub></code></td>
+                                <td>Corriente de cortocircuito: <code>I<sub>sc</sub> = I<sub>N</sub></code></td>
+                                <td><code>I<sub>N</sub> = V<sub>th</sub> / R<sub>th</sub></code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cálculo en la Carga R<sub>L</sub></strong></td>
+                                <td>Divisor de tensión serie: <code>V<sub>L</sub> = V<sub>th</sub> · [R<sub>L</sub> / (R<sub>th</sub> + R<sub>L</sub>)]</code></td>
+                                <td>Divisor de corriente paralelo: <code>I<sub>L</sub> = I<sub>N</sub> · [R<sub>N</sub> / (R<sub>N</sub> + R<sub>L</sub>)]</code></td>
+                                <td><code>V<sub>L</sub> = I<sub>L</sub> · R<sub>L</sub></code> (mismos resultados)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Fuente Ideal Límite</strong></td>
+                                <td><code>R<sub>th</sub> ➔ 0 Ω</code> (resistencia serie nula)</td>
+                                <td><code>R<sub>N</sub> ➔ ∞ Ω</code> (resistencia paralela infinita)</td>
+                                <td>Comportamiento asintótico dual</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Método Analítico Natural</strong></td>
+                                <td>Método de Mallas de Maxwell (LVK)</td>
+                                <td>Método de Nudos (LCK)</td>
+                                <td>Álgebra lineal transponible</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="box-callout box-info">
+                    <span class="box-icon">⚡</span>
+                    <div class="box-content">
+                        <span class="box-title">¿Querés repasar el equivalente de Thévenin?</span>
+                        Si necesitás consultar el procedimiento analítico del circuito serie dual, podés acceder directamente a nuestra guía completa del <a href="TeoremaThevenin.html" style="color: var(--primary-color); font-weight: 700; text-decoration: underline;">Teorema de Thévenin en Corriente Continua</a>.
+                    </div>
+                </div>
+
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 760 260" role="img" aria-label="Dualidad y Transformación de Fuentes: Thévenin y Norton">
+                            <defs>
+                                <marker id="arrowRedDual" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--primary-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Bloque Thévenin (Izquierda) -->
+                            <rect x="25" y="20" width="290" height="215" rx="12" fill="var(--secondary-color)" stroke="var(--border-color)" stroke-width="1.5" />
+                            <text x="170" y="48" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="15">EQUIVALENTE DE THÉVENIN</text>
+                            
+                            <!-- Fuente Vth -->
+                            <circle cx="90" cy="130" r="22" class="source-circle" />
+                            <text x="90" y="123" text-anchor="middle" font-size="18" fill="var(--primary-color)" font-weight="bold">+</text>
+                            <text x="90" y="143" text-anchor="middle" font-size="18" fill="var(--primary-color)" font-weight="bold">−</text>
+                            <text x="50" y="135" text-anchor="middle" class="component-label">V<tspan dy="3" font-size="10">th</tspan></text>
+
+                            <!-- Cable serie a Rth -->
+                            <line x1="90" y1="108" x2="90" y2="85" class="wire" />
+                            <line x1="90" y1="85" x2="145" y2="85" class="wire" />
+                            <rect x="145" y="76" width="38" height="18" rx="3" class="resistor-box" />
+                            <line x1="183" y1="85" x2="270" y2="85" class="wire-highlight" />
+                            <text x="164" y="66" text-anchor="middle" class="component-label">R<tspan dy="3" font-size="10">th</tspan></text>
+
+                            <!-- Retorno común -->
+                            <line x1="90" y1="152" x2="90" y2="185" class="wire" />
+                            <line x1="90" y1="185" x2="270" y2="185" class="wire-highlight" />
+
+                            <!-- Bornes Thévenin -->
+                            <circle cx="270" cy="85" r="4.5" class="terminal-dot" />
+                            <text x="270" y="72" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="270" cy="185" r="4.5" class="terminal-dot" />
+                            <text x="270" y="205" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Zona Central de Conversión Dual -->
+                            <rect x="330" y="45" width="100" height="165" rx="10" fill="var(--card-bg)" stroke="var(--primary-color)" stroke-width="1.8" />
+                            <text x="380" y="72" text-anchor="middle" font-size="13" fill="var(--primary-color)" font-weight="bold">DUALIDAD</text>
+                            <text x="380" y="95" text-anchor="middle" font-size="20">⇄</text>
+                            <text x="380" y="125" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text-color)">R<tspan dy="2" font-size="9">N</tspan> = R<tspan dy="2" font-size="9">th</tspan></text>
+                            <text x="380" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text-color)">V<tspan dy="2" font-size="9">th</tspan> = I<tspan dy="2" font-size="9">N</tspan>·R<tspan dy="2" font-size="9">N</tspan></text>
+                            <text x="380" y="185" text-anchor="middle" font-size="12" font-weight="700" fill="var(--text-color)">I<tspan dy="2" font-size="9">N</tspan> = V<tspan dy="2" font-size="9">th</tspan>/R<tspan dy="2" font-size="9">th</tspan></text>
+
+                            <!-- Bloque Norton (Derecha) -->
+                            <rect x="445" y="20" width="290" height="215" rx="12" fill="var(--secondary-color)" stroke="var(--border-color)" stroke-width="1.5" />
+                            <text x="590" y="48" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="15">EQUIVALENTE DE NORTON</text>
+
+                            <!-- Rieles Norton -->
+                            <line x1="480" y1="85" x2="690" y2="85" class="wire-highlight" />
+                            <line x1="480" y1="185" x2="690" y2="185" class="wire-highlight" />
+
+                            <!-- Fuente IN -->
+                            <line x1="500" y1="85" x2="500" y2="108" class="wire" />
+                            <circle cx="500" cy="135" r="22" class="source-circle" />
+                            <line x1="500" y1="150" x2="500" y2="120" stroke="var(--primary-color)" stroke-width="2.5" marker-end="url(#arrowRedDual)" />
+                            <line x1="500" y1="157" x2="500" y2="185" class="wire" />
+                            <text x="465" y="140" text-anchor="middle" class="component-label">I<tspan dy="3" font-size="10">N</tspan></text>
+
+                            <!-- Resistencia RN en Paralelo -->
+                            <line x1="600" y1="85" x2="600" y2="114" class="wire" />
+                            <rect x="591" y="114" width="18" height="38" rx="3" class="resistor-box" />
+                            <line x1="600" y1="152" x2="600" y2="185" class="wire" />
+                            <text x="625" y="140" text-anchor="start" class="component-label">R<tspan dy="3" font-size="10">N</tspan></text>
+
+                            <!-- Bornes Norton -->
+                            <circle cx="690" cy="85" r="4.5" class="terminal-dot" />
+                            <text x="690" y="72" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="690" cy="185" r="4.5" class="terminal-dot" />
+                            <text x="690" y="205" text-anchor="middle" class="terminal-label">B</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Figura 3:</strong> Dualidad estricta y transformación de generadores reales de Thévenin y Norton.</p>
+                    </div>
+
+            </section>
+
+            <!-- SECCIÓN 3: PROCEDIMIENTO Y ALGORITMO METÓDICO DE 4 PASOS -->
+            <section id="procedimiento">
+                <h2>📋 3. Procedimiento y Algoritmo Metódico de 4 Pasos</h2>
+                <p>
+                    Para resolver sistemáticamente cualquier red lineal activa mediante el Teorema de Norton, se sigue el siguiente <strong>algoritmo estructurado de cuatro pasos</strong>:
+                </p>
+
+                <!-- PASO 0 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">0</span>
+                        <span class="step-title-text">Paso 0: Identificar y Desconectar la Resistencia de Carga (R<sub>L</sub>)</span>
+                    </div>
+                    <p>
+                        Se individualiza el componente resistivo receptor sobre el que se quiere calcular corriente, tensión o potencia. Se retira físicamente de la red y los dos terminales de acoplamiento resultantes se designan de forma formal como nodos <strong>A</strong> y <strong>B</strong>.
+                    </p>
+
+                    <div class="circuit-container" style="max-width: 620px; margin: 1rem auto;">
+                        <svg class="circuit-svg" viewBox="0 0 600 160" role="img" aria-label="Paso 0: Desconexión de la carga RL">
+                            <!-- Red Activa -->
+                            <rect x="30" y="25" width="230" height="110" rx="10" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2" />
+                            <text x="145" y="70" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="14">RED LINEAL ACTIVA</text>
+                            <text x="145" y="92" text-anchor="middle" font-size="12" fill="var(--text-light)">Fuentes y Resistencias</text>
+
+                            <!-- Líneas a terminales -->
+                            <line x1="260" y1="50" x2="350" y2="50" class="wire-highlight" />
+                            <line x1="260" y1="110" x2="350" y2="110" class="wire-highlight" />
+                            <circle cx="350" cy="50" r="4.5" class="terminal-dot" />
+                            <text x="350" y="38" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="350" cy="110" r="4.5" class="terminal-dot" />
+                            <text x="350" y="130" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Carga Desconectada -->
+                            <line x1="380" y1="50" x2="440" y2="50" class="wire-open" />
+                            <line x1="440" y1="50" x2="440" y2="65" class="wire-open" />
+                            <rect x="431" y="65" width="18" height="32" rx="3" class="load-resistor" />
+                            <line x1="440" y1="97" x2="440" y2="110" class="wire-open" />
+                            <line x1="440" y1="110" x2="380" y2="110" class="wire-open" />
+                            <text x="470" y="85" text-anchor="start" class="component-label" fill="var(--info-color)">R<tspan dy="3" font-size="11">L</tspan> (Retirada)</text>
+
+                            <!-- Tijera / corte indicativo -->
+                            <text x="365" y="55" font-size="15">✂️</text>
+                            <text x="365" y="115" font-size="15">✂️</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Paso 0:</strong> Desacople de la carga R<sub>L</sub> para aislar los terminales A y B de la red.</p>
+                    </div>
+
+                </div>
+
+                <!-- PASO 1 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">1</span>
+                        <span class="step-title-text">Paso 1: Pasivar Fuentes y Calcular la Resistencia de Norton (R<sub>N</sub>)</span>
+                    </div>
+                    <p>
+                        Se apagan (pasivan) todas las fuentes independientes presentes en la red respetando estrictamente sus naturalezas físicas:
+                    </p>
+                    <ul>
+                        <li><strong>Fuentes ideales de tensión independientes:</strong> Se sustituyen por un <em>cortocircuito</em> (conductor continuo de 0 V, puente de resistencia nula).</li>
+                        <li><strong>Fuentes ideales de corriente independientes:</strong> Se sustituyen por un <em>circuito abierto</em> (se retira la rama, dejando una discontinuidad de corriente nula, 0 A).</li>
+                    </ul>
+                    <p>
+                        Una vez pasivada la red, se calcula la resistencia equivalente vista <strong>únicamente desde los terminales A y B mirando hacia adentro del circuito</strong> aplicando asociaciones serie y paralelo (o transformaciones Delta-Estrella si fuere necesario). <em>Nota: R<sub>N</sub> es numéricamente igual a R<sub>th</sub>.</em>
+                    </p>
+
+                    <div class="circuit-container" style="max-width: 620px; margin: 1rem auto;">
+                        <svg class="circuit-svg" viewBox="0 0 620 170" role="img" aria-label="Paso 1: Fuentes pasivadas para cálculo de RN">
+                            <!-- Red Pasivada -->
+                            <rect x="30" y="25" width="250" height="120" rx="10" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2" />
+                            <text x="155" y="65" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="14">RED PASIVA INTERNA</text>
+                            <text x="155" y="86" text-anchor="middle" font-size="11" fill="var(--success-color)" font-weight="bold">Fuentes Tensión ➔ Cortocircuito (0 V)</text>
+                            <text x="155" y="104" text-anchor="middle" font-size="11" fill="var(--warning-color)" font-weight="bold">Fuentes Corriente ➔ Circuito Abierto (0 A)</text>
+
+                            <!-- Terminales de salida -->
+                            <line x1="280" y1="55" x2="380" y2="55" class="wire-highlight" />
+                            <line x1="280" y1="115" x2="380" y2="115" class="wire-highlight" />
+                            <circle cx="380" cy="55" r="4.5" class="terminal-dot" />
+                            <text x="380" y="42" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="380" cy="115" r="4.5" class="terminal-dot" />
+                            <text x="380" y="135" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Óhmetro o medición visual hacia el interior -->
+                            <line x1="380" y1="55" x2="470" y2="55" class="wire" />
+                            <line x1="380" y1="115" x2="470" y2="115" class="wire" />
+                            <circle cx="505" cy="85" r="28" class="meter-circle" />
+                            <text x="505" y="91" text-anchor="middle" font-size="18" fill="var(--success-color)" font-weight="bold">Ω</text>
+                            <line x1="470" y1="55" x2="490" y2="65" class="wire" />
+                            <line x1="470" y1="115" x2="490" y2="105" class="wire" />
+                            <text x="550" y="90" text-anchor="start" class="component-label" fill="var(--success-color)" font-size="15">R<tspan dy="3" font-size="11">N</tspan> = R<tspan dy="3" font-size="11">AB</tspan></text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Paso 1:</strong> Fuentes independientes apagadas. La resistencia vista entre A y B es R<sub>N</sub> (idéntica a R<sub>th</sub>).</p>
+                    </div>
+
+                </div>
+
+                <!-- PASO 2 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">2</span>
+                        <span class="step-title-text">Paso 2: Restablecer Fuentes y Calcular la Corriente de Norton (I<sub>N</sub>)</span>
+                    </div>
+                    <p>
+                        Se restablecen todas las fuentes de tensión y corriente a sus valores y conexiones originales. A continuación, se conecta un <strong>cortocircuito ideal (conductor de resistencia 0 Ω) directamente entre los bornes A y B</strong>, imponiendo la condición <code>V<sub>AB</sub> = 0 V</code>.
+                    </p>
+                    <p>
+                        La corriente <strong>I<sub>N</sub> (o I<sub>sc</sub>)</strong> es exactamente la intensidad de corriente eléctrica que circula por ese cable de cortocircuito desde el nodo A hacia el nodo B. Para calcularla analíticamente, se puede emplear el método de mallas, análisis de nudos, leyes de Kirchhoff o el principio de superposición.
+                    </p>
+                    <div class="box-callout box-warning">
+                        <span class="box-icon">⚠️</span>
+                        <div class="box-content">
+                            <span class="box-title">Regla Crítica del Cortocircuito sobre Elementos en Paralelo:</span>
+                            Al colocar un cortocircuito ideal entre A y B, cualquier resistencia o conjunto de componentes que se encuentre conectado en paralelo directo entre los terminales A y B queda <strong>puenteado (anulado)</strong>: toda la corriente fluirá por el cable de cortocircuito y por dicha rama en paralelo la corriente será estrictamente 0 A.
+                        </div>
+                    </div>
+
+                    <div class="circuit-container" style="max-width: 620px; margin: 1rem auto;">
+                        <svg class="circuit-svg" viewBox="0 0 620 170" role="img" aria-label="Paso 2: Conexión de cortocircuito entre A y B para calcular IN">
+                            <defs>
+                                <marker id="arrowGreenN5" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--success-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Red Activa con Fuentes Conectadas -->
+                            <rect x="30" y="25" width="250" height="120" rx="10" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2" />
+                            <text x="155" y="65" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="14">RED LINEAL ACTIVA</text>
+                            <text x="155" y="86" text-anchor="middle" font-size="12" fill="var(--text-light)">Todas las fuentes energizadas</text>
+                            <text x="155" y="106" text-anchor="middle" font-size="11" fill="var(--primary-color)" font-weight="bold">Valores nominales de CC</text>
+
+                            <!-- Terminales de salida -->
+                            <line x1="280" y1="55" x2="380" y2="55" class="wire-highlight" />
+                            <line x1="280" y1="115" x2="380" y2="115" class="wire-highlight" />
+                            <circle cx="380" cy="55" r="4.5" class="terminal-dot" />
+                            <text x="360" y="48" text-anchor="end" class="terminal-label">A</text>
+                            <circle cx="380" cy="115" r="4.5" class="terminal-dot" />
+                            <text x="360" y="130" text-anchor="end" class="terminal-label">B</text>
+
+                            <!-- Cortocircuito Ideal entre A y B con Amperímetro -->
+                            <line x1="380" y1="55" x2="440" y2="55" class="wire-short" />
+                            <line x1="440" y1="55" x2="440" y2="65" class="wire-short" />
+                            <circle cx="440" cy="85" r="20" class="meter-circle" />
+                            <text x="440" y="91" text-anchor="middle" font-size="16" fill="var(--success-color)" font-weight="bold">A</text>
+                            <line x1="440" y1="105" x2="440" y2="115" class="wire-short" />
+                            <line x1="440" y1="115" x2="380" y2="115" class="wire-short" />
+
+                            <!-- Flecha corriente de cortocircuito -->
+                            <line x1="470" y1="65" x2="470" y2="105" class="current-arrow" marker-end="url(#arrowGreenN5)" />
+                            <text x="485" y="90" text-anchor="start" font-size="14" fill="var(--success-color)" font-weight="bold">I<tspan dy="3" font-size="10">N</tspan> = I<tspan dy="3" font-size="10">sc</tspan></text>
+                            <text x="485" y="112" text-anchor="start" font-size="11" fill="var(--text-light)">(Cortocircuito: V<tspan dy="2" font-size="8">AB</tspan> = 0 V)</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Paso 2:</strong> Determinación de I<sub>N</sub> mediante la corriente de cortocircuito que fluye entre A y B.</p>
+                    </div>
+
+                </div>
+
+                <!-- PASO 3 -->
+                <div class="step-block">
+                    <div class="step-header">
+                        <span class="step-badge">3</span>
+                        <span class="step-title-text">Paso 3: Construir el Equivalente y Conectar la Carga (R<sub>L</sub>)</span>
+                    </div>
+                    <p>
+                        Se dibuja el circuito equivalente de Norton constituido por la fuente de corriente <code>I<sub>N</sub></code> en paralelo con la resistencia <code>R<sub>N</sub></code> entre los bornes A y B. Finalmente, se reconecta la resistencia de carga <code>R<sub>L</sub></code> en paralelo entre A y B.
+                    </p>
+                    <p>
+                        La corriente <code>I<sub>L</sub></code> se determina de forma instantánea mediante la regla del <strong>divisor de corriente</strong>:
+                        <br><code>I<sub>L</sub> = I<sub>N</sub> · [ R<sub>N</sub> / (R<sub>N</sub> + R<sub>L</sub>) ]</code>.
+                    </p>
+
+                    <div class="circuit-container" style="max-width: 620px; margin: 1rem auto;">
+                        <svg class="circuit-svg" viewBox="0 0 600 170" role="img" aria-label="Paso 3: Circuito equivalente de Norton con carga RL">
+                            <defs>
+                                <marker id="arrowRedN6" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--primary-color)" />
+                                </marker>
+                                <marker id="arrowGreenN6" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--success-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Rieles superior e inferior -->
+                            <line x1="70" y1="45" x2="490" y2="45" class="wire-highlight" />
+                            <line x1="70" y1="135" x2="490" y2="135" class="wire-highlight" />
+
+                            <!-- Fuente IN -->
+                            <line x1="100" y1="45" x2="100" y2="69" class="wire" />
+                            <circle cx="100" cy="90" r="21" class="source-circle" />
+                            <line x1="100" y1="104" x2="100" y2="76" stroke="var(--primary-color)" stroke-width="2.5" marker-end="url(#arrowRedN6)" />
+                            <line x1="100" y1="111" x2="100" y2="135" class="wire" />
+                            <text x="60" y="95" text-anchor="middle" class="component-label" font-size="15">I<tspan dy="3" font-size="11">N</tspan></text>
+
+                            <!-- Resistencia RN -->
+                            <line x1="240" y1="45" x2="240" y2="72" class="wire" />
+                            <rect x="232" y="72" width="16" height="36" rx="3" class="resistor-box" />
+                            <line x1="240" y1="108" x2="240" y2="135" class="wire" />
+                            <text x="260" y="95" text-anchor="start" class="component-label" font-size="15">R<tspan dy="3" font-size="11">N</tspan></text>
+
+                            <!-- Terminales A y B -->
+                            <circle cx="360" cy="45" r="4.5" class="terminal-dot" />
+                            <text x="360" y="32" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="360" cy="135" r="4.5" class="terminal-dot" />
+                            <text x="360" y="155" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Carga RL -->
+                            <line x1="360" y1="45" x2="460" y2="45" class="wire" />
+                            <line x1="460" y1="45" x2="460" y2="72" class="wire" />
+                            <rect x="452" y="72" width="16" height="36" rx="3" class="load-resistor" />
+                            <line x1="460" y1="108" x2="460" y2="135" class="wire" />
+                            <line x1="460" y1="135" x2="360" y2="135" class="wire" />
+                            <text x="480" y="95" text-anchor="start" class="component-label" fill="var(--info-color)" font-size="15">R<tspan dy="3" font-size="11">L</tspan></text>
+
+                            <!-- Flecha corriente IL -->
+                            <line x1="435" y1="78" x2="435" y2="105" class="current-arrow" marker-end="url(#arrowGreenN6)" />
+                            <text x="425" y="95" text-anchor="end" font-size="11" fill="var(--success-color)" font-weight="bold">I<tspan dy="2" font-size="8">L</tspan></text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Paso 3:</strong> Reducción al equivalente final. Se calcula I<sub>L</sub> mediante divisor de corriente.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- SECCIÓN 4: METODOLOGÍA EXPERIMENTAL Y ENSAYOS DE LABORATORIO -->
+            <section id="experimental">
+                <h2>🛠️ 4. Metodología Experimental y Ensayos de Laboratorio</h2>
+                <p>
+                    En la práctica experimental de banco y en el control de calidad industrial de módulos o cajas negras activas, caracterizar empíricamente los parámetros equivalentes de Norton (<code>I<sub>N</sub></code> y <code>R<sub>N</sub></code>) requiere seguir protocolos seguros con instrumental normalizado (voltímetros digitales, amperímetros, resistores patrón y shunts calibrados).
+                </p>
+
+                <div class="box-callout box-warning">
+                    <span class="box-icon">🛑</span>
+                    <div class="box-content">
+                        <span class="box-title">Alerta de Seguridad Crítica en Laboratorio:</span>
+                        <strong>NUNCA debe conectarse un amperímetro directo entre los bornes A y B de una red energizada si no se conoce su corriente de cortocircuito o si la red posee baja resistencia interna.</strong> Un multímetro en función amperímetro presenta una resistencia interna casi nula (<code>R<sub>int</sub> ≈ 0 Ω</code>). En fuentes de potencia o baterías, esto produce un cortocircuito violento que quema el fusible interno del tester, funde pistas del circuito o destruye semiconductores por sobrecorriente.
+                    </div>
+                </div>
+
+                <h3>Los 3 Métodos de Ensayo en Banco de Trabajo</h3>
+                <div class="sim-grid">
+                    <!-- Método 1: Shunt Calibrado -->
+                    <div class="sim-control-group" style="margin-bottom: 0;">
+                        <div class="sim-control-title" style="color: var(--primary-color);">Método 1: Resistencia Shunt Calibrada</div>
+                        <p style="font-size: 0.95rem;">
+                            Se conecta entre los bornes A y B una resistencia de derivación (shunt) calibrada de valor muy bajo y precisión certificada (por ejemplo <code>R<sub>shunt</sub> = 0,10 Ω</code> al 0,1%).
+                        </p>
+                        <p style="font-size: 0.92rem; color: var(--text-light);">
+                            Dado que <code>R<sub>shunt</sub> ≪ R<sub>N</sub></code>, la presencia del shunt simula fielmente un cortocircuito sin forzar corrientes destructivas. Se mide la pequeña caída de tensión en milivoltios con un voltímetro digital y se deduce:
+                            <br><code>I<sub>N</sub> ≈ V<sub>shunt</sub> / R<sub>shunt</sub></code>.
+                        </p>
+                    </div>
+
+                    <!-- Método 2: Método de Dos Cargas -->
+                    <div class="sim-control-group" style="margin-bottom: 0;">
+                        <div class="sim-control-title" style="color: var(--primary-color);">Método 2: Método Volt-Amperométrico de 2 Cargas</div>
+                        <p style="font-size: 0.95rem;">
+                            Se acopla primero una carga conocida <code>R<sub>L1</sub></code> y se miden tensión <code>V<sub>L1</sub></code> y corriente <code>I<sub>L1</sub></code>. Luego se cambia por otra carga distinta <code>R<sub>L2</sub></code> y se obtienen <code>V<sub>L2</sub></code> e <code>I<sub>L2</sub></code>.
+                        </p>
+                        <p style="font-size: 0.92rem; color: var(--text-light);">
+                            Planteando el sistema de dos ecuaciones lineales con dos incógnitas:
+                            <br><code>R<sub>N</sub> = (V<sub>L1</sub> − V<sub>L2</sub>) / (I<sub>L2</sub> − I<sub>L1</sub>)</code>
+                            <br><code>I<sub>N</sub> = I<sub>L1</sub> · [1 + (R<sub>L1</sub> / R<sub>N</sub>)]</code>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="box-callout box-tip" style="margin-top: 1.5rem;">
+                    <span class="box-icon">💡</span>
+                    <div class="box-content">
+                        <span class="box-title">Método 3: Ensayo Mixto mediante Thévenin (Método del Medio Voltaje)</span>
+                        Para fuentes de pequeña señal o instrumentación donde no se dispone de shunt de potencia:
+                        <ol style="margin-left: 1.2rem; margin-top: 0.4rem; font-size: 0.95rem;">
+                            <li>Se mide la tensión a circuito abierto (en vacío) con un voltímetro digital de alta impedancia: <code>V<sub>oc</sub> = V<sub>th</sub></code>.</li>
+                            <li>Se conecta un reóstato o década resistiva calibrada entre A y B y se ajusta su valor hasta que la tensión caiga exactamente al 50% del valor de vacío (<code>V<sub>L</sub> = V<sub>oc</sub> / 2</code>). En ese punto exacto, por divisor de tensión, <code>R<sub>década</sub> = R<sub>th</sub> = R<sub>N</sub></code>.</li>
+                            <li>Se calcula de inmediato la corriente de Norton por transformación de fuentes: <code>I<sub>N</sub> = V<sub>oc</sub> / R<sub>N</sub></code>.</li>
+                        </ol>
+                    </div>
+                </div>
+
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 680 220" role="img" aria-label="Ensayo de laboratorio seguro con shunt calibrado">
+                            <defs>
+                                <marker id="dimArrowShuntTop" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                    <path d="M 5 0 L 0 8 L 10 8 z" fill="var(--info-color)" />
+                                </marker>
+                                <marker id="dimArrowShuntBottom" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                    <path d="M 0 2 L 10 2 L 5 10 z" fill="var(--info-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Red Bajo Ensayo (Caja de Laboratorio) -->
+                            <rect x="30" y="30" width="240" height="150" rx="12" fill="var(--secondary-color)" stroke="var(--primary-color)" stroke-width="2" />
+                            <text x="150" y="75" text-anchor="middle" class="component-label" fill="var(--primary-color)" font-size="14">CIRCUITO BAJO ENSAYO</text>
+                            <text x="150" y="98" text-anchor="middle" font-size="12" fill="var(--text-light)">(Caja Negra Activa)</text>
+                            <text x="150" y="125" text-anchor="middle" font-size="11" fill="var(--text-light)">Parámetros I<tspan dy="2" font-size="8">N</tspan> y R<tspan dy="2" font-size="8">N</tspan> a determinar</text>
+
+                            <!-- Bornes A y B -->
+                            <line x1="270" y1="65" x2="350" y2="65" class="wire-highlight" />
+                            <line x1="270" y1="155" x2="350" y2="155" class="wire-highlight" />
+                            <circle cx="350" cy="65" r="5" class="terminal-dot" />
+                            <text x="350" y="50" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="350" cy="155" r="5" class="terminal-dot" />
+                            <text x="350" y="178" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Resistencia Shunt Calibrada de muy bajo valor -->
+                            <line x1="350" y1="65" x2="430" y2="65" class="wire" />
+                            <line x1="430" y1="65" x2="430" y2="90" class="wire" />
+                            <rect x="421" y="90" width="18" height="40" rx="3" fill="#ffe082" stroke="#f57c00" stroke-width="2.5" />
+                            <line x1="430" y1="130" x2="430" y2="155" class="wire" />
+                            <line x1="430" y1="155" x2="350" y2="155" class="wire" />
+                            <text x="448" y="112" text-anchor="start" font-size="13" font-weight="bold" fill="#e65100">R<tspan dy="3" font-size="9">shunt</tspan></text>
+                            <text x="448" y="128" text-anchor="start" font-size="11" fill="var(--text-light)">(0,1 Ω patrón)</text>
+
+                            <!-- Voltímetro Digital de Alta Impedancia acoplado al shunt -->
+                            <line x1="430" y1="78" x2="520" y2="78" class="probe-red" />
+                            <line x1="430" y1="142" x2="520" y2="142" class="probe-black" />
+                            <circle cx="550" cy="110" r="26" class="meter-circle" />
+                            <text x="550" y="116" text-anchor="middle" font-size="16" fill="var(--success-color)" font-weight="bold">mV</text>
+                            <text x="585" y="115" text-anchor="start" class="component-label" fill="var(--success-color)">Voltímetro Digital</text>
+                            <text x="585" y="133" text-anchor="start" font-size="11" fill="var(--text-light)">(R<tspan dy="2" font-size="8">in</tspan> &gt; 10 MΩ)</text>
+
+                            <!-- Fórmula de deducción segura -->
+                            <rect x="290" y="185" width="280" height="26" rx="6" fill="var(--card-bg)" stroke="var(--border-color)" />
+                            <text x="430" y="202" text-anchor="middle" font-size="11.5" font-weight="bold" fill="var(--success-color)">I<tspan dy="2" font-size="8">N</tspan> ≈ V<tspan dy="2" font-size="8">shunt</tspan> / R<tspan dy="2" font-size="8">shunt</tspan> (Medición 100% Segura)</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Figura 4:</strong> Medición experimental segura de corriente de cortocircuito mediante shunt patrón de precisión y milivoltímetro de alta impedancia.</p>
+                    </div>
+
+            </section>
+
+            <!-- SECCIÓN 5: CASOS DE APLICACIÓN EN LA VIDA REAL Y EN LA INDUSTRIA -->
+            <section id="aplicaciones">
+                <h2>🏭 5. Casos de Aplicación en la Vida Real y en la Industria</h2>
+                <p>
+                    El Teorema de Norton no es una mera curiosidad analítica: constituye el estándar conceptual fundamental en ramas críticas de la ingeniería electrónica, la instrumentación industrial y las energías renovables:
+                </p>
+
+                <div class="sim-grid">
+                    <!-- Caso 1: Transistores -->
+                    <div class="box-callout box-info" style="margin: 0;">
+                        <span class="box-icon">📡</span>
+                        <div class="box-content">
+                            <span class="box-title">1. Modelado de Transistores BJT y MOSFET en Pequeña Señal</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                ¿Por qué los libros avanzados de electrónica analógica modelan los amplificadores con fuentes de corriente?
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                En el modelo híbrido-π de un transistor bipolar (BJT) o de efecto de campo (MOSFET), la salida de colector o drenador actúa físicamente como una fuente de corriente dependiente de la transconductancia (<code>i = g<sub>m</sub> · v<sub>in</sub></code>) en paralelo con la resistencia interna de salida <code>r<sub>o</sub></code> (resistencia Early). Es exactamente un <strong>circuito equivalente de Norton dependiente</strong>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Caso 2: Paneles Solares -->
+                    <div class="box-callout box-info" style="margin: 0;">
+                        <span class="box-icon">☀️</span>
+                        <div class="box-content">
+                            <span class="box-title">2. Celdas Solares y Generadores Fotovoltaicos</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                En la hoja de datos de cualquier panel solar fotovoltaico comercial, el parámetro primordial de corriente es <strong>I<sub>sc</sub> (Short-Circuit Current)</strong>.
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                Una celda solar iluminada es físicamente un generador de fotocorriente constante <code>I<sub>ph</sub></code> acoplado en paralelo con una unión semiconductora PN (diodo) y una resistencia shunt parásita <code>R<sub>sh</sub></code>. El circuito equivalente de Norton modela de forma natural la corriente de cortocircuito entregada al inversor o regulador MPPT.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Caso 3: Bucles 4-20 mA -->
+                    <div class="box-callout box-info" style="margin: 0;">
+                        <span class="box-icon">🏭</span>
+                        <div class="box-content">
+                            <span class="box-title">3. Lazos de Corriente Industriales 4-20 mA (Norma ISA / HART)</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                En refinerías, plantas petroquímicas y centrales eléctricas, los transmisores de presión, temperatura y caudal se conectan mediante lazos de 4 a 20 mA.
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                Al modelarse y funcionar como fuentes de corriente en paralelo con muy alta impedancia interna (Norton con <code>R<sub>N</sub> ➔ ∞</code>), la señal de corriente que viaja hacia el PLC es <strong>totalmente inmune a las caídas de tensión óhmicas</strong> provocadas por cientos de metros de cables de cobre en la planta.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Caso 4: Fuentes Conmutadas -->
+                    <div class="box-callout box-info" style="margin: 0;">
+                        <span class="box-icon">🔋</span>
+                        <div class="box-content">
+                            <span class="box-title">4. Fuentes Conmutadas en Modo de Control por Corriente (Current-Mode SMPS)</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                Los reguladores Buck, Boost y Flyback modernos emplean modulación por ancho de pulsos con bucle interno de corriente.
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                Bajo este lazo de control, la etapa de potencia conmutada se comporta ante la salida no como una fuente de tensión, sino como una <strong>fuente de corriente Norton</strong> inyectando carga al capacitor de filtrado y al receptor, eliminando un polo en la función de transferencia y facilitando la estabilidad del sistema.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Caso 5: Fotodiodos -->
+                    <div class="box-callout box-info" style="margin: 0; grid-column: 1 / -1;">
+                        <span class="box-icon">💡</span>
+                        <div class="box-content">
+                            <span class="box-title">5. Sensores Ópticos, Fotodiodos y Detectores de Radiación</span>
+                            <p style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                                Los fotodiodos operan en modo fotoconductor polarizados en inversa generando portadores libres al incidir fotones.
+                            </p>
+                            <p style="font-size: 0.93rem; color: var(--text-light); margin-bottom: 0;">
+                                El sensor se modela fielmente mediante una fuente de corriente Norton <code>i<sub>p</sub> = ℛ · P<sub>opt</sub></code> en paralelo con una alta resistencia dinámica de unión <code>R<sub>sh</sub> &gt; 100 MΩ</code> y una capacitancia de juntura <code>C<sub>j</sub></code>. Esta representación permite diseñar transimpedancias óptimas con amplificadores operacionales para telecomunicaciones por fibra óptica y espectrometría.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 6: EJEMPLOS PRÁCTICOS RESUELTOS PASO A PASO -->
+            <section id="ejemplos">
+                <h2>📐 6. Ejemplos Prácticos Resueltos Paso a Paso</h2>
+                <p>
+                    A continuación se desarrollan tres casos emblemáticos de complejidad gradual. Cada ejemplo cuenta con esquemas vectoriales dedicados para cada etapa del cálculo analítico:
+                </p>
+
+                <!-- Pestañas Interactivas de Ejemplos -->
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="switchExample('ej1', this)">Ejemplo 1: Divisor con Rama Serie</button>
+                    <button class="tab-btn" onclick="switchExample('ej2', this)">Ejemplo 2: Dos Fuentes de Tensión</button>
+                    <button class="tab-btn" onclick="switchExample('ej3', this)">Ejemplo 3: Puente de Wheatstone</button>
+                </div>
+
+                <!-- EJEMPLO 1 -->
+                <div id="ej1" class="tab-panel active">
+                    <h3>Ejemplo 1: Circuito con Fuente de CC, Divisor y Rama Serie</h3>
+                    <p>
+                        <strong>Enunciado:</strong> Dado el circuito alimentado por una fuente de continua de <code>E = 24 V</code>, con resistencias <code>R₁ = 6 Ω</code>, <code>R₂ = 12 Ω</code> y <code>R₃ = 4 Ω</code>, calcular el circuito equivalente de Norton respecto a los bornes A y B, y determinar la corriente, tensión y potencia disipada en una carga receptora <code>R<sub>L</sub> = 8 Ω</code>.
+                    </p>
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 640 220" role="img" aria-label="Circuito original del Ejemplo 1">
+                            <!-- Fuente E = 24 V -->
+                            <line x1="80" y1="60" x2="80" y2="88" class="wire" />
+                            <circle cx="80" cy="110" r="22" class="source-circle" />
+                            <text x="80" y="103" text-anchor="middle" class="source-symbol">+</text>
+                            <text x="80" y="123" text-anchor="middle" class="source-symbol">−</text>
+                            <line x1="80" y1="132" x2="80" y2="170" class="wire" />
+                            <text x="45" y="115" text-anchor="middle" class="component-label">E = 24 V</text>
+
+                            <!-- Rama superior R1 = 6 Ω -->
+                            <line x1="80" y1="60" x2="160" y2="60" class="wire" />
+                            <rect x="160" y="51" width="44" height="18" rx="3" class="resistor-box" />
+                            <text x="182" y="42" text-anchor="middle" class="component-label">R₁ = 6 Ω</text>
+                            <line x1="204" y1="60" x2="270" y2="60" class="wire" />
+
+                            <!-- Nodo C -->
+                            <circle cx="270" cy="60" r="3.5" fill="var(--text-color)" />
+                            <text x="270" y="48" text-anchor="middle" font-size="11" font-weight="bold">C</text>
+
+                            <!-- Rama paralela R2 = 12 Ω -->
+                            <line x1="270" y1="60" x2="270" y2="90" class="wire" />
+                            <rect x="261" y="90" width="18" height="42" rx="3" class="resistor-box" />
+                            <text x="290" y="115" text-anchor="start" class="component-label">R₂ = 12 Ω</text>
+                            <line x1="270" y1="132" x2="270" y2="170" class="wire" />
+
+                            <!-- Rama serie R3 = 4 Ω a borne A -->
+                            <line x1="270" y1="60" x2="340" y2="60" class="wire" />
+                            <rect x="340" y="51" width="44" height="18" rx="3" class="resistor-box" />
+                            <text x="362" y="42" text-anchor="middle" class="component-label">R₃ = 4 Ω</text>
+                            <line x1="384" y1="60" x2="470" y2="60" class="wire-highlight" />
+
+                            <!-- Retorno masa común a borne B -->
+                            <line x1="80" y1="170" x2="470" y2="170" class="wire-highlight" />
+
+                            <!-- Bornes A y B -->
+                            <circle cx="470" cy="60" r="4.5" class="terminal-dot" />
+                            <text x="470" y="48" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="470" cy="170" r="4.5" class="terminal-dot" />
+                            <text x="470" y="190" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Carga RL = 8 Ω -->
+                            <line x1="470" y1="60" x2="550" y2="60" class="wire" />
+                            <line x1="550" y1="60" x2="550" y2="90" class="wire" />
+                            <rect x="541" y="90" width="18" height="42" rx="3" class="load-resistor" />
+                            <line x1="550" y1="132" x2="550" y2="170" class="wire" />
+                            <line x1="550" y1="170" x2="470" y2="170" class="wire" />
+                            <text x="575" y="115" text-anchor="start" class="component-label" fill="var(--info-color)">R<tspan dy="2" font-size="10">L</tspan> = 8 Ω</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Esquema 1.1:</strong> Circuito original del Ejemplo 1 con divisor de tensión y rama serie.</p>
+                    </div>
+
+                    <!-- Paso 0 -->
+                    <h4>Paso 0: Desconexión de la carga R<sub>L</sub></h4>
+                    <p>Se retira la resistencia <code>R<sub>L</sub> = 8 Ω</code>, dejando abiertos los bornes A y B.</p>
+
+                    <!-- Paso 1 -->
+                    <h4>Paso 1: Cálculo de la Resistencia de Norton (R<sub>N</sub>)</h4>
+                    <p>
+                        Se sustituye la fuente de tensión <code>E = 24 V</code> por un cortocircuito (0 V). Mirando hacia el interior desde los terminales A y B:
+                    </p>
+                    <ul>
+                        <li>Las resistencias <code>R₁</code> y <code>R₂</code> quedan conectadas en paralelo:
+                            <br><code>R₁₂ = (R₁ · R₂) / (R₁ + R₂) = (6 · 12) / (6 + 12) = 72 / 18 = <strong>4,0 Ω</strong></code>.
+                        </li>
+                        <li>La resistencia <code>R₃</code> queda en serie con la combinación paralelo anterior:
+                            <br><code>R<sub>N</sub> = R₃ + R₁₂ = 4,0 + 4,0 = <strong>8,0 Ω</strong></code>.
+                        </li>
+                    </ul>
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 640 180" role="img" aria-label="Ejemplo 1 Paso 1: Cálculo de RN">
+                            <!-- Fuente cortocircuitada -->
+                            <line x1="80" y1="45" x2="80" y2="145" class="wire-short" />
+                            <text x="45" y="95" text-anchor="middle" font-size="11" fill="var(--success-color)" font-weight="bold">0 V (Corto)</text>
+
+                            <!-- R1 = 6 Ω -->
+                            <line x1="80" y1="45" x2="160" y2="45" class="wire" />
+                            <rect x="160" y="36" width="44" height="18" rx="3" class="resistor-box" />
+                            <text x="182" y="28" text-anchor="middle" class="component-label">R₁ = 6 Ω</text>
+                            <line x1="204" y1="45" x2="270" y2="45" class="wire" />
+
+                            <!-- R2 = 12 Ω en paralelo con R1 -->
+                            <line x1="270" y1="45" x2="270" y2="70" class="wire" />
+                            <rect x="261" y="70" width="18" height="42" rx="3" class="resistor-box" />
+                            <text x="288" y="95" text-anchor="start" class="component-label">R₂ = 12 Ω</text>
+                            <line x1="270" y1="112" x2="270" y2="145" class="wire" />
+
+                            <!-- R3 = 4 Ω en serie hacia A -->
+                            <line x1="270" y1="45" x2="350" y2="45" class="wire" />
+                            <rect x="350" y="36" width="44" height="18" rx="3" class="resistor-box" />
+                            <text x="372" y="28" text-anchor="middle" class="component-label">R₃ = 4 Ω</text>
+                            <line x1="394" y1="45" x2="490" y2="45" class="wire-highlight" />
+
+                            <!-- Retorno masa a B -->
+                            <line x1="80" y1="145" x2="490" y2="145" class="wire-highlight" />
+
+                            <!-- Bornes A y B con Óhmetro -->
+                            <circle cx="490" cy="45" r="4.5" class="terminal-dot" />
+                            <text x="490" y="32" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="490" cy="145" r="4.5" class="terminal-dot" />
+                            <text x="490" y="165" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Cálculo destacado -->
+                            <rect x="525" y="70" width="105" height="48" rx="8" fill="var(--secondary-color)" stroke="var(--primary-color)" />
+                            <text x="577" y="90" text-anchor="middle" font-size="11" fill="var(--text-light)">R<tspan dy="2" font-size="8">12</tspan> = 4 Ω</text>
+                            <text x="577" y="108" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--primary-color)">R<tspan dy="2" font-size="9">N</tspan> = 8 Ω</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Esquema 1.2:</strong> Cálculo de R<sub>N</sub>: R<sub>1</sub> || R<sub>2</sub> = 4 Ω, sumado en serie con R<sub>3</sub> = 4 Ω da R<sub>N</sub> = 8 Ω.</p>
+                    </div>
+
+
+                    <!-- Paso 2 -->
+                    <h4>Paso 2: Cálculo de la Corriente de Norton (I<sub>N</sub> = I<sub>sc</sub>)</h4>
+                    <p>
+                        Se restablece la fuente de 24 V y se coloca un cortocircuito directo entre los terminales A y B (<code>V<sub>AB</sub> = 0 V</code>). Al estar el borne B conectado a masa (0 V), el extremo derecho de <code>R₃</code> queda ahora conectado directamente a masa.
+                    </p>
+                    <p>
+                        Por lo tanto, entre el nodo central <strong>C</strong> y masa quedan en paralelo <code>R₂</code> (12 Ω) y <code>R₃</code> (4 Ω):
+                    </p>
+                    <ul>
+                        <li>Resistencia equivalente del paralelo entre R₂ y R₃:
+                            <br><code>R₂₃ = (R₂ · R₃) / (R₂ + R₃) = (12 · 4) / (12 + 4) = 48 / 16 = <strong>3,0 Ω</strong></code>.
+                        </li>
+                        <li>Resistencia total vista por la fuente de 24 V:
+                            <br><code>R<sub>total</sub> = R₁ + R₂₃ = 6,0 + 3,0 = <strong>9,0 Ω</strong></code>.
+                        </li>
+                        <li>Corriente total suministrada por la fuente:
+                            <br><code>I<sub>total</sub> = E / R<sub>total</sub> = 24 V / 9,0 Ω = <strong>2,667 A</strong> (8/3 A)</code>.
+                        </li>
+                        <li>Tensión en el nodo intermedio C respecto a masa:
+                            <br><code>V<sub>C</sub> = I<sub>total</sub> · R₂₃ = (8/3 A) · 3,0 Ω = <strong>8,0 V</strong></code>.
+                        </li>
+                        <li>La corriente de cortocircuito I<sub>N</sub> es la corriente que atraviesa R₃ hacia el borne A cortocircuitado:
+                            <br><code>I<sub>N</sub> = V<sub>C</sub> / R₃ = 8,0 V / 4,0 Ω = <strong>2,0 A</strong></code>.
+                        </li>
+                    </ul>
+
+                    <div class="box-callout box-tip">
+                        <span class="box-icon">✔️</span>
+                        <div class="box-content">
+                            <span class="box-title">Verificación Cruzada Inmediata con Thévenin:</span>
+                            En vacío, por divisor de tensión: <code>V<sub>th</sub> = 24 · [12 / (6 + 12)] = 16,0 V</code>. Como <code>R<sub>th</sub> = 8,0 Ω</code>:
+                            <br><code>I<sub>N</sub> = V<sub>th</sub> / R<sub>th</sub> = 16,0 V / 8,0 Ω = <strong>2,0 A</strong></code>. ¡Coincidencia matemática exacta!
+                        </div>
+                    </div>
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 640 220" role="img" aria-label="Ejemplo 1 Paso 2: Cálculo de IN con cortocircuito">
+                            <defs>
+                                <marker id="arrowGreenN11" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--success-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Fuente E = 24 V -->
+                            <line x1="80" y1="55" x2="80" y2="85" class="wire" />
+                            <circle cx="80" cy="107" r="22" class="source-circle" />
+                            <text x="80" y="100" text-anchor="middle" class="source-symbol">+</text>
+                            <text x="80" y="120" text-anchor="middle" class="source-symbol">−</text>
+                            <line x1="80" y1="129" x2="80" y2="165" class="wire" />
+                            <text x="45" y="112" text-anchor="middle" class="component-label">24 V</text>
+
+                            <!-- Corriente total Itot -->
+                            <line x1="80" y1="55" x2="150" y2="55" class="wire" />
+                            <line x1="105" y1="47" x2="135" y2="47" class="current-arrow" marker-end="url(#arrowGreenN11)" />
+                            <text x="120" y="38" text-anchor="middle" font-size="10" fill="var(--success-color)" font-weight="bold">I<tspan dy="2" font-size="8">tot</tspan></text>
+
+                            <!-- R1 = 6 Ω -->
+                            <rect x="150" y="46" width="44" height="18" rx="3" class="resistor-box" />
+                            <text x="172" y="38" text-anchor="middle" class="component-label">6 Ω</text>
+                            <line x1="194" y1="55" x2="260" y2="55" class="wire" />
+
+                            <!-- Nodo C con tensión VC = 8 V -->
+                            <circle cx="260" cy="55" r="4" fill="var(--primary-color)" />
+                            <text x="260" y="42" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--primary-color)">V<tspan dy="2" font-size="8">C</tspan> = 8 V</text>
+
+                            <!-- R2 = 12 Ω -->
+                            <line x1="260" y1="55" x2="260" y2="85" class="wire" />
+                            <rect x="251" y="85" width="18" height="42" rx="3" class="resistor-box" />
+                            <text x="240" y="110" text-anchor="end" class="component-label">12 Ω</text>
+                            <line x1="260" y1="127" x2="260" y2="165" class="wire" />
+
+                            <!-- R3 = 4 Ω -->
+                            <line x1="260" y1="55" x2="330" y2="55" class="wire" />
+                            <rect x="330" y="46" width="44" height="18" rx="3" class="resistor-box" />
+                            <text x="352" y="38" text-anchor="middle" class="component-label">4 Ω</text>
+                            <line x1="374" y1="55" x2="470" y2="55" class="wire-highlight" />
+
+                            <!-- Retorno de masa -->
+                            <line x1="80" y1="165" x2="470" y2="165" class="wire-highlight" />
+
+                            <!-- Bornes A y B CORTOCIRCUITADOS -->
+                            <circle cx="470" cy="55" r="4.5" class="terminal-dot" />
+                            <text x="470" y="42" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="470" cy="165" r="4.5" class="terminal-dot" />
+                            <text x="470" y="185" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Cable grueso verde de cortocircuito -->
+                            <line x1="470" y1="55" x2="470" y2="165" class="wire-short" />
+                            
+                            <!-- Flecha corriente de cortocircuito IN -->
+                            <line x1="495" y1="85" x2="495" y2="135" class="current-arrow" marker-end="url(#arrowGreenN11)" stroke-width="3" />
+                            <text x="510" y="110" text-anchor="start" font-size="15" font-weight="bold" fill="var(--success-color)">I<tspan dy="3" font-size="11">N</tspan> = 2,0 A</text>
+                            <text x="510" y="130" text-anchor="start" font-size="11" fill="var(--text-light)">(V<tspan dy="2" font-size="8">C</tspan> / R₃ = 8 V / 4 Ω)</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Esquema 1.3:</strong> Al cortocircuitar A con B, R<sub>3</sub> queda en paralelo con R<sub>2</sub>. La corriente por R<sub>3</sub> es I<sub>N</sub> = 2,0 A.</p>
+                    </div>
+
+
+                    <!-- Paso 3 -->
+                    <h4>Paso 3: Circuito Equivalente y Acoplamiento de la Carga (R<sub>L</sub> = 8 Ω)</h4>
+                    <p>
+                        Con <code>I<sub>N</sub> = 2,0 A</code> y <code>R<sub>N</sub> = 8,0 Ω</code> en paralelo con <code>R<sub>L</sub> = 8,0 Ω</code>:
+                    </p>
+                    <div class="formula-card">
+                        <div class="formula-main">I<sub>L</sub> = I<sub>N</sub> · [ R<sub>N</sub> / (R<sub>N</sub> + R<sub>L</sub>) ] = 2,0 A · [ 8 / (8 + 8) ] = <strong>1,0 A</strong></div>
+                        <div class="formula-desc">Corriente en la carga calculada mediante divisor de corriente</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-main">V<sub>L</sub> = I<sub>L</sub> · R<sub>L</sub> = 1,0 A · 8,0 Ω = <strong>8,0 V</strong></div>
+                        <div class="formula-desc">Tensión en bornes de la carga</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-main">P<sub>L</sub> = I<sub>L</sub><sup>2</sup> · R<sub>L</sub> = (1,0 A)<sup>2</sup> · 8,0 Ω = <strong>8,0 W</strong></div>
+                        <div class="formula-desc">Potencia activa en la carga. ¡Al ser R<sub>L</sub> = R<sub>N</sub> = 8 Ω, estamos en la condición de Máxima Transferencia de Potencia!</div>
+                    </div>
+                </div>
+
+                <!-- EJEMPLO 2 -->
+                <div id="ej2" class="tab-panel">
+                    <h3>Ejemplo 2: Circuito con Dos Fuentes Independientes de CC</h3>
+                    <p>
+                        <strong>Enunciado:</strong> Una red activa cuenta con dos ramas generadoras en paralelo conectadas a los bornes A y B: la rama izquierda posee <code>E₁ = 30 V</code> con <code>R₁ = 15 Ω</code>, y la rama derecha posee <code>E₂ = 10 V</code> con <code>R₂ = 10 Ω</code>. Determinar el equivalente de Norton y evaluar la potencia en <code>R<sub>L</sub> = 6 Ω</code>.
+                    </p>
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 680 230" role="img" aria-label="Circuito con dos fuentes independientes del Ejemplo 2">
+                            <!-- Riel Superior (A) e Inferior (B) -->
+                            <line x1="100" y1="55" x2="520" y2="55" class="wire-highlight" />
+                            <line x1="100" y1="185" x2="520" y2="185" class="wire-highlight" />
+
+                            <!-- Rama 1: E1 = 30 V, R1 = 15 Ω -->
+                            <line x1="140" y1="55" x2="140" y2="75" class="wire" />
+                            <rect x="131" y="75" width="18" height="40" rx="3" class="resistor-box" />
+                            <text x="118" y="100" text-anchor="end" class="component-label">R₁ = 15 Ω</text>
+                            <line x1="140" y1="115" x2="140" y2="130" class="wire" />
+                            <circle cx="140" cy="148" r="18" class="source-circle" />
+                            <text x="140" y="143" text-anchor="middle" class="source-symbol">+</text>
+                            <text x="140" y="159" text-anchor="middle" class="source-symbol">−</text>
+                            <line x1="140" y1="166" x2="140" y2="185" class="wire" />
+                            <text x="118" y="152" text-anchor="end" class="component-label">E₁ = 30 V</text>
+
+                            <!-- Rama 2: E2 = 10 V, R2 = 10 Ω -->
+                            <line x1="310" y1="55" x2="310" y2="75" class="wire" />
+                            <rect x="301" y="75" width="18" height="40" rx="3" class="resistor-box" />
+                            <text x="288" y="100" text-anchor="end" class="component-label">R₂ = 10 Ω</text>
+                            <line x1="310" y1="115" x2="310" y2="130" class="wire" />
+                            <circle cx="310" cy="148" r="18" class="source-circle" />
+                            <text x="310" y="143" text-anchor="middle" class="source-symbol">+</text>
+                            <text x="310" y="159" text-anchor="middle" class="source-symbol">−</text>
+                            <line x1="310" y1="166" x2="310" y2="185" class="wire" />
+                            <text x="288" y="152" text-anchor="end" class="component-label">E₂ = 10 V</text>
+
+                            <!-- Bornes A y B -->
+                            <circle cx="430" cy="55" r="4.5" class="terminal-dot" />
+                            <text x="430" y="42" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="430" cy="185" r="4.5" class="terminal-dot" />
+                            <text x="430" y="205" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Carga RL = 6 Ω -->
+                            <line x1="430" y1="55" x2="520" y2="55" class="wire" />
+                            <line x1="520" y1="55" x2="520" y2="95" class="wire" />
+                            <rect x="511" y="95" width="18" height="42" rx="3" class="load-resistor" />
+                            <line x1="520" y1="137" x2="520" y2="185" class="wire" />
+                            <line x1="520" y1="185" x2="430" y2="185" class="wire" />
+                            <text x="545" y="120" text-anchor="start" class="component-label" fill="var(--info-color)">R<tspan dy="2" font-size="10">L</tspan> = 6 Ω</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Esquema 2.1:</strong> Circuito del Ejemplo 2 con dos ramas generadoras independientes conectadas a la carga R<sub>L</sub>.</p>
+                    </div>
+
+                    <!-- Paso 1 -->
+                    <h4>Paso 1: Cálculo de R<sub>N</sub></h4>
+                    <p>
+                        Se cortocircuitan ambas fuentes de tensión (<code>E₁ = 0 V</code> y <code>E₂ = 0 V</code>). Mirando desde los terminales A y B, las resistencias <code>R₁</code> y <code>R₂</code> quedan conectadas en paralelo directo:
+                        <br><code>R<sub>N</sub> = (R₁ · R₂) / (R₁ + R₂) = (15 · 10) / (15 + 10) = 150 / 25 = <strong>6,0 Ω</strong></code>.
+                    </p>
+
+                    <!-- Paso 2 -->
+                    <h4>Paso 2: Cálculo de I<sub>N</sub> por Suma Directa de Corrientes de Cortocircuito</h4>
+                    <p>
+                        Al colocar un cable de cortocircuito entre el riel superior A y el inferior B (<code>V<sub>AB</sub> = 0 V</code>), cada una de las dos ramas con fuentes queda conectada directamente a cero voltios. Esto desacopla las ramas y permite calcular la corriente que aporta cada una de forma inmediata:
+                    </p>
+                    <ul>
+                        <li>Corriente de cortocircuito aportada por la rama 1 hacia A:
+                            <br><code>I<sub>sc1</sub> = E₁ / R₁ = 30 V / 15 Ω = <strong>2,0 A</strong></code>.
+                        </li>
+                        <li>Corriente de cortocircuito aportada por la rama 2 hacia A:
+                            <br><code>I<sub>sc2</sub> = E₂ / R₂ = 10 V / 10 Ω = <strong>1,0 A</strong></code>.
+                        </li>
+                    </ul>
+                    <p>
+                        Aplicando la Primera Ley de Kirchhoff (LCK) en el nodo superior A, la corriente total que ingresa al cable de cortocircuito es la suma algebraica directa:
+                    </p>
+                    <div class="formula-card">
+                        <div class="formula-main">I<sub>N</sub> = I<sub>sc1</sub> + I<sub>sc2</sub> = 2,0 A + 1,0 A = <strong>3,0 A</strong></div>
+                        <div class="formula-desc">Corriente de Norton obtenida de forma directa gracias a la topología paralela</div>
+                    </div>
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 680 210" role="img" aria-label="Ejemplo 2 Paso 2: Cálculo de IN mediante suma de corrientes de cortocircuito">
+                            <defs>
+                                <marker id="arrowGreenN13" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--success-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Riel Superior e Inferior -->
+                            <line x1="80" y1="45" x2="440" y2="45" class="wire-highlight" />
+                            <line x1="80" y1="175" x2="440" y2="175" class="wire-highlight" />
+
+                            <!-- Rama 1 Cortocircuitada: Isc1 = 30 V / 15 Ω = 2 A -->
+                            <line x1="120" y1="45" x2="120" y2="65" class="wire" />
+                            <rect x="111" y="65" width="18" height="38" rx="3" class="resistor-box" />
+                            <text x="98" y="88" text-anchor="end" class="component-label">15 Ω</text>
+                            <line x1="120" y1="103" x2="120" y2="118" class="wire" />
+                            <circle cx="120" cy="136" r="18" class="source-circle" />
+                            <text x="120" y="131" text-anchor="middle" class="source-symbol">+</text>
+                            <text x="120" y="147" text-anchor="middle" class="source-symbol">−</text>
+                            <line x1="120" y1="154" x2="120" y2="175" class="wire" />
+                            <line x1="145" y1="80" x2="145" y2="55" class="current-arrow" marker-end="url(#arrowGreenN13)" />
+                            <text x="155" y="70" text-anchor="start" font-size="11" font-weight="bold" fill="var(--success-color)">I<tspan dy="2" font-size="8">sc1</tspan> = 2 A</text>
+
+                            <!-- Rama 2 Cortocircuitada: Isc2 = 10 V / 10 Ω = 1 A -->
+                            <line x1="280" y1="45" x2="280" y2="65" class="wire" />
+                            <rect x="271" y="65" width="18" height="38" rx="3" class="resistor-box" />
+                            <text x="258" y="88" text-anchor="end" class="component-label">10 Ω</text>
+                            <line x1="280" y1="103" x2="280" y2="118" class="wire" />
+                            <circle cx="280" cy="136" r="18" class="source-circle" />
+                            <text x="280" y="131" text-anchor="middle" class="source-symbol">+</text>
+                            <text x="280" y="147" text-anchor="middle" class="source-symbol">−</text>
+                            <line x1="280" y1="154" x2="280" y2="175" class="wire" />
+                            <line x1="305" y1="80" x2="305" y2="55" class="current-arrow" marker-end="url(#arrowGreenN13)" />
+                            <text x="315" y="70" text-anchor="start" font-size="11" font-weight="bold" fill="var(--success-color)">I<tspan dy="2" font-size="8">sc2</tspan> = 1 A</text>
+
+                            <!-- Bornes A y B con cable de cortocircuito -->
+                            <circle cx="440" cy="45" r="4.5" class="terminal-dot" />
+                            <text x="440" y="32" text-anchor="middle" class="terminal-label">A</text>
+                            <circle cx="440" cy="175" r="4.5" class="terminal-dot" />
+                            <text x="440" y="195" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Cable grueso verde de cortocircuito -->
+                            <line x1="440" y1="45" x2="440" y2="175" class="wire-short" />
+                            
+                            <!-- Flecha corriente total IN -->
+                            <line x1="470" y1="80" x2="470" y2="135" class="current-arrow" marker-end="url(#arrowGreenN13)" stroke-width="3" />
+                            <text x="485" y="105" text-anchor="start" font-size="16" font-weight="bold" fill="var(--success-color)">I<tspan dy="3" font-size="11">N</tspan> = 3,0 A</text>
+                            <text x="485" y="125" text-anchor="start" font-size="11" fill="var(--text-light)">(I<tspan dy="2" font-size="8">sc1</tspan> + I<tspan dy="2" font-size="8">sc2</tspan> = 2 A + 1 A)</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Esquema 2.2:</strong> La corriente de cortocircuito I<sub>N</sub> es la suma directa e inmediata de las corrientes aportadas por cada rama independiente.</p>
+                    </div>
+
+
+                    <!-- Paso 3 -->
+                    <h4>Paso 3: Conexión de la Carga R<sub>L</sub> = 6 Ω</h4>
+                    <p>
+                        Dado que <code>R<sub>L</sub> = R<sub>N</sub> = 6,0 Ω</code>, la carga se encuentra adaptada en máxima transferencia de potencia:
+                    </p>
+                    <div class="formula-card">
+                        <div class="formula-main">I<sub>L</sub> = I<sub>N</sub> · [ R<sub>N</sub> / (R<sub>N</sub> + R<sub>L</sub>) ] = 3,0 A · (6 / 12) = <strong>1,5 A</strong></div>
+                        <div class="formula-desc">La corriente se reparte equitativamente en mitades idénticas</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-main">V<sub>L</sub> = 1,5 A · 6,0 Ω = <strong>9,0 V</strong> | P<sub>L</sub> = (1,5 A)<sup>2</sup> · 6,0 Ω = <strong>13,5 W</strong></div>
+                        <div class="formula-desc">Potencia máxima transferida a la carga</div>
+                    </div>
+                </div>
+
+                <!-- EJEMPLO 3 -->
+                <div id="ej3" class="tab-panel">
+                    <h3>Ejemplo 3: El Puente de Wheatstone Desequilibrado</h3>
+                    <p>
+                        <strong>Enunciado:</strong> Un puente de Wheatstone alimentado por una fuente de continua de <code>E = 24 V</code> está compuesto por <code>R₁ = 10 Ω</code>, <code>R₂ = 20 Ω</code>, <code>R₃ = 30 Ω</code> y <code>R₄ = 40 Ω</code>. Determinar la corriente de Norton <code>I<sub>N</sub></code> y la resistencia <code>R<sub>N</sub></code> vistas desde la diagonal entre los nodos A y B.
+                    </p>
+
+                    <div class="circuit-container">
+                        <svg class="circuit-svg" viewBox="0 0 680 250" role="img" aria-label="Puente de Wheatstone con diagonal cortocircuitada para calcular IN">
+                            <defs>
+                                <marker id="arrowGreenN14" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--success-color)" />
+                                </marker>
+                            </defs>
+
+                            <!-- Fuente E = 24 V a la izquierda -->
+                            <line x1="60" y1="40" x2="60" y2="105" class="wire" />
+                            <circle cx="60" cy="125" r="20" class="source-circle" />
+                            <text x="60" y="119" text-anchor="middle" class="source-symbol">+</text>
+                            <text x="60" y="137" text-anchor="middle" class="source-symbol">−</text>
+                            <line x1="60" y1="145" x2="60" y2="210" class="wire" />
+                            <text x="25" y="130" text-anchor="middle" class="component-label">24 V</text>
+
+                            <!-- Conexión superior (Polo positivo a nodo superior S) -->
+                            <line x1="60" y1="40" x2="300" y2="40" class="wire" />
+                            <circle cx="300" cy="40" r="4" fill="var(--primary-color)" />
+                            <text x="300" y="28" text-anchor="middle" font-size="11" font-weight="bold">S (+24 V)</text>
+
+                            <!-- Conexión inferior (Masa a nodo inferior M) -->
+                            <line x1="60" y1="210" x2="300" y2="210" class="wire" />
+                            <circle cx="300" cy="210" r="4" fill="var(--text-color)" />
+                            <text x="300" y="228" text-anchor="middle" font-size="11" font-weight="bold">M (0 V)</text>
+
+                            <!-- Rama 1: R1 = 10 Ω (S a A) -->
+                            <line x1="300" y1="40" x2="190" y2="70" class="wire" />
+                            <rect x="175" y="65" width="30" height="16" rx="3" class="resistor-box" transform="rotate(-30 190 73)" />
+                            <text x="145" y="68" text-anchor="end" class="component-label">R₁=10 Ω</text>
+                            <line x1="190" y1="76" x2="160" y2="125" class="wire" />
+
+                            <!-- Nodo A -->
+                            <circle cx="160" cy="125" r="5" class="terminal-dot" />
+                            <text x="135" y="130" text-anchor="middle" class="terminal-label">A</text>
+
+                            <!-- Rama 3: R3 = 30 Ω (A a M) -->
+                            <line x1="160" y1="125" x2="195" y2="175" class="wire" />
+                            <rect x="180" y="170" width="30" height="16" rx="3" class="resistor-box" transform="rotate(30 195 178)" />
+                            <text x="145" y="195" text-anchor="end" class="component-label">R₃=30 Ω</text>
+                            <line x1="195" y1="181" x2="300" y2="210" class="wire" />
+
+                            <!-- Rama 2: R2 = 20 Ω (S a B) -->
+                            <line x1="300" y1="40" x2="410" y2="70" class="wire" />
+                            <rect x="395" y="65" width="30" height="16" rx="3" class="resistor-box" transform="rotate(30 410 73)" />
+                            <text x="455" y="68" text-anchor="start" class="component-label">R₂=20 Ω</text>
+                            <line x1="410" y1="76" x2="440" y2="125" class="wire" />
+
+                            <!-- Nodo B -->
+                            <circle cx="440" cy="125" r="5" class="terminal-dot" />
+                            <text x="465" y="130" text-anchor="middle" class="terminal-label">B</text>
+
+                            <!-- Rama 4: R4 = 40 Ω (B a M) -->
+                            <line x1="440" y1="125" x2="405" y2="175" class="wire" />
+                            <rect x="390" y="170" width="30" height="16" rx="3" class="resistor-box" transform="rotate(-30 405 178)" />
+                            <text x="455" y="195" text-anchor="start" class="component-label">R₄=40 Ω</text>
+                            <line x1="405" y1="181" x2="300" y2="210" class="wire" />
+
+                            <!-- DIAGONAL CORTOCIRCUITADA A - B -->
+                            <line x1="160" y1="125" x2="440" y2="125" class="wire-short" stroke-width="4" />
+                            <circle cx="300" cy="125" r="3.5" fill="var(--success-color)" />
+                            <text x="300" y="112" text-anchor="middle" font-size="11" fill="var(--success-color)" font-weight="bold">Cortocircuito Diagonal A-B (V<tspan dy="2" font-size="8">AB</tspan> = 0 V; V<tspan dy="2" font-size="8">nodo AB</tspan> = 17,28 V a masa)</text>
+
+                            <!-- Flecha corriente IN que viaja de A hacia B -->
+                            <line x1="260" y1="138" x2="340" y2="138" class="current-arrow" marker-end="url(#arrowGreenN14)" stroke-width="2.5" />
+                            <text x="300" y="155" text-anchor="middle" font-size="14" font-weight="bold" fill="var(--success-color)">I<tspan dy="2" font-size="10">N</tspan> = 96,0 mA</text>
+                        </svg>
+                        <p class="circuit-caption"><strong>Esquema 3:</strong> Resolución del Puente de Wheatstone por Norton. El cortocircuito A-B unifica los nodos y permite calcular directamente I<sub>N</sub> = 96,0 mA.</p>
+                    </div>
+
+                    <!-- Paso 1 -->
+                    <h4>Paso 1: Cálculo de la Resistencia Interna R<sub>N</sub></h4>
+                    <p>
+                        Pasivando la fuente de 24 V (cortocircuito): el polo positivo queda unido a masa. Por lo tanto, <code>R₁</code> queda en paralelo con <code>R₃</code> en la rama izquierda, y <code>R₂</code> queda en paralelo con <code>R₄</code> en la derecha:
+                    </p>
+                    <ul>
+                        <li><code>R₁₃ = (10 · 30) / (10 + 30) = 300 / 40 = <strong>7,50 Ω</strong></code>.</li>
+                        <li><code>R₂₄ = (20 · 40) / (20 + 40) = 800 / 60 = 40 / 3 ≈ <strong>13,33 Ω</strong></code>.</li>
+                        <li>Resistencia total de Norton:
+                            <br><code>R<sub>N</sub> = R₁₃ + R₂₄ = 7,50 + 13,33 = <strong>20,83 Ω</strong> (125 / 6 Ω)</code>.
+                        </li>
+                    </ul>
+
+                    <!-- Paso 2 -->
+                    <h4>Paso 2: Cálculo de I<sub>N</sub> mediante Cortocircuito de la Diagonal A-B</h4>
+                    <p>
+                        Al colocar un cortocircuito ideal entre los terminales A y B, <strong>los nodos A y B se fusionan en un único supernodo común (nodo AB)</strong>:
+                    </p>
+                    <ul>
+                        <li>Las resistencias superiores <code>R₁</code> y <code>R₂</code> quedan en paralelo conectadas entre la fuente de 24 V y el nodo AB:
+                            <br><code>R₁₂ = (10 · 20) / (10 + 20) = 200 / 30 = 20 / 3 ≈ <strong>6,667 Ω</strong></code>.
+                        </li>
+                        <li>Las resistencias inferiores <code>R₃</code> y <code>R₄</code> quedan en paralelo conectadas entre el nodo AB y masa (0 V):
+                            <br><code>R₃₄ = (30 · 40) / (30 + 40) = 1200 / 70 = 120 / 7 ≈ <strong>17,143 Ω</strong></code>.
+                        </li>
+                        <li>Por divisor de tensión, el potencial del nodo unificado AB respecto a masa es:
+                            <br><code>V<sub>nodo(AB)</sub> = 24 V · [ R₃₄ / (R₁₂ + R₃₄) ] = 24 · [ (120/7) / (20/3 + 120/7) ] = 24 · 0,72 = <strong>17,28 V</strong></code> (tensión del supernodo AB respecto a masa).
+                        </li>
+                        <li>Corrientes que descienden por las ramas de la izquierda:
+                            <br>Por R₁: <code>I<sub>R1</sub> = (24 V − 17,28 V) / 10 Ω = 7,20 V / 10 Ω = <strong>0,672 A</strong></code>.
+                            <br>Por R₃: <code>I<sub>R3</sub> = 17,28 V / 30 Ω = <strong>0,576 A</strong></code>.
+                        </li>
+                    </ul>
+                    <p>
+                        Aplicando LCK en el nodo A original, la corriente que debe ingresar al cable de cortocircuito para equilibrar el nudo es:
+                    </p>
+                    <div class="formula-card">
+                        <div class="formula-main">I<sub>N</sub> = I<sub>R1</sub> − I<sub>R3</sub> = 0,672 A − 0,576 A = <strong>0,096 A = 96,0 mA</strong></div>
+                        <div class="formula-desc">Corriente de cortocircuito de Norton que fluye a través de la diagonal desde A hacia B</div>
+                    </div>
+
+                    <div class="box-callout box-tip">
+                        <span class="box-icon">🎯</span>
+                        <div class="box-content">
+                            <span class="box-title">Comprobación con Thévenin:</span>
+                            En vacío: <code>V<sub>A</sub> = 24 · (30/40) = 18,0 V</code> y <code>V<sub>B</sub> = 24 · (40/60) = 16,0 V</code> ⟹ <code>V<sub>th</sub> = 18,0 − 16,0 = 2,0 V</code>.
+                            <br>Corriente dual: <code>I<sub>N</sub> = V<sub>th</sub> / R<sub>N</sub> = 2,0 V / (125/6 Ω) = 12 / 125 A = <strong>0,096 A = 96,0 mA</strong></code>. ¡Resultado perfecto!
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 7: BANCO DE ENSAYO INTERACTIVO: SIMULADOR DE NORTON -->
+            <section id="simulador">
+                <h2>🧪 7. Banco de Ensayo Interactivo: Simulador de Norton</h2>
+                <p>
+                    ¡Experimentá vos mismo! Seleccioná la topología del circuito, ajustá los parámetros de las fuentes y resistores, y modificá la resistencia de carga <strong>R<sub>L</sub></strong> con el control deslizante.
+                    El simulador recalcula en tiempo real el equivalente de Norton, su dual de Thévenin, y grafica la <strong>curva analítica de potencia vs. R<sub>L</sub></strong> con indicación del punto de máxima transferencia.
+                </p>
+
+                <div class="simulator-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                        <h3 style="margin: 0;">🎛️ Banco de Trabajo Virtual</h3>
+                        <div>
+                            <label for="simTopologySelect" style="font-weight: 600; font-size: 0.9rem; margin-right: 0.4rem;">Topología:</label>
+                            <select id="simTopologySelect" onchange="changeTopology()" style="padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); font-weight: 600;">
+                                <option value="1">1. Divisor + Rama Serie</option>
+                                <option value="2">2. Dos Fuentes de CC en Paralelo</option>
+                                <option value="3">3. Puente de Wheatstone</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="sim-grid">
+                        <!-- Controles de Entrada -->
+                        <div class="sim-control-group">
+                            <div class="sim-control-title" id="simTitleControls">Parámetros del Circuito</div>
+                            
+                            <!-- Inputs Dinámicos para Topología 1 -->
+                            <div id="controlsTop1">
+                                <div class="control-row">
+                                    <label for="simE1">Fuente E:</label>
+                                    <div><input type="number" id="simE1" value="24" min="0" max="250" step="1" oninput="updateSim()"> <span style="font-weight: 600;">V</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR1_1">Resistor R₁:</label>
+                                    <div><input type="number" id="simR1_1" value="6" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR2_1">Resistor R₂:</label>
+                                    <div><input type="number" id="simR2_1" value="12" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR3_1">Resistor R₃:</label>
+                                    <div><input type="number" id="simR3_1" value="4" min="0" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Inputs Dinámicos para Topología 2 -->
+                            <div id="controlsTop2" style="display: none;">
+                                <div class="control-row">
+                                    <label for="simE1_2">Fuente E₁:</label>
+                                    <div><input type="number" id="simE1_2" value="30" min="0" max="250" step="1" oninput="updateSim()"> <span style="font-weight: 600;">V</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR1_2">Resistor R₁:</label>
+                                    <div><input type="number" id="simR1_2" value="15" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simE2_2">Fuente E₂:</label>
+                                    <div><input type="number" id="simE2_2" value="10" min="0" max="250" step="1" oninput="updateSim()"> <span style="font-weight: 600;">V</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR2_2">Resistor R₂:</label>
+                                    <div><input type="number" id="simR2_2" value="10" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Inputs Dinámicos para Topología 3 -->
+                            <div id="controlsTop3" style="display: none;">
+                                <div class="control-row">
+                                    <label for="simE_3">Fuente E:</label>
+                                    <div><input type="number" id="simE_3" value="24" min="0" max="250" step="1" oninput="updateSim()"> <span style="font-weight: 600;">V</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR1_3">Rama Izq. Sup. (R₁):</label>
+                                    <div><input type="number" id="simR1_3" value="10" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR3_3">Rama Izq. Inf. (R₃):</label>
+                                    <div><input type="number" id="simR3_3" value="30" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR2_3">Rama Der. Sup. (R₂):</label>
+                                    <div><input type="number" id="simR2_3" value="20" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <div class="control-row">
+                                    <label for="simR4_3">Rama Der. Inf. (R₄):</label>
+                                    <div><input type="number" id="simR4_3" value="40" min="0.5" max="500" step="0.5" oninput="updateSim()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                            </div>
+
+                            <!-- Control de la Carga RL -->
+                            <div style="margin-top: 1.2rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+                                <div class="control-row">
+                                    <label for="simRL" style="font-weight: 700; color: var(--info-color);">Carga Receptora (R<sub>L</sub>):</label>
+                                    <div><input type="number" id="simRL" value="8" min="0.1" max="1000" step="0.5" oninput="syncRLFromInput()"> <span style="font-weight: 600;">Ω</span></div>
+                                </div>
+                                <input type="range" id="simRLSlider" min="0.1" max="40" step="0.1" value="8" oninput="syncRLFromSlider()">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-light); margin-top: 0.2rem;">
+                                    <span>0.1 Ω</span>
+                                    <span>Carga Variable</span>
+                                    <span id="sliderMaxLabel">40 Ω</span>
+                                </div>
+                                <div style="margin-top: 0.6rem; text-align: center;">
+                                    <button class="btn-action-small" onclick="autoMatchRL()">🎯 Adaptar Carga (R<sub>L</sub> = R<sub>N</sub>)</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Resultados Calculados y Circuito Norton -->
+                        <div class="sim-control-group">
+                            <div class="sim-control-title" style="color: var(--primary-color);">Parámetros Equivalentes y Respuesta</div>
+                            
+                            <!-- Badges Equivalentes -->
+                            <div class="results-grid">
+                                <div class="result-badge">
+                                    <span class="lbl">Corriente de Norton (I<sub>N</sub>):</span>
+                                    <span class="val" id="outIN">2,00 A</span>
+                                </div>
+                                <div class="result-badge">
+                                    <span class="lbl">Sentido de Circulación:</span>
+                                    <span class="val" id="outPolarity" style="font-size: 0.95rem;">Hacia el borne A</span>
+                                </div>
+                                <div class="result-badge">
+                                    <span class="lbl">Resistencia de Norton (R<sub>N</sub>):</span>
+                                    <span class="val" id="outRN">8,00 Ω</span>
+                                </div>
+                                <div class="result-badge">
+                                    <span class="lbl">Dual Thévenin (V<sub>th</sub>):</span>
+                                    <span class="val" id="outVth" style="color: var(--code-color);">16,00 V</span>
+                                </div>
+                            </div>
+
+                            <!-- Variables en la Carga RL -->
+                            <div class="sim-control-title" style="margin-top: 1rem; color: var(--info-color);">Respuesta en la Carga (R<sub>L</sub>)</div>
+                            <div class="results-grid">
+                                <div class="result-badge">
+                                    <span class="lbl">Corriente en Carga (I<sub>L</sub>):</span>
+                                    <span class="val" id="outIL">1,000 A</span>
+                                </div>
+                                <div class="result-badge">
+                                    <span class="lbl">Tensión en Carga (V<sub>L</sub>):</span>
+                                    <span class="val" id="outVL">8,00 V</span>
+                                </div>
+                                <div class="result-badge">
+                                    <span class="lbl">Potencia en Carga (P<sub>L</sub>):</span>
+                                    <span class="val" id="outPL" style="color: var(--primary-color);">8,000 W</span>
+                                </div>
+                                <div class="result-badge">
+                                    <span class="lbl">Rendimiento (η):</span>
+                                    <span class="val" id="outEta">50,0 %</span>
+                                </div>
+                            </div>
+
+                            <!-- Banner de Alerta Dinámica -->
+                            <div id="simMatchNotice" style="margin-top: 1rem; padding: 0.6rem 0.8rem; border-radius: 8px; font-size: 0.88rem; font-weight: 700; display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico Canvas de la Curva de Potencia -->
+                    <div style="margin-top: 1.5rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 12px; padding: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
+                            <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-color);">Curva de Transferencia de Potencia: P<sub>L</sub> vs. R<sub>L</sub></span>
+                            <span style="font-size: 0.82rem; color: var(--text-light);">Máximo global analítico en R<sub>L</sub> = R<sub>N</sub></span>
+                        </div>
+                        <canvas id="powerCanvas" style="width: 100%; height: 200px; display: block; border-radius: 6px;"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 8: CRITERIOS CRÍTICOS Y ERRORES METODOLÓGICOS FRECUENTES -->
+            <section id="errores">
+                <h2>⚠️ 8. Criterios Críticos y Errores Metodológicos Frecuentes</h2>
+                <p>
+                    Durante el cálculo analítico y la implementación práctica del Teorema de Norton, surgen confusiones recurrentes de concepto. La siguiente tabla resume las precauciones analíticas y experimentales indispensables:
+                </p>
+
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Error Frecuente</th>
+                                <th>Consecuencia en el Análisis</th>
+                                <th>La Forma Correcta de Proceder</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">1. Pasivar fuentes de corriente como cortocircuitos</td>
+                                <td>Al unir con un cable la rama de una fuente de corriente, se altera la topología de la red y el cálculo de R<sub>N</sub> queda completamente arruinado.</td>
+                                <td style="text-align: left;">La fuente de corriente ideal se pasiva haciéndola un <strong>circuito abierto</strong> (se retira la rama, imponiendo <code>I = 0 A</code>). Solo las fuentes de tensión se cortocircuitan (<code>V = 0 V</code>).</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">2. Calcular I<sub>N</sub> en circuito abierto</td>
+                                <td>Confundir la corriente de Norton con la corriente que circula en vacío por la red sin cortocircuitar bornes.</td>
+                                <td style="text-align: left;">Por definición estricta, <strong>I<sub>N</sub> es la corriente de cortocircuito (I<sub>sc</sub>)</strong> que viaja por el conductor que une directamente los bornes A y B (<code>V<sub>AB</sub> = 0 V</code>).</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">3. Olvidar que el cortocircuito anula elementos en paralelo directo con A-B</td>
+                                <td>Intentar calcular corriente por resistores que están conectados en paralelo directo entre A y B cuando estos bornes están unidos por el cortocircuito.</td>
+                                <td style="text-align: left;">Cualquier resistencia acoplada en paralelo directo entre A y B queda <strong>cortocircuitada (puenteada)</strong>: su corriente es 0 A y toda la intensidad pasa por el cable de cortocircuito.</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">4. Confundir el numerador en la regla del divisor de corriente</td>
+                                <td>Aplicar erróneamente la fórmula del divisor de tensión colocando R<sub>L</sub> en el numerador: <code>I<sub>L</sub> ≠ I<sub>N</sub> · [R<sub>L</sub> / (R<sub>N</sub> + R<sub>L</sub>)]</code>.</td>
+                                <td style="text-align: left;">En el divisor de corriente, la corriente por una rama es proporcional a la resistencia de la <strong>OTRA rama</strong>: <code>I<sub>L</sub> = I<sub>N</sub> · [R<sub>N</sub> / (R<sub>N</sub> + R<sub>L</sub>)]</code>.</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">5. Medir I<sub>N</sub> con amperímetro directo en laboratorio</td>
+                                <td>Fusibles destruidos en el multímetro, chispazos o avería de transistores y pistas del circuito impreso por sobrecorrientes incontroladas.</td>
+                                <td style="text-align: left;">En redes de baja impedancia interna o fuentes de potencia, utilizar siempre el <strong>método de shunt calibrado</strong> o el método de dos cargas.</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align: left; font-weight: 700; color: var(--warning-color);">6. Pretender sumar potencias por superposición</td>
+                                <td>Sumar directamente potencias disipadas calculadas para cada fuente individualmente (<code>P ≠ P₁ + P₂</code>).</td>
+                                <td style="text-align: left;">La potencia eléctrica es una función no lineal cuadrática (<code>P = I² · R</code>). El principio de superposición solo es válido para corrientes y tensiones; la potencia se calcula únicamente al final sobre el circuito resultante.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 9: CASOS DE ESTUDIO Y EJERCICIOS PRÁCTICOS DE APLICACIÓN -->
+            <section id="propuestos">
+                <h2>📝 9. Casos de Estudio y Ejercicios Prácticos de Aplicación</h2>
+                <p>A continuación se proponen tres problemas de ingeniería eléctrica con memoria de cálculo analítica desplegable para su autocomprobación:</p>
+
+                <!-- Ejercicio 1 -->
+                <div class="quiz-card">
+                    <div class="quiz-question">
+                        <strong>Ejercicio 1:</strong> Una fuente de continua de <code>E = 36 V</code> alimenta un divisor de tensión formado por <code>R₁ = 18 Ω</code> y <code>R₂ = 36 Ω</code>. Desde el nodo intermedio entre ambas resistencias, una tercera resistencia <code>R₃ = 8 Ω</code> se conecta en serie hasta el terminal A. El terminal B va a masa común. Entre A y B se conecta una carga <code>R<sub>L</sub> = 10 Ω</code>.
+                        <br>Calcular mediante el Teorema de Norton: <code>I<sub>N</sub></code>, <code>R<sub>N</sub></code>, <code>I<sub>L</sub></code> y la potencia disipada <code>P<sub>L</sub></code>.
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAccordion('solN1')">
+                        <span>👁️ Ver Solución Paso a Paso</span>
+                        <span id="solN1-icon">▼</span>
+                    </button>
+                    <div id="solN1" class="accordion-content">
+                        <p><strong>Paso 1 (Cálculo de R<sub>N</sub>):</strong> Se pasiva la fuente de 36 V (cortocircuito a masa).
+                            <br><code>R₁₂ = (18 · 36) / (18 + 36) = 648 / 54 = 12,0 Ω</code>.
+                            <br>Sumando R₃ en serie con dicho paralelo: <code>R<sub>N</sub> = 12,0 + 8,0 = <strong>20,0 Ω</strong></code>.
+                        </p>
+                        <p><strong>Paso 2 (Cálculo de I<sub>N</sub>):</strong> Se coloca un cortocircuito ideal entre A y B (masa).
+                            <br>R₃ queda en paralelo con R₂: <code>R₂₃ = (36 · 8) / (36 + 8) = 288 / 44 = 72 / 11 ≈ 6,545 Ω</code>.
+                            <br>Resistencia total del circuito: <code>R<sub>total</sub> = 18 + 72/11 = 270 / 11 ≈ 24,545 Ω</code>.
+                            <br>Corriente total de la fuente: <code>I<sub>T</sub> = 36 / (270/11) = 396 / 270 = 1,467 A</code>.
+                            <br>Tensión en el nodo divisor: <code>V<sub>nodo</sub> = 1,467 A · (72/11 Ω) = 9,60 V</code>.
+                            <br>Corriente de cortocircuito por R₃: <code>I<sub>N</sub> = 9,60 V / 8 Ω = <strong>1,20 A</strong></code>.
+                            <br><em>(Verificación con Thévenin: V<sub>th</sub> = 36 · [36/54] = 24 V ⟹ I<sub>N</sub> = 24 V / 20 Ω = 1,20 A).</em>
+                        </p>
+                        <p><strong>Paso 3 (Respuesta con R<sub>L</sub> = 10 Ω):</strong>
+                            <br><code>I<sub>L</sub> = I<sub>N</sub> · [ R<sub>N</sub> / (R<sub>N</sub> + R<sub>L</sub>) ] = 1,20 A · [ 20 / (20 + 10) ] = 1,20 · (2/3) = <strong>0,80 A</strong></code>.
+                            <br><code>V<sub>L</sub> = 0,80 A · 10 Ω = <strong>8,0 V</strong></code>.
+                            <br><code>P<sub>L</sub> = (0,80 A)<sup>2</sup> · 10 Ω = <strong>6,40 W</strong></code>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 2 -->
+                <div class="quiz-card">
+                    <div class="quiz-question">
+                        <strong>Ejercicio 2:</strong> Un módulo industrial cuenta con dos ramas activas independientes en paralelo conectadas a los bornes A y B:
+                        <br>• Rama 1: Generador <code>E₁ = 48 V</code> con resistencia interna <code>R₁ = 12 Ω</code>.
+                        <br>• Rama 2: Generador <code>E₂ = 24 V</code> con resistencia interna <code>R₂ = 24 Ω</code>.
+                        <br>Determinar los parámetros equivalentes de Norton (<code>I<sub>N</sub></code> y <code>R<sub>N</sub></code>) y hallar la potencia transferida cuando se conecta una carga adaptada para máxima transferencia de potencia.
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAccordion('solN2')">
+                        <span>👁️ Ver Solución Paso a Paso</span>
+                        <span id="solN2-icon">▼</span>
+                    </button>
+                    <div id="solN2" class="accordion-content">
+                        <p><strong>Paso 1 (Resistencia interna R<sub>N</sub>):</strong> Cortocircuitando ambas fuentes:
+                            <br><code>R<sub>N</sub> = (R₁ · R₂) / (R₁ + R₂) = (12 · 24) / (12 + 24) = 288 / 36 = <strong>8,0 Ω</strong></code>.
+                        </p>
+                        <p><strong>Paso 2 (Corriente de cortocircuito I<sub>N</sub>):</strong> Al cortocircuitar los bornes A y B, cada rama entrega su corriente de cortocircuito de forma independiente:
+                            <br><code>I<sub>sc1</sub> = 48 V / 12 Ω = 4,0 A</code>.
+                            <br><code>I<sub>sc2</sub> = 24 V / 24 Ω = 1,0 A</code>.
+                            <br>Suma total por LCK: <code>I<sub>N</sub> = I<sub>sc1</sub> + I<sub>sc2</sub> = 4,0 A + 1,0 A = <strong>5,0 A</strong></code>.
+                        </p>
+                        <p><strong>Paso 3 (Máxima Transferencia de Potencia):</strong>
+                            <br>La carga debe ser igual a la resistencia interna: <code>R<sub>L</sub> = R<sub>N</sub> = <strong>8,0 Ω</strong></code>.
+                            <br>Corriente por la carga: <code>I<sub>L</sub> = I<sub>N</sub> / 2 = 5,0 A / 2 = <strong>2,5 A</strong></code>.
+                            <br>Tensión en bornes: <code>V<sub>L</sub> = 2,5 A · 8,0 Ω = <strong>20,0 V</strong></code>.
+                            <br>Potencia máxima disipada: <code>P<sub>L, máx</sub> = (2,5 A)<sup>2</sup> · 8,0 Ω = <strong>50,0 W</strong></code>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Ejercicio 3 -->
+                <div class="quiz-card">
+                    <div class="quiz-question">
+                        <strong>Ejercicio 3 (Caracterización de Laboratorio):</strong> Se realiza un ensayo experimental sobre una fuente de alimentación de laboratorio encapsulada:
+                        <br>• En vacío (circuito abierto sin carga), el voltímetro mide <code>V<sub>oc</sub> = 15,0 V</code>.
+                        <br>• Al acoplar una resistencia patrón calibrada <code>R<sub>L</sub> = 30 Ω</code>, el amperímetro registra una corriente de <code>I<sub>L</sub> = 0,375 A</code>.
+                        <br>Determinar: el equivalente de Norton (<code>I<sub>N</sub></code> y <code>R<sub>N</sub></code>) y la potencia máxima absoluta que la fuente puede suministrar a una carga.
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAccordion('solN3')">
+                        <span>👁️ Ver Solución Paso a Paso</span>
+                        <span id="solN3-icon">▼</span>
+                    </button>
+                    <div id="solN3" class="accordion-content">
+                        <p><strong>Paso 1 (Deducción de R<sub>N</sub>):</strong>
+                            <br>La tensión sobre la carga en el ensayo es: <code>V<sub>L</sub> = I<sub>L</sub> · R<sub>L</sub> = 0,375 A · 30 Ω = 11,25 V</code>.
+                            <br>La caída de tensión interna provocada por la carga es: <code>ΔV = V<sub>oc</sub> − V<sub>L</sub> = 15,0 V − 11,25 V = 3,75 V</code>.
+                            <br>Por lo tanto: <code>R<sub>N</sub> = R<sub>th</sub> = ΔV / I<sub>L</sub> = 3,75 V / 0,375 A = <strong>10,0 Ω</strong></code>.
+                        </p>
+                        <p><strong>Paso 2 (Corriente de Norton I<sub>N</sub>):</strong>
+                            <br><code>I<sub>N</sub> = V<sub>oc</sub> / R<sub>N</sub> = 15,0 V / 10,0 Ω = <strong>1,50 A</strong></code>.
+                        </p>
+                        <p><strong>Paso 3 (Potencia Máxima):</strong>
+                            <br>Se obtiene para <code>R<sub>L</sub> = R<sub>N</sub> = 10,0 Ω</code>:
+                            <br><code>P<sub>L, máx</sub> = (I<sub>N</sub><sup>2</sup> · R<sub>N</sub>) / 4 = (1,50<sup>2</sup> · 10,0) / 4 = (2,25 · 10) / 4 = <strong>5,625 W</strong></code>.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN 10: CUESTIONARIO DE VALIDACIÓN Y AUTOEVALUACIÓN CONCEPTUAL -->
+            <section id="quiz">
+                <h2>🎯 10. Cuestionario de Validación y Autoevaluación Conceptual</h2>
+                <p>Seleccione la opción correcta para cada una de las proposiciones técnicas planteadas:</p>
+
+                <div class="quiz-container">
+                    <!-- Pregunta 1 -->
+                    <div class="quiz-card" id="q1">
+                        <div class="quiz-question">1. Al momento de calcular la resistencia de Norton (R<sub>N</sub>), ¿qué se debe hacer con las fuentes independientes de CORRIENTE de la red?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(1, 0)">A) Sustituirlas por un cortocircuito (un cable de resistencia cero, 0 V).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(1, 1)">B) Sustituirlas por un circuito abierto (desconectarlas, rama interrumpida con corriente 0 A).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(1, 2)">C) Dejarlas conectadas inyectando su corriente nominal.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(1, 3)">D) Multiplicar su corriente por la resistencia de carga.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q1-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 2 -->
+                    <div class="quiz-card" id="q2">
+                        <div class="quiz-question">2. La corriente de Norton (I<sub>N</sub>) se define analítica y experimentalmente como:</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(2, 0)">A) La corriente que circula por la red cuando los bornes A y B están en circuito abierto.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(2, 1)">B) La corriente que circula a través de un cortocircuito ideal conectado directamente entre los terminales A y B.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(2, 2)">C) La corriente total que entrega la batería principal del circuito.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(2, 3)">D) La corriente de carga cuando R<sub>L</sub> tiende a infinito.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q2-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 3 -->
+                    <div class="quiz-card" id="q3">
+                        <div class="quiz-question">3. Si un circuito equivalente de Thévenin tiene V<sub>th</sub> = 24 V y R<sub>th</sub> = 6 Ω, ¿cuál es su equivalente dual de Norton exacto?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(3, 0)">A) Una fuente de tensión de 24 V en paralelo con 6 Ω.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(3, 1)">B) Una fuente de corriente de 4 A en paralelo con una resistencia de 6 Ω.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(3, 2)">C) Una fuente de corriente de 144 A en serie con 6 Ω.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(3, 3)">D) Una fuente de corriente de 0,25 A en paralelo con 36 Ω.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q3-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 4 -->
+                    <div class="quiz-card" id="q4">
+                        <div class="quiz-question">4. En el circuito equivalente de Norton, cuando se acopla una carga R<sub>L</sub>, ¿cómo se calcula la corriente por dicha carga (I<sub>L</sub>)?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(4, 0)">A) I<sub>L</sub> = I<sub>N</sub> · [ R<sub>L</sub> / (R<sub>N</sub> + R<sub>L</sub>) ]</button>
+                            <button class="quiz-btn" onclick="checkAnswer(4, 1)">B) I<sub>L</sub> = I<sub>N</sub> · [ R<sub>N</sub> / (R<sub>N</sub> + R<sub>L</sub>) ] (Regla del divisor de corriente con R<sub>N</sub> en el numerador)</button>
+                            <button class="quiz-btn" onclick="checkAnswer(4, 2)">C) I<sub>L</sub> = I<sub>N</sub> · (R<sub>N</sub> + R<sub>L</sub>)</button>
+                            <button class="quiz-btn" onclick="checkAnswer(4, 3)">D) I<sub>L</sub> = I<sub>N</sub> / (R<sub>N</sub> · R<sub>L</sub>)</button>
+                        </div>
+                        <div class="quiz-feedback" id="q4-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 5 -->
+                    <div class="quiz-card" id="q5">
+                        <div class="quiz-question">5. En un ensayo experimental de laboratorio sobre una red real de potencia, ¿por qué está contraindicado medir I<sub>N</sub> conectando un amperímetro directo entre A y B?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(5, 0)">A) Porque el amperímetro al tener resistencia casi nula provoca un cortocircuito severo que puede fundir su fusible o destruir componentes.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(5, 1)">B) Porque el amperímetro solo puede medir corriente alterna senoidal.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(5, 2)">C) Porque los cables del tester triplican el valor de la corriente de Norton.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(5, 3)">D) Porque la resistencia de Norton se vuelve negativa bajo cortocircuito.</button>
+                        </div>
+                        <div class="quiz-feedback" id="q5-fb"></div>
+                    </div>
+
+                    <!-- Pregunta 6 -->
+                    <div class="quiz-card" id="q6">
+                        <div class="quiz-question">6. En la condición de máxima transferencia de potencia de un equivalente Norton (R<sub>L</sub> = R<sub>N</sub>), ¿qué fracción de la corriente total de Norton (I<sub>N</sub>) circula por la carga receptora?</div>
+                        <div class="quiz-options">
+                            <button class="quiz-btn" onclick="checkAnswer(6, 0)">A) Toda la corriente (100% de I<sub>N</sub>).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(6, 1)">B) Exactamente la mitad de la corriente (I<sub>L</sub> = I<sub>N</sub> / 2), con un rendimiento energético del 50%.</button>
+                            <button class="quiz-btn" onclick="checkAnswer(6, 2)">C) Cero corriente (I<sub>L</sub> = 0 A).</button>
+                            <button class="quiz-btn" onclick="checkAnswer(6, 3)">D) El doble de la corriente de Norton (2 · I<sub>N</sub>).</button>
+                        </div>
+                        <div class="quiz-feedback" id="q6-fb"></div>
+                    </div>
+
+                    <div id="quizScoreBanner" class="quiz-score-banner" style="display: none;">
+                        <span id="quizScoreText"></span>
+                        <div style="margin-top: 0.8rem;">
+                            <button class="btn-action-small" onclick="resetQuiz()">🔄 Reiniciar Autoevaluación</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas | Plataforma de Teoría y Simulación de Circuitos Eléctricos</p>
+    </footer>
+
+    <!-- Scripts de Interactividad, Simulador y Modo Oscuro -->
+    <script>
+        // --- 1. Dark Mode Toggle (Compatible con todo el sitio) ---
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                themeToggle.innerHTML = '☀️';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                themeToggle.innerHTML = '🌙';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+            if (typeof updateSim === 'function') {
+                updateSim();
+            }
+        }
+
+        const currentMode = localStorage.getItem('darkMode');
+        if (currentMode === 'disabled') {
+            setDarkMode(false);
+        } else {
+            setDarkMode(true);
+        }
+
+        themeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+
+        // --- 2. Pestañas de Ejemplos ---
+        function switchExample(tabId, btn) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            panels.forEach(p => p.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+
+            const targetPanel = document.getElementById(tabId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+
+            if (btn) {
+                btn.classList.add('active');
+            }
+        }
+
+        // --- 3. Acordeones / Desplegables de Soluciones ---
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(id + '-icon');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                icon.textContent = '▼';
+            } else {
+                content.style.display = 'block';
+                icon.textContent = '▲';
+            }
+        }
+
+        // --- 4. Simulador Interactivo Multitopología de Norton ---
+        function changeTopology() {
+            const sel = document.getElementById('simTopologySelect').value;
+            document.getElementById('controlsTop1').style.display = sel === '1' ? 'block' : 'none';
+            document.getElementById('controlsTop2').style.display = sel === '2' ? 'block' : 'none';
+            document.getElementById('controlsTop3').style.display = sel === '3' ? 'block' : 'none';
+
+            const slider = document.getElementById('simRLSlider');
+            slider.min = '0.1';
+            slider.step = '0.1';
+            if (sel === '1') {
+                slider.max = '40';
+                slider.value = '8';
+                document.getElementById('simRL').value = '8';
+            } else if (sel === '2') {
+                slider.max = '30';
+                slider.value = '6';
+                document.getElementById('simRL').value = '6';
+            } else if (sel === '3') {
+                slider.max = '60';
+                slider.value = '20.8';
+                document.getElementById('simRL').value = '20.8';
+            }
+
+            updateSim();
+        }
+
+        function syncRLFromSlider() {
+            const slider = document.getElementById('simRLSlider');
+            document.getElementById('simRL').value = slider.value;
+            updateSim();
+        }
+
+        function syncRLFromInput() {
+            const input = document.getElementById('simRL');
+            const val = Math.max(0.01, parseFloat(input.value) || 0.1);
+            const slider = document.getElementById('simRLSlider');
+            if (val > parseFloat(slider.max)) {
+                slider.max = Math.ceil(val * 1.5);
+                document.getElementById('sliderMaxLabel').textContent = slider.max + ' Ω';
+            }
+            if (val < parseFloat(slider.min)) {
+                slider.min = Math.min(0.1, val);
+            }
+            slider.value = val;
+            updateSim();
+        }
+
+        function autoMatchRL() {
+            const currentRN = window._lastRN || 8;
+            const targetVal = parseFloat(currentRN.toFixed(2));
+            const slider = document.getElementById('simRLSlider');
+            if (targetVal > parseFloat(slider.max)) {
+                slider.max = Math.ceil(targetVal * 1.5);
+                document.getElementById('sliderMaxLabel').textContent = slider.max + ' Ω';
+            }
+            if (targetVal < parseFloat(slider.min)) {
+                slider.min = Math.min(0.1, targetVal);
+            }
+            slider.value = targetVal;
+            document.getElementById('simRL').value = targetVal;
+            updateSim();
+        }
+
+        function updateSim() {
+            const topo = document.getElementById('simTopologySelect').value;
+            const RL = Math.max(0.01, parseFloat(document.getElementById('simRL').value) || 0.1);
+
+            let IN = 0;
+            let RN = 0;
+            let polarityDesc = "Hacia el borne A (A sale, B entra)";
+
+            if (topo === '1') {
+                const E = parseFloat(document.getElementById('simE1').value) || 0;
+                const R1 = Math.max(0.01, parseFloat(document.getElementById('simR1_1').value) || 0.1);
+                const R2 = Math.max(0.01, parseFloat(document.getElementById('simR2_1').value) || 0.1);
+                const R3 = Math.max(0, parseFloat(document.getElementById('simR3_1').value) || 0);
+
+                const R12 = (R1 * R2) / (R1 + R2);
+                RN = R3 + R12;
+
+                // Tensión de Thévenin dual para determinar IN = Vth / RN
+                const Vth = E * (R2 / (R1 + R2));
+                IN = RN > 0 ? (Vth / RN) : 0;
+                polarityDesc = "Hacia el borne A (A sale, B entra)";
+            } else if (topo === '2') {
+                const E1 = parseFloat(document.getElementById('simE1_2').value) || 0;
+                const R1 = Math.max(0.01, parseFloat(document.getElementById('simR1_2').value) || 0.1);
+                const E2 = parseFloat(document.getElementById('simE2_2').value) || 0;
+                const R2 = Math.max(0.01, parseFloat(document.getElementById('simR2_2').value) || 0.1);
+
+                RN = (R1 * R2) / (R1 + R2);
+                const Isc1 = E1 / R1;
+                const Isc2 = E2 / R2;
+                IN = Isc1 + Isc2;
+                polarityDesc = "Hacia el riel A (suma de ambas ramas)";
+            } else if (topo === '3') {
+                const E = parseFloat(document.getElementById('simE_3').value) || 0;
+                const R1 = Math.max(0.01, parseFloat(document.getElementById('simR1_3').value) || 0.1);
+                const R3 = Math.max(0.01, parseFloat(document.getElementById('simR3_3').value) || 0.1);
+                const R2 = Math.max(0.01, parseFloat(document.getElementById('simR2_3').value) || 0.1);
+                const R4 = Math.max(0.01, parseFloat(document.getElementById('simR4_3').value) || 0.1);
+
+                const VA = E * (R3 / (R1 + R3));
+                const VB = E * (R4 / (R2 + R4));
+                const Vth = VA - VB;
+                RN = ((R1 * R3) / (R1 + R3)) + ((R2 * R4) / (R2 + R4));
+                IN = RN > 0 ? (Vth / RN) : 0;
+
+                if (Math.abs(IN) < 1e-4) {
+                    polarityDesc = "Puente en equilibrio (IN = 0 A)";
+                } else if (IN > 0) {
+                    polarityDesc = "De nodo A hacia B";
+                } else {
+                    polarityDesc = "De nodo B hacia A";
+                }
+            }
+
+            RN = Math.max(0.001, RN);
+            window._lastRN = RN;
+
+            // Ajuste dinámico del slider
+            const slider = document.getElementById('simRLSlider');
+            const recommendedMax = Math.max(30, Math.ceil(RN * 2.5 / 10) * 10);
+            if (parseFloat(slider.max) < recommendedMax) {
+                slider.max = recommendedMax;
+            }
+            document.getElementById('sliderMaxLabel').textContent = slider.max + ' Ω';
+
+            // Magnitudes en la carga mediante divisor de corriente
+            const totalR = RN + RL;
+            const IL = IN * (RN / totalR);
+            const VL = IL * RL;
+            const PL = IL * IL * RL;
+            const Vth_dual = IN * RN;
+            const eta = (Math.abs(IN) > 1e-6 && totalR > 0) ? (RN / totalR) * 100 : 0;
+
+            // Formateo de Corriente IN
+            const absIN = Math.abs(IN);
+            document.getElementById('outIN').textContent = (absIN < 0.1 ? (absIN * 1000).toFixed(1) + ' mA' : absIN.toFixed(3) + ' A');
+            document.getElementById('outPolarity').textContent = polarityDesc;
+            document.getElementById('outRN').textContent = RN.toFixed(2) + ' Ω';
+            document.getElementById('outVth').textContent = Math.abs(Vth_dual).toFixed(2) + ' V';
+
+            // Formateo en la carga
+            const absIL = Math.abs(IL);
+            document.getElementById('outIL').textContent = (absIL < 0.1 ? (absIL * 1000).toFixed(1) + ' mA' : absIL.toFixed(3) + ' A');
+            document.getElementById('outVL').textContent = Math.abs(VL).toFixed(2) + ' V';
+            document.getElementById('outPL').textContent = (PL < 0.1 ? (PL * 1000).toFixed(1) + ' mW' : PL.toFixed(3) + ' W');
+            document.getElementById('outEta').textContent = eta.toFixed(1) + ' %';
+
+            // Aviso de condición de adaptación / equilibrio
+            const notice = document.getElementById('simMatchNotice');
+            if (Math.abs(IN) < 1e-4) {
+                notice.style.display = 'block';
+                notice.style.backgroundColor = 'var(--info-bg)';
+                notice.style.color = 'var(--info-color)';
+                notice.innerHTML = '⚖️ ¡Puente Equilibrado! La corriente de cortocircuito entre A y B es 0 A (puente balanceado).';
+            } else if (Math.abs(RL - RN) < (RN * 0.06 + 0.15)) {
+                notice.style.display = 'block';
+                notice.style.backgroundColor = 'var(--success-bg)';
+                notice.style.color = 'var(--success-color)';
+                notice.innerHTML = '🎯 ¡Condición de Máxima Potencia (R<sub>L</sub> ≈ R<sub>N</sub> = ' + RN.toFixed(1) + ' Ω)! Rendimiento de transmisión: 50%.';
+            } else {
+                notice.style.display = 'none';
+            }
+
+            drawPowerCurve(IN, RN, RL);
+        }
+
+        function drawPowerCurve(IN, RN, RL) {
+            const canvas = document.getElementById('powerCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const rect = canvas.getBoundingClientRect();
+            const displayW = Math.round(rect.width || canvas.parentElement.clientWidth || 700);
+            const displayH = 200;
+            const dpr = window.devicePixelRatio || 1;
+
+            if (canvas.width !== displayW * dpr || canvas.height !== displayH * dpr) {
+                canvas.width = displayW * dpr;
+                canvas.height = displayH * dpr;
+            }
+
+            ctx.save();
+            ctx.scale(dpr, dpr);
+
+            const w = displayW;
+            const h = displayH;
+
+            const isDark = body.classList.contains('dark-mode');
+            const textColor = isDark ? '#e2e2ec' : '#2b2124';
+            const axisColor = isDark ? '#444455' : '#e0c0c5';
+            const curveColor = isDark ? '#bfaee3' : '#e56b73';
+            const highlightColor = isDark ? '#ffb74d' : '#e65100';
+
+            ctx.clearRect(0, 0, w, h);
+
+            const padLeft = 55;
+            const padRight = 35;
+            const padBottom = 32;
+            const padTop = 22;
+            const graphW = w - padLeft - padRight;
+            const graphH = h - padTop - padBottom;
+
+            const isZeroPower = Math.abs(IN) < 1e-4;
+            const theoreticalPmax = isZeroPower ? 0 : (IN * IN * RN) / 4;
+
+            const maxRL = Math.max(RN * 3.2, RL * 1.25, 20);
+            const scaleP = isZeroPower ? 1.0 : (theoreticalPmax * 1.25);
+
+            // Ejes
+            ctx.strokeStyle = axisColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(padLeft, padTop);
+            ctx.lineTo(padLeft, h - padBottom);
+            ctx.lineTo(w - padRight, h - padBottom);
+            ctx.stroke();
+
+            // Etiquetas de Ejes
+            ctx.fillStyle = textColor;
+            ctx.font = '11px sans-serif';
+            ctx.fillText('0', padLeft - 15, h - padBottom + 4);
+            ctx.fillText('P (W)', 10, padTop + 12);
+            ctx.fillText('RL (Ω)', w - padRight - 35, h - padBottom + 22);
+
+            if (isZeroPower) {
+                ctx.fillStyle = textColor;
+                ctx.font = 'bold 13px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Puente en equilibrio: IN = 0 A (Potencia nula en toda la curva)', padLeft + graphW / 2, padTop + graphH / 2);
+                ctx.restore();
+                return;
+            }
+
+            // Dibujar Curva P vs RL
+            ctx.strokeStyle = curveColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            const steps = 140;
+            for (let i = 0; i <= steps; i++) {
+                const r = (i / steps) * maxRL;
+                const il = (IN * RN) / (RN + r);
+                const p = il * il * r;
+                const x = padLeft + (r / maxRL) * graphW;
+                const y = (h - padBottom) - (p / scaleP) * graphH;
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+
+            // Marcar Pico Teórico (RL = RN)
+            const peakX = padLeft + (RN / maxRL) * graphW;
+            const peakY = (h - padBottom) - (theoreticalPmax / scaleP) * graphH;
+
+            ctx.strokeStyle = isDark ? '#7dd3ad' : '#2e7d32';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(peakX, h - padBottom);
+            ctx.lineTo(peakX, peakY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = isDark ? '#7dd3ad' : '#2e7d32';
+            ctx.beginPath();
+            ctx.arc(peakX, peakY, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            const pUnit = theoreticalPmax < 0.01 ? (theoreticalPmax * 1000).toFixed(1) + ' mW' : theoreticalPmax.toFixed(2) + ' W';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Pmax = ' + pUnit + ' (RL = ' + RN.toFixed(1) + ' Ω)', Math.min(w - padRight - 50, Math.max(padLeft + 60, peakX)), peakY - 10);
+
+            // Marcar Punto Actual (RL seleccionado)
+            const curIL = (IN * RN) / (RN + RL);
+            const curP = curIL * curIL * RL;
+            const curX = padLeft + (RL / maxRL) * graphW;
+            const curY = (h - padBottom) - (curP / scaleP) * graphH;
+
+            if (curX <= w - padRight) {
+                ctx.strokeStyle = highlightColor;
+                ctx.lineWidth = 1.2;
+                ctx.setLineDash([2, 2]);
+                ctx.beginPath();
+                ctx.moveTo(curX, h - padBottom);
+                ctx.lineTo(curX, curY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = highlightColor;
+                ctx.beginPath();
+                ctx.arc(curX, curY, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                const curPUnit = curP < 0.01 ? (curP * 1000).toFixed(1) + ' mW' : curP.toFixed(2) + ' W';
+                ctx.fillStyle = textColor;
+                ctx.font = '10px sans-serif';
+                ctx.fillText(RL.toFixed(1) + ' Ω; ' + curPUnit, curX, Math.max(padTop + 15, curY + 18));
+            }
+
+            ctx.restore();
+        }
+
+        // --- 5. Cuestionario / Quiz de Autoevaluación ---
+        const quizAnswers = {
+            1: {
+                correct: 1,
+                feedback: '¡Correcto! Una fuente ideal de corriente independiente se pasiva reemplazándola por un circuito abierto (rama desconectada con corriente I = 0 A).'
+            },
+            2: {
+                correct: 1,
+                feedback: '¡Exacto! IN es la corriente de cortocircuito (Isc) que circula por un conductor de resistencia nula conectado entre los terminales A y B.'
+            },
+            3: {
+                correct: 1,
+                feedback: '¡Excelente! Por transformación dual: RN = Rth = 6 Ω, e IN = Vth / Rth = 24 V / 6 Ω = 4 A en paralelo con la resistencia.'
+            },
+            4: {
+                correct: 1,
+                feedback: '¡Muy bien! En la regla del divisor de corriente, la corriente por la carga IL lleva en el numerador la resistencia de la OTRA rama (RN): IL = IN · [RN / (RN + RL)].'
+            },
+            5: {
+                correct: 0,
+                feedback: '¡Correcto! El amperímetro ideal presenta resistencia casi nula; conectarlo directo a una fuente o red de baja impedancia produce una sobrecorriente violenta que funde su fusible o destruye componentes.'
+            },
+            6: {
+                correct: 1,
+                feedback: '¡Perfecto! Al ser RL = RN, la corriente se reparte equitativamente en mitades idénticas (IL = IN / 2), transfiriéndose la máxima potencia posible con un rendimiento del 50%.'
+            }
+        };
+
+        let userAnswersCount = 0;
+        let correctAnswersCount = 0;
+
+        function checkAnswer(questionNum, optionIndex) {
+            const card = document.getElementById('q' + questionNum);
+            const buttons = card.querySelectorAll('.quiz-btn');
+            const feedback = document.getElementById('q' + questionNum + '-fb');
+            const data = quizAnswers[questionNum];
+
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (idx === data.correct) {
+                    btn.classList.add('correct');
+                } else if (idx === optionIndex) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            feedback.style.display = 'block';
+            if (optionIndex === data.correct) {
+                feedback.style.backgroundColor = 'var(--success-bg)';
+                feedback.style.color = 'var(--success-color)';
+                feedback.textContent = data.feedback;
+                correctAnswersCount++;
+            } else {
+                feedback.style.backgroundColor = 'var(--warning-bg)';
+                feedback.style.color = 'var(--warning-color)';
+                feedback.textContent = 'Incorrecto. ' + data.feedback;
+            }
+
+            userAnswersCount++;
+            if (userAnswersCount === Object.keys(quizAnswers).length) {
+                const banner = document.getElementById('quizScoreBanner');
+                const text = document.getElementById('quizScoreText');
+                banner.style.display = 'block';
+                text.textContent = 'Autoevaluación completada: ' + correctAnswersCount + ' de ' + Object.keys(quizAnswers).length + ' respuestas correctas.';
+            }
+        }
+
+        function resetQuiz() {
+            userAnswersCount = 0;
+            correctAnswersCount = 0;
+            document.getElementById('quizScoreBanner').style.display = 'none';
+
+            for (let q = 1; q <= Object.keys(quizAnswers).length; q++) {
+                const card = document.getElementById('q' + q);
+                if (card) {
+                    const buttons = card.querySelectorAll('.quiz-btn');
+                    const feedback = document.getElementById('q' + q + '-fb');
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.classList.remove('correct', 'incorrect');
+                    });
+                    if (feedback) {
+                        feedback.style.display = 'none';
+                        feedback.textContent = '';
+                    }
+                }
+            }
+        }
+
+        // Inicializar Simulador al Cargar y al Redimensionar
+        window.addEventListener('DOMContentLoaded', () => {
+            updateSim();
+        });
+        window.addEventListener('resize', () => {
+            updateSim();
+        });
+    </script>
+</body>
+
+</html>
