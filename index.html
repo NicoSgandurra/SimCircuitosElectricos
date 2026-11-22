@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simuladores de Ingeniería - Hub</title>
+    <title>Simuladores de Ingeniería | Nicolas Sgandurra</title>
     <meta name="description" content="Hub central para acceder a los simuladores de Circuitos Eléctricos y Máquinas.">
 
     <!-- Google Fonts (Optional but recommended for consistency if available, likely system fonts are fine given offline context) -->
@@ -241,6 +241,32 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .intro {
+            margin-bottom: 2.5rem;
+            max-width: 62rem;
+            line-height: 1.6;
+        }
+
+        .intro-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+
+        .intro-links a {
+            padding: 0.45rem 0.9rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .intro-links a:hover {
+            background: var(--secondary-color);
+        }
     </style>
 </head>
 
@@ -252,6 +278,17 @@
     </header>
 
     <main>
+
+        <!-- Presentación -->
+        <section class="intro">
+            <p>Simuladores y material de estudio de ingeniería eléctrica, hechos por <strong>Nicolas Sgandurra</strong>,
+                técnico electricista, docente de Circuitos Eléctricos y estudiante de Ingeniería Electromecánica (UTN San Rafael).</p>
+            <nav class="intro-links" aria-label="Destacados">
+                <a href="Circuitos Eléctricos II/NeutroFlotante.html">Neutro flotante</a>
+                <a href="Teoría/SistemasTrifasicos.html">Sistemas trifásicos</a>
+                <a href="Redes/CaidasDeTensión.html">Caída de tensión</a>
+            </nav>
+        </section>
 
         <!-- Circuitos Eléctricos I -->
         <section class="subject-section">
@@ -660,60 +697,10 @@
             </div>
         </section>
 
-        <!-- Misceláneos -->
-        <section class="subject-section">
-            <h2 class="subject-title">Misceláneos</h2>
-            <div class="grid">
-
-                <a href="Miscelaneos/Pomodoro.html" class="card">
-                    <div class="card-header">
-                        <span>Pomodoro</span>
-                        <span>🍅</span>
-                    </div>
-                    <div class="card-body">
-                        <p>Temporizador Pomodoro para gestionar el tiempo de estudio con intervalos de trabajo y
-                            descanso.</p>
-                    </div>
-                    <div class="card-footer">
-                        <span class="btn">Abrir ➔</span>
-                    </div>
-                </a>
-
-                <a href="https://nicosgandurra.github.io/TrucoScore/" target="_blank" rel="noopener" class="card">
-                    <div class="card-header">
-                        <span>Anotador de Truco</span>
-                        <span>🃏</span>
-                    </div>
-                    <div class="card-body">
-                        <p>Marcador digital para llevar el puntaje en partidas de Truco. Gratis, sin publicidad y
-                            offline. Soporta partidas a 15, 18 y 30 puntos.</p>
-                    </div>
-                    <div class="card-footer">
-                        <span class="btn">Abrir ➔</span>
-                    </div>
-                </a>
-
-                <a href="https://nicosgandurra.github.io/CuackdernosWEBSITE/" target="_blank" rel="noopener"
-                    class="card">
-                    <div class="card-header">
-                        <span>Cuackdernos</span>
-                        <span>🦆</span>
-                    </div>
-                    <div class="card-body">
-                        <p>Plataforma de configuración y pedido de Cuackdernos (Cuadernos infinitos).</p>
-                    </div>
-                    <div class="card-footer">
-                        <span class="btn">Abrir ➔</span>
-                    </div>
-                </a>
-
-            </div>
-        </section>
-
     </main>
 
     <footer>
-        <p>&copy; 2024 Lab Hub - Sgandurra Nicolas</p>
+        <p>&copy; 2025-2026 Nicolas Sgandurra</p>
     </footer>
 
     <script>

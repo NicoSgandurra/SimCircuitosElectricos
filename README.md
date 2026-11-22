@@ -2,6 +2,21 @@
 
 Este repositorio contiene una colección de simuladores interactivos para materias de ingeniería, desarrollados con tecnologías web estándar (HTML, CSS y JavaScript). El objetivo es facilitar la comprensión de conceptos teóricos mediante herramientas visuales, prácticas y libres de publicidad.
 
+![Simulador de neutro flotante con cargas desequilibradas](docs/neutro-flotante.png)
+
+## Caso verificado: neutro flotante
+
+Sistema de 220 V por fase con cargas resistivas de 10, 20 y 40 Ω en R, T y S. Los valores del simulador coinciden con el teorema de Millman:
+
+| Magnitud | Valor |
+| --- | --- |
+| Tensión en R | 144,0 V |
+| Tensión en T | 249,5 V |
+| Tensión en S | 288,0 V |
+| Desplazamiento del neutro | 83,2 V |
+
+Este control cubre solo el simulador de neutro flotante.
+
 ## 🚀 Acceso Online
 
 El proyecto está disponible online y se puede acceder a través del siguiente enlace:
